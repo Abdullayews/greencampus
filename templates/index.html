@@ -1,0 +1,1305 @@
+{#
+  templates/index.html
+  Renders via Flask render_template(). Context variables required (see index_route.py):
+    user_name, user_ixtisas, user_kurs, user_otaq (str)
+    is_logged_in (bool)
+    name_first, user_initials, name_short (str)
+    current_year (int)
+#}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yaşıl Kampus | Tələbə Yataqxanası Platforması</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --ku-green: #44766C; --ku-dark-green: #16423C; --ku-soft-green: #D3E8BF;
+            --ku-light-blue: #CAEAF1; --ku-cream: #F0F3BF; --bg: #F8FAFC; --surface: #FFFFFF;
+            --border: #E2E8F0; --text-primary: #1E293B; --text-secondary: #64748B;
+            --success: #10B981; --warning: #F59E0B; --danger: #EF4444;
+            --shadow-xs: 0 1px 2px rgba(0,0,0,.04); --shadow-sm: 0 2px 6px rgba(0,0,0,.06);
+            --shadow-md: 0 8px 20px rgba(0,0,0,.08); --shadow-lg: 0 12px 32px rgba(0,0,0,.10);
+            --radius-btn: 8px; --radius-card: 12px; --radius-badge: 999px;
+            --radius-modal: 16px; --radius-avatar: 50%;
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Poppins', Tahoma, sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+        /* === ANIMATIONS === */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.8; }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes ripple {
+            to { transform: scale(4); opacity: 0; }
+        }
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes typing {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 0.5s var(--transition-base) forwards; opacity: 0; }
+        .animate-fade-in { animation: fadeIn 0.4s var(--transition-base) forwards; opacity: 0; }
+        .animate-slide-in-left { animation: slideInLeft 0.4s var(--transition-base) forwards; opacity: 0; }
+        .animate-slide-in-right { animation: slideInRight 0.4s var(--transition-base) forwards; opacity: 0; }
+        .animate-bounce-in { animation: bounceIn 0.5s var(--transition-bounce) forwards; }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-400 { animation-delay: 400ms; }
+        .delay-500 { animation-delay: 500ms; }
+
+        /* === SKELETON LOADING === */
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: var(--radius-btn);
+        }
+        .skeleton-text { height: 16px; margin-bottom: 8px; }
+        .skeleton-title { height: 20px; width: 60%; margin-bottom: 12px; }
+        .skeleton-circle { width: 48px; height: 48px; border-radius: 50%; }
+
+        /* === LOGIN === */
+        .login-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, var(--ku-dark-green) 0%, #1a5248 50%, var(--ku-green) 100%); background-size: 200% 200%; animation: gradientShift 15s ease infinite; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 24px; }
+        .login-overlay::before {
+            content: ''; position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.6;
+        }
+        .login-card { width: 100%; max-width: 420px; background: var(--surface); border-radius: var(--radius-modal); padding: 40px; box-shadow: var(--shadow-lg); position: relative; z-index: 2; transform: translateY(0); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .login-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .login-logo { display: flex; flex-direction: column; align-items: center; margin-bottom: 32px; animation: fadeInUp 0.6s ease; }
+        .login-logo-icon { width: 64px; height: 64px; background: linear-gradient(135deg, var(--ku-soft-green), var(--ku-light-blue)); border-radius: var(--radius-avatar); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--shadow-sm); animation: float 3s ease-in-out infinite; }
+        .login-logo-icon i { width: 32px; height: 32px; color: var(--ku-dark-green); }
+        .login-logo h2 { font-size: 28px; font-weight: 700; color: var(--ku-dark-green); margin-bottom: 4px; }
+        .login-logo p { font-size: 14px; color: var(--text-secondary); font-weight: 400; }
+        .input-group { margin-bottom: 20px; position: relative; }
+        .input-group label { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; transition: color 0.2s; }
+        .input-group input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 16px; outline: none; background: var(--bg); transition: all var(--transition-fast); }
+        .input-group input:focus { border-color: var(--ku-green); background: var(--surface); box-shadow: 0 0 0 4px rgba(68, 118, 108, 0.1); }
+        .input-group input:focus + label { color: var(--ku-green); }
+        .login-btn { width: 100%; padding: 14px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; transition: all var(--transition-base); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(68, 118, 108, 0.3); }
+        .login-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.2) 100%); opacity: 0; transition: opacity 0.3s; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(68, 118, 108, 0.4); }
+        .login-btn:hover::after { opacity: 1; }
+        .login-btn:active { transform: translateY(0); }
+        .login-btn i { width: 20px; height: 20px; transition: transform 0.3s; }
+        .login-btn:hover i { transform: translateX(4px); }
+        .login-error { color: var(--danger); font-size: 14px; text-align: center; margin-top: 16px; display: none; padding: 8px; background: #fef2f2; border-radius: var(--radius-btn); border: 1px solid #fee2e2; animation: shake 0.4s ease; }
+
+        /* === SIDEBAR === */
+        .sidebar { width: 280px; background: var(--surface); height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; white-space: nowrap; box-shadow: var(--shadow-sm); }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar.collapsed .logo span, .sidebar.collapsed .nav-item span, .sidebar.collapsed .sidebar-footer-links h4, .sidebar.collapsed .sidebar-footer-links li a span { opacity: 0; width: 0; pointer-events: none; }
+        .sidebar.collapsed .logo { padding: 0; justify-content: center; gap: 0; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 12px 16px; gap: 0; }
+        .sidebar.collapsed .sidebar-footer-links li a { justify-content: center; padding: 8px 16px; gap: 0; }
+        .sidebar.collapsed .contact-dropdown { display: none; }
+
+        .logo { height: 72px; padding: 0 24px; font-size: 22px; font-weight: 700; color: var(--ku-dark-green); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); cursor: pointer; flex-shrink: 0; transition: all var(--transition-base); position: relative; overflow: hidden; }
+        .logo::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--ku-green); transform: scaleY(0); transition: transform 0.3s ease; }
+        .logo:hover::before { transform: scaleY(1); }
+        .logo:hover { background: var(--bg); }
+        .logo i { width: 28px; height: 28px; color: var(--ku-green); flex-shrink: 0; transition: transform 0.3s ease; }
+        .logo:hover i { transform: rotate(-10deg) scale(1.1); }
+        .logo span { transition: opacity 0.2s ease; font-weight: 700; }
+        .nav-menu { flex: 1; padding: 16px 12px; overflow-y: auto; overflow-x: hidden; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-primary); text-decoration: none; border-radius: var(--radius-btn); margin-bottom: 6px; font-size: 15px; font-weight: 500; transition: all var(--transition-fast); cursor: pointer; position: relative; overflow: hidden; }
+        .nav-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%) scaleY(0); width: 3px; height: 60%; background: var(--ku-green); border-radius: 0 4px 4px 0; transition: transform 0.25s ease; }
+        .nav-item:hover::before { transform: translateY(-50%) scaleY(1); }
+        .nav-item i { width: 22px; height: 22px; color: var(--text-secondary); flex-shrink: 0; transition: all 0.25s ease; }
+        .nav-item span { transition: opacity 0.2s ease; }
+        .nav-item:hover { background: var(--bg); transform: translateX(4px); }
+        .nav-item:hover i { color: var(--ku-green); transform: scale(1.1); }
+        .nav-item.active { background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); box-shadow: 0 4px 12px rgba(22, 66, 60, 0.25); }
+        .nav-item.active i { color: var(--surface); }
+        .nav-item.active::before { display: none; }
+        .sidebar-footer-links { padding: 16px; border-top: 1px solid var(--border); position: relative; }
+        .sidebar-footer-links h4 { font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.08em; transition: opacity 0.2s; font-weight: 600; }
+        .sidebar-footer-links ul { list-style: none; }
+        .sidebar-footer-links li { position: relative; margin-bottom: 4px; }
+        .sidebar-footer-links li a { display: flex; align-items: center; gap: 12px; color: var(--text-primary); text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-btn); transition: all var(--transition-fast); cursor: pointer; position: relative; overflow: hidden; }
+        .sidebar-footer-links li a:hover { background: var(--bg); color: var(--ku-green); transform: translateX(4px); }
+        .sidebar-footer-links li a i { width: 18px; height: 18px; color: var(--text-secondary); transition: color 0.2s; }
+        .sidebar-footer-links li a:hover i { color: var(--ku-green); }
+
+        .contact-dropdown { position: absolute; left: 100%; bottom: 0; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: 16px; opacity: 0; visibility: hidden; transform: translateX(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; margin-left: 8px; }
+        .contact-dropdown.active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); }
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-btn); text-decoration: none; color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 8px; transition: all var(--transition-fast); }
+        .contact-item:last-child { margin-bottom: 0; }
+        .contact-item:hover { background: var(--bg); transform: translateX(4px); }
+        .contact-item i { width: 20px; height: 20px; color: var(--ku-green); }
+
+        /* === MAIN LAYOUT === */
+        .main-wrapper { margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; }
+        .main-wrapper.expanded { margin-left: 80px; }
+        .top-bar { height: 72px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 32px; position: sticky; top: 0; z-index: 90; transition: all var(--transition-fast); }
+        .top-bar h1 { font-size: 28px; font-weight: 700; color: var(--text-primary); opacity: 0; animation: fadeInUp 0.4s ease forwards; }
+        .top-bar-actions { display: flex; align-items: center; gap: 16px; }
+        .icon-btn { width: 44px; height: 44px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; position: relative; transition: all var(--transition-fast); }
+        .icon-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .icon-btn:active { transform: translateY(0); }
+        .icon-btn:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; }
+        .icon-btn i { width: 20px; height: 20px; transition: transform 0.2s; }
+        .icon-btn:hover i { transform: scale(1.1); }
+        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-badge); border: 2px solid var(--surface); animation: pulse 2s infinite; }
+
+        .notif-dropdown { position: absolute; top: 110%; right: 0; width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; max-height: 480px; overflow-y: auto; }
+        .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .notif-item { display: flex; gap: 12px; padding: 14px; border-radius: var(--radius-btn); align-items: flex-start; cursor: pointer; transition: all var(--transition-fast); margin-bottom: 4px; }
+        .notif-item:hover { background: var(--bg); transform: translateX(4px); }
+        .notif-item:last-child { margin-bottom: 0; }
+        .notif-icon { width: 36px; height: 36px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.2s; }
+        .notif-item:hover .notif-icon { transform: scale(1.1); }
+        .notif-icon i { width: 18px; height: 18px; }
+        .notif-text h5 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .notif-text p { font-size: 13px; color: var(--text-secondary); margin: 0; font-weight: 400; line-height: 1.4; }
+
+        .profile-dropdown { position: relative; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 14px; border-radius: var(--radius-btn); transition: all var(--transition-fast); border: 1px solid transparent; }
+        .profile-dropdown:hover { background: var(--bg); border-color: var(--border); }
+        .profile-dropdown .avatar { width: 36px; height: 36px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; box-shadow: var(--shadow-xs); transition: transform 0.2s; }
+        .profile-dropdown:hover .avatar { transform: scale(1.05); }
+        .profile-dropdown .name { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+        .profile-dropdown > i { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .profile-dropdown.active > i { transform: rotate(180deg); }
+        .profile-dropdown.active { background: var(--bg); border-color: var(--border); }
+        .dropdown-menu { position: absolute; top: 110%; right: 0; width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; }
+        .profile-dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-btn); text-decoration: none; color: var(--text-primary); font-size: 14px; font-weight: 500; cursor: pointer; transition: all var(--transition-fast); }
+        .dropdown-item:hover { background: var(--bg); color: var(--ku-green); transform: translateX(4px); }
+        .dropdown-item i { width: 18px; height: 18px; color: var(--text-secondary); transition: color 0.2s; }
+        .dropdown-item:hover i { color: var(--ku-green); }
+        .dropdown-item.danger { color: var(--danger); }
+        .dropdown-item.danger:hover { background: #fef2f2; transform: translateX(4px); }
+        .dropdown-item.danger i { color: var(--danger); }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+        .content-layout { padding: 32px; flex: 1; }
+        .col-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+        .page-content { display: none; width: 100%; opacity: 0; transform: translateY(16px); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .page-content.active-page { display: block; opacity: 1; transform: translateY(0); animation: fadeInUp 0.4s ease; }
+        .home-layout { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+        .home-main { flex: 1; display: flex; flex-direction: column; gap: 24px; min-width: 300px; }
+        .col-side { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 24px; }
+
+        /* === WELCOME BANNER === */
+        .welcome-banner { background: linear-gradient(135deg, var(--ku-green) 0%, var(--ku-dark-green) 100%); border-radius: var(--radius-card); padding: 40px; color: var(--surface); position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); animation: fadeInUp 0.5s ease; }
+        .welcome-banner::before {
+            content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+        .welcome-banner::after {
+            content: ''; position: absolute; bottom: -30%; left: -5%; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(211, 232, 191, 0.15) 0%, transparent 70%);
+        }
+        .welcome-content { position: relative; z-index: 2; }
+        .welcome-content h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; animation: fadeInUp 0.5s ease 0.1s both; }
+        .welcome-content p { font-size: 16px; opacity: 0.9; max-width: 500px; margin-bottom: 28px; font-weight: 400; animation: fadeInUp 0.5s ease 0.2s both; }
+        .welcome-actions { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.5s ease 0.3s both; }
+        .btn-primary { background: var(--surface); color: var(--ku-dark-green); border: none; padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 600; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; transition: all var(--transition-base); position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-primary::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(68, 118, 108, 0.05) 100%); opacity: 0; transition: opacity 0.3s; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .btn-primary:hover::before { opacity: 1; }
+        .btn-primary:active { transform: translateY(-1px); }
+        .btn-primary i { width: 20px; height: 20px; transition: transform 0.2s; }
+        .btn-primary:hover i { transform: scale(1.1); }
+        .btn-secondary { background: rgba(255,255,255,0.15); color: var(--surface); border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 500; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; transition: all var(--transition-base); backdrop-filter: blur(4px); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-secondary:active { transform: translateY(-1px); }
+        .btn-secondary i { width: 20px; height: 20px; }
+
+        .section-title { font-size: 24px; margin-bottom: 24px; color: var(--text-primary); font-weight: 700; position: relative; display: inline-block; }
+        .section-title::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 40px; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); border-radius: 2px; }
+
+        /* === SERVICE CARDS === */
+        .service-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .service-card { background: var(--surface); padding: 28px 24px; border-radius: var(--radius-card); border: 1px solid var(--border); box-shadow: var(--shadow-xs); transition: all var(--transition-base); cursor: pointer; flex: 1 1 200px; display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow: hidden; }
+        .service-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); transform: scaleX(0); transition: transform 0.3s ease; }
+        .service-card:hover::before { transform: scaleX(1); }
+        .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--ku-green); }
+        .service-card:active { transform: translateY(-2px); }
+        .service-icon { width: 52px; height: 52px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; transition: all 0.3s ease; }
+        .service-card:hover .service-icon { transform: scale(1.1) rotate(-5deg); }
+        .service-icon i { width: 24px; height: 24px; }
+        .bg-green { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .bg-blue { background: linear-gradient(135deg, var(--ku-light-blue), #e0f4f8); color: #0c4a6e; }
+        .bg-orange { background: linear-gradient(135deg, #fef3c7, #fde68a); color: var(--warning); }
+        .bg-purple { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7e22ce; }
+        .bg-red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+        .bg-gray { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: var(--text-secondary); }
+        .service-card h3 { font-size: 18px; margin-bottom: 6px; font-weight: 600; }
+        .service-card p { font-size: 14px; color: var(--text-secondary); font-weight: 400; line-height: 1.5; }
+
+        /* === WIDGETS === */
+        .widgets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .widget-card { background: var(--surface); border-radius: var(--radius-card); border: 1px solid var(--border); padding: 28px; box-shadow: var(--shadow-xs); transition: all var(--transition-base); position: relative; overflow: hidden; }
+        .widget-card:hover { box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+        .widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .widget-header h3 { font-size: 18px; font-weight: 600; }
+        .view-all { font-size: 14px; color: var(--ku-green); text-decoration: none; font-weight: 600; cursor: pointer; background: none; border: none; font-family: 'Poppins'; position: relative; transition: all 0.2s; }
+        .view-all::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--ku-green); transition: width 0.3s ease; }
+        .view-all:hover::after { width: 100%; }
+        .view-all:hover { color: var(--ku-dark-green); }
+
+        /* === NOTIFICATION ITEMS === */
+        .notification-item { display: flex; gap: 16px; padding: 18px; border-radius: var(--radius-btn); background: var(--bg); margin-bottom: 12px; border-left: 4px solid var(--ku-green); transition: all var(--transition-fast); cursor: pointer; }
+        .notification-item:last-child { margin-bottom: 0; }
+        .notification-item:hover { transform: translateX(6px); box-shadow: var(--shadow-sm); background: var(--surface); }
+        .notification-item.danger { border-left-color: var(--danger); background: linear-gradient(90deg, #fff5f5, var(--bg)); }
+        .notification-item.warning { border-left-color: var(--warning); background: linear-gradient(90deg, #fffbeb, var(--bg)); }
+        .notification-item.info { border-left-color: var(--ku-light-blue); background: linear-gradient(90deg, #f0f9ff, var(--bg)); }
+        .notification-icon { width: 40px; height: 40px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; background: var(--surface); box-shadow: var(--shadow-xs); flex-shrink: 0; transition: transform 0.2s; }
+        .notification-item:hover .notification-icon { transform: scale(1.1); }
+        .notification-icon i { width: 20px; height: 20px; color: var(--ku-green); }
+        .notification-item.danger .notification-icon i { color: var(--danger); }
+        .notification-item.warning .notification-icon i { color: var(--warning); }
+        .notification-item.info .notification-icon i { color: #0c4a6e; }
+        .notification-content { flex: 1; }
+        .notification-content h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+        .notification-content p { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 400; line-height: 1.5; }
+        .notification-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-weight: 400; }
+        .notification-meta i { width: 14px; height: 14px; margin-right: 4px; vertical-align: middle; }
+        .badge { padding: 4px 12px; border-radius: var(--radius-badge); font-weight: 600; font-size: 12px; transition: transform 0.2s; }
+        .notification-item:hover .badge { transform: scale(1.05); }
+        .badge-danger { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+        .badge-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); color: var(--warning); }
+        .badge-info { background: linear-gradient(135deg, var(--ku-light-blue), #e0f4f8); color: #0c4a6e; }
+        .badge-success { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .badge-purple { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7e22ce; }
+
+        /* === MATCH CARDS === */
+        .match-card { background: var(--bg); border-radius: var(--radius-btn); padding: 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; text-align: left; margin-bottom: 12px; transition: all var(--transition-fast); cursor: pointer; }
+        .match-card:hover { border-color: var(--ku-green); transform: translateX(6px); box-shadow: var(--shadow-sm); }
+        .match-card:last-child { margin-bottom: 0; }
+        .match-avatar { width: 48px; height: 48px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; flex-shrink: 0; box-shadow: var(--shadow-xs); transition: transform 0.2s; }
+        .match-card:hover .match-avatar { transform: scale(1.1); }
+        .btn-contact { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); border: none; padding: 10px 18px; border-radius: var(--radius-btn); font-weight: 600; cursor: pointer; font-family: 'Poppins'; font-size: 14px; transition: all var(--transition-fast); box-shadow: var(--shadow-xs); }
+        .btn-contact:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .btn-contact:active { transform: translateY(0); }
+
+        /* === PROFILE === */
+        .profile-card-h { display: flex; align-items: center; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .profile-avatar { width: 64px; height: 64px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--surface); font-weight: 700; flex-shrink: 0; box-shadow: var(--shadow-sm); transition: transform 0.3s ease; }
+        .profile-card-h:hover .profile-avatar { transform: scale(1.05); }
+        .profile-info h3 { font-size: 20px; margin-bottom: 4px; font-weight: 600; }
+        .profile-info p { font-size: 14px; color: var(--text-secondary); font-weight: 400; }
+        .profile-details { text-align: left; }
+        .detail-item { display: flex; justify-content: space-between; padding: 14px 0; font-size: 14px; border-bottom: 1px solid var(--border); transition: all 0.2s; }
+        .detail-item:hover { background: var(--bg); margin: 0 -12px; padding: 14px 12px; border-radius: var(--radius-btn); border-bottom-color: transparent; }
+        .detail-item:last-child { border-bottom: none; }
+        .detail-item:last-child:hover { border-bottom-color: transparent; }
+        .detail-label { color: var(--text-secondary); font-weight: 500; }
+        .detail-value { font-weight: 600; color: var(--text-primary); }
+        .text-green { color: var(--ku-green); font-weight: 700; }
+
+        /* === ACCORDION === */
+        .accordion { border: 1px solid var(--border); border-radius: var(--radius-btn); margin-bottom: 12px; overflow: hidden; transition: all var(--transition-fast); background: var(--surface); }
+        .accordion:last-child { margin-bottom: 0; }
+        .accordion:hover { border-color: var(--ku-green); box-shadow: var(--shadow-xs); }
+        .accordion-header { padding: 16px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; font-size: 15px; transition: all var(--transition-fast); }
+        .accordion-header:hover { background: linear-gradient(90deg, var(--bg), var(--ku-soft-green)); }
+        .accordion-header span { display: flex; align-items: center; gap: 12px; }
+        .accordion-header i { width: 20px; height: 20px; }
+        .toggle-icon { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .accordion.active .toggle-icon { transform: rotate(180deg); }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease; }
+        .accordion.active .accordion-body { max-height: 500px; padding: 16px; }
+        .meal-list { list-style: none; }
+        .meal-list li { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed var(--border); font-size: 14px; transition: all 0.2s; }
+        .meal-list li:hover { background: var(--bg); margin: 0 -8px; padding: 14px 8px; border-radius: 6px; }
+        .meal-list li:last-child { border-bottom: none; }
+        .meal-day { font-weight: 600; color: var(--text-secondary); }
+        .meal-name { color: var(--text-primary); text-align: right; font-weight: 500; }
+
+        /* === APPLICATIONS === */
+        .app-grid { display: flex; flex-wrap: wrap; gap: 24px; }
+        .add-card { width: 300px; min-height: 250px; border: 2px dashed var(--border); border-radius: var(--radius-card); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-base); background: var(--surface); position: relative; overflow: hidden; }
+        .add-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--ku-soft-green), var(--ku-light-blue)); opacity: 0; transition: opacity 0.3s; }
+        .add-card:hover { border-color: var(--ku-green); color: var(--ku-green); transform: translateY(-4px) scale(1.02); box-shadow: var(--shadow-md); border-style: solid; }
+        .add-card:hover::before { opacity: 0.1; }
+        .add-card i { width: 48px; height: 48px; margin-bottom: 16px; transition: transform 0.3s ease; }
+        .add-card:hover i { transform: scale(1.2) rotate(90deg); }
+        .add-card span { font-size: 16px; font-weight: 600; position: relative; z-index: 1; }
+        .app-card { width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-xs); position: relative; display: flex; flex-direction: column; transition: all var(--transition-base); }
+        .app-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--ku-green); }
+        .app-card-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; opacity: 0; transform: translateY(-4px); transition: all 0.25s ease; }
+        .app-card:hover .app-card-actions { opacity: 1; transform: translateY(0); }
+        .card-action-btn { width: 32px; height: 32px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-fast); }
+        .card-action-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); transform: scale(1.1); }
+        .card-action-btn.delete:hover { background: #fee2e2; color: var(--danger); border-color: var(--danger); }
+        .card-action-btn i { width: 16px; height: 16px; }
+        .app-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-right: 80px; }
+        .app-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 400; line-height: 1.5; }
+        .app-card-status { margin-top: auto; display: inline-block; padding: 6px 14px; background: var(--bg); border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; color: var(--text-secondary); width: fit-content; transition: all 0.2s; }
+        .app-card-status.approved { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .app-card-status.pending { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+
+        /* === MODAL === */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 24px; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-card { width: 100%; max-width: 500px; background: var(--surface); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.9) translateY(20px); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
+        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { font-size: 20px; font-weight: 600; }
+        .modal-header i { width: 24px; height: 24px; cursor: pointer; transition: transform 0.2s; }
+        .modal-header i:hover { transform: rotate(90deg); }
+        .modal-body { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+        .modal-input, .modal-textarea, .priority-select { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 15px; outline: none; background: var(--bg); color: var(--text-primary); font-weight: 400; transition: all var(--transition-fast); }
+        .modal-textarea { min-height: 120px; resize: vertical; }
+        .modal-input:focus, .modal-textarea:focus, .priority-select:focus { border-color: var(--ku-green); background: var(--surface); box-shadow: 0 0 0 4px rgba(68, 118, 108, 0.1); }
+        .priority-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 40px; }
+        .modal-footer { padding: 20px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+
+        /* === ROOM CARDS === */
+        .apartment-plan { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; width: 100%; }
+        .room-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; position: relative; transition: all var(--transition-base); overflow: hidden; }
+        .room-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); transform: scaleX(0); transition: transform 0.3s ease; }
+        .room-card:hover::before { transform: scaleX(1); }
+        .room-card:hover { border-color: var(--ku-green); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+        .bed-icon { width: 52px; height: 52px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; transition: all 0.3s ease; }
+        .room-card:hover .bed-icon { transform: scale(1.1) rotate(-5deg); }
+        .bed-icon i { width: 24px; height: 24px; }
+        .room-owner { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary); }
+        .item-list { display: flex; flex-direction: column; gap: 10px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--bg); border-radius: var(--radius-btn); font-size: 14px; transition: all 0.2s; }
+        .item-row:hover { background: linear-gradient(90deg, var(--bg), var(--ku-soft-green)); transform: translateX(4px); }
+        .item-name { font-weight: 600; }
+        .status-badge { padding: 5px 14px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; transition: all 0.2s; }
+        .status-good { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .status-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .status-bad { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+
+        /* === SURVEY === */
+        .survey-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; box-shadow: var(--shadow-xs); display: flex; flex-direction: column; gap: 16px; transition: all var(--transition-base); }
+        .survey-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--ku-green); }
+        .survey-card h3 { font-size: 18px; font-weight: 600; }
+        .survey-card p { font-size: 14px; color: var(--text-secondary); flex: 1; font-weight: 400; line-height: 1.6; }
+
+        /* === PAYMENTS === */
+        .payment-card { max-width: 500px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--danger); border-radius: var(--radius-card); padding: 28px; box-shadow: var(--shadow-xs); position: relative; transition: all var(--transition-base); }
+        .payment-card:hover { transform: translateX(8px); box-shadow: var(--shadow-md); }
+        .payment-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--danger); }
+
+        /* === FOOTER === */
+        .simple-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 20px 32px; text-align: center; color: var(--text-secondary); font-size: 14px; font-weight: 400; }
+
+        /* === AI CHAT === */
+        .ai-chat-window { position: fixed; bottom: 96px; right: 32px; width: 380px; height: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); z-index: 200; display: none; flex-direction: column; overflow: hidden; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .ai-chat-window.active { display: flex; transform: scale(1) translateY(0); opacity: 1; }
+        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .ai-chat-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .ai-chat-header i { width: 22px; height: 22px; cursor: pointer; transition: transform 0.2s; }
+        .ai-chat-header i:hover { transform: rotate(90deg); }
+        .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: linear-gradient(180deg, var(--bg) 0%, #f1f5f9 100%); display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
+        .ai-msg { max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.6; font-weight: 400; animation: fadeInUp 0.3s ease; position: relative; }
+        .ai-msg.user { background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(68, 118, 108, 0.25); }
+        .ai-msg.bot { background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: var(--shadow-xs); }
+        .ai-msg.loading { color: var(--text-secondary); font-style: italic; background: var(--surface); border: 1px dashed var(--border); }
+        .ai-msg.loading::after { content: '...'; animation: typing 1.5s infinite; }
+        .ai-chat-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: var(--surface); }
+        .ai-input { flex: 1; padding: 12px 18px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; outline: none; background: var(--bg); font-weight: 400; transition: all var(--transition-fast); }
+        .ai-input:focus { border-color: var(--ku-green); background: var(--surface); box-shadow: 0 0 0 4px rgba(68, 118, 108, 0.1); }
+        .ai-send-btn { width: 44px; height: 44px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition-fast); box-shadow: 0 4px 8px rgba(68, 118, 108, 0.25); }
+        .ai-send-btn:hover { transform: scale(1.1); box-shadow: 0 6px 12px rgba(68, 118, 108, 0.35); }
+        .ai-send-btn:active { transform: scale(0.95); }
+        .ai-send-btn i { width: 20px; height: 20px; }
+        .ai-float-btn { position: fixed; bottom: 32px; right: 32px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-avatar); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 20px rgba(68, 118, 108, 0.4); z-index: 200; transition: all var(--transition-base); animation: fadeInScale 0.5s ease 1s both; }
+        .ai-float-btn:hover { transform: scale(1.1) rotate(-5deg); box-shadow: 0 8px 24px rgba(68, 118, 108, 0.5); }
+        .ai-float-btn:active { transform: scale(0.95); }
+        .ai-float-btn i { width: 26px; height: 26px; }
+        .ai-float-btn::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--ku-green); opacity: 0; animation: ripple 2s infinite; }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* === FOCUS VISIBLE === */
+        *:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; border-radius: 4px; }
+        button:focus-visible, a:focus-visible { outline-offset: 3px; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1023px) { 
+            .col-side { width: 100%; } 
+            .home-layout { flex-direction: column; } 
+            .widgets-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 767px) { 
+            .widgets-grid { grid-template-columns: 1fr; } 
+            .top-bar h1 { font-size: 22px; } 
+            .sidebar { width: 80px; transform: translateX(0); } 
+            .main-wrapper { margin-left: 80px; } 
+            .sidebar .logo span, .sidebar .nav-item span, .sidebar .sidebar-footer-links h4, .sidebar .sidebar-footer-links li a span { opacity: 0; width: 0; pointer-events: none; } 
+            .sidebar .logo, .sidebar .nav-item, .sidebar .sidebar-footer-links li a { justify-content: center; padding: 12px 16px; gap: 0; } 
+            .ai-chat-window { width: calc(100% - 32px); right: 16px; bottom: 96px; height: 60%; } 
+            .contact-dropdown { display: none; }
+            .content-layout { padding: 20px; }
+            .welcome-banner { padding: 28px 20px; }
+            .welcome-content h2 { font-size: 24px; }
+            .service-grid { gap: 16px; }
+            .app-grid { justify-content: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN EKRANI -->
+    <div class="login-overlay" id="loginOverlay" {% if is_logged_in %}style="display:none;"{% endif %}>
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="login-logo-icon"><i data-lucide="leaf"></i></div>
+                <h2>Yaşıl Kampus</h2>
+                <p>Qarabağ Universiteti</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="muhemmed@qu.edu.az" required>
+                </div>
+                <div class="input-group">
+                    <label>Şifrə</label>
+                    <input type="password" id="loginPassword" placeholder="12345" required>
+                </div>
+                <div class="login-error" id="loginError">Email və ya şifrə yanlışdır.</div>
+                <button type="submit" class="login-btn">
+                    <i data-lucide="log-in"></i> Daxil ol
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="logo" onclick="toggleSidebar()">
+            <i data-lucide="leaf"></i>
+            <span>Yaşıl Kampus</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a class="nav-item active" data-menu="home" onclick="setActivePage('home', 'Ana Səhifə')" tabindex="0" role="button" aria-label="Ana Səhifə"><i data-lucide="home"></i> <span>Ana Səhifə</span></a>
+            <a class="nav-item" data-menu="applications" onclick="setActivePage('applications', 'Müraciətlər')" tabindex="0" role="button" aria-label="Müraciətlər"><i data-lucide="clipboard-list"></i> <span>Müraciətlər</span></a>
+            <a class="nav-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')" tabindex="0" role="button" aria-label="Mənim evim"><i data-lucide="door-open"></i> <span>Mənim evim</span></a>
+            <a class="nav-item" data-menu="roommate" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')" tabindex="0" role="button" aria-label="Otaq Yoldaşı Axtar"><i data-lucide="search"></i> <span>Otaq Yoldaşı Axtar</span></a>
+            <a class="nav-item" data-menu="announcements" onclick="setActivePage('announcements', 'Elanlar')" tabindex="0" role="button" aria-label="Elanlar"><i data-lucide="megaphone"></i> <span>Elanlar</span></a>
+            <a class="nav-item" data-menu="payments" onclick="setActivePage('payments', 'Ödənişlər')" tabindex="0" role="button" aria-label="Ödənişlər"><i data-lucide="wallet"></i> <span>Ödənişlər</span></a>
+        </nav>
+
+        <div class="sidebar-footer-links">
+            <h4>Faydalı keçidlər</h4>
+            <ul>
+                <li><a href="https://qu.edu.az/en" target="_blank"><i data-lucide="globe"></i> <span>Universitet rəsmi saytı</span></a></li>
+                <li><a href="#"><i data-lucide="calendar"></i> <span>Akademik təqvim</span></a></li>
+                <li>
+                    <a id="contactToggle" onclick="toggleContactDropdown(event)"><i data-lucide="phone"></i> <span>İdarə ilə əlaqə</span></a>
+                    <div class="contact-dropdown" id="contactDropdown" onclick="event.stopPropagation()">
+                        <a href="https://wa.me/994551234567" target="_blank" class="contact-item"><i data-lucide="message-circle"></i> WhatsApp: +994 55 123 45 67</a>
+                        <a href="tel:+994121234567" class="contact-item"><i data-lucide="phone-call"></i> Qaynar Xətt: +994 12 123 45 67</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- MAIN WRAPPER -->
+    <div class="main-wrapper" id="mainWrapper">
+        <header class="top-bar">
+            <h1 id="pageTitle">Ana Səhifə</h1>
+            <div class="top-bar-actions">
+                <div style="position: relative;">
+                    <button class="icon-btn" onclick="toggleNotifDropdown(event)" aria-label="Bildirişlər"><i data-lucide="bell"></i><span class="notification-dot"></span></button>
+                    <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
+                        <div id="notifDropdownContent">Yüklənir...</div>
+                    </div>
+                </div>
+
+                <div class="profile-dropdown" id="profileDropdown" onclick="toggleProfileMenu(event)">
+                    <div class="avatar" id="topBarAvatar">{{ user_initials }}</div>
+                    <span class="name" id="topBarName">{{ name_short }}</span>
+                    <i data-lucide="chevron-down"></i>
+                    <div class="dropdown-menu" onclick="event.stopPropagation()">
+                        <div class="dropdown-item" onclick="setActivePage('profile', 'Mənim Profilim'); closeProfileMenu()"><i data-lucide="user"></i> Mənim profilim</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item danger" onclick="logout()"><i data-lucide="log-out"></i> Çıxış</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="content-layout">
+            <div class="col-main">
+                <!-- HOME -->
+                <section id="page-home" class="page-content active-page">
+                    <div class="home-layout">
+                        <div class="home-main">
+                            <div class="welcome-banner">
+                                <div class="welcome-content">
+                                    <h2>Xoş gəlmisiniz, {{ name_first }}!</h2>
+                                    <p>Qarabağ Universiteti Tələbə Yataqxanasına xoş gəlmisiniz.</p>
+                                    <div class="welcome-actions">
+                                        <button class="btn-primary" onclick="setActivePage('applications', 'Müraciətlər')"><i data-lucide="file-plus"></i> Müraciət et</button>
+                                        <button class="btn-secondary" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')"><i data-lucide="user-search"></i> Otaq yoldaşı axtar</button>
+                                    </div>
+                                </div>
+                                <div style="opacity: 0.15; position: absolute; right: 32px;"><i data-lucide="building-2" style="width: 100px; height: 100px;"></i></div>
+                            </div>
+
+                            <div class="widgets-grid">
+                                <div class="widget-card">
+                                    <div class="widget-header">
+                                        <h3>Otaq Yoldaşı Axtaranlar</h3>
+                                        <button class="view-all" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')">Hamısına bax</button>
+                                    </div>
+                                    <div id="homeRoommates"></div>
+                                </div>
+
+                                <div class="widget-card">
+                                    <div class="widget-header">
+                                        <h3>Yaxınlaşan tədbirlər və elanlar</h3>
+                                        <button class="view-all" onclick="setActivePage('announcements', 'Elanlar')">Bütün elanlar</button>
+                                    </div>
+                                    <div id="homeAnnouncements"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h2 class="section-title">Xidmətlər</h2>
+                                <div class="service-grid">
+                                    <div class="service-card" onclick="setActivePage('applications', 'Müraciətlər')"><div class="service-icon bg-green"><i data-lucide="clipboard-list"></i></div><h3>Müraciətlər</h3><p>Yataqxana və Təmir sorğuları</p></div>
+                                    <div class="service-card" onclick="setActivePage('myhome', 'Mənim evim')"><div class="service-icon bg-blue"><i data-lucide="door-open"></i></div><h3>Mənim evim</h3><p>Otağın virtual görünüşü</p></div>
+                                    <div class="service-card" onclick="setActivePage('payments', 'Ödənişlər')"><div class="service-icon bg-purple"><i data-lucide="wallet"></i></div><h3>Ödənişlər</h3><p>Yataqxana haqqı ödənişi</p></div>
+                                    <div class="service-card" onclick="setActivePage('canteen', 'Yeməkxana')"><div class="service-icon bg-orange"><i data-lucide="utensils"></i></div><h3>Yeməkxana</h3><p>Bugünkü yeməklər</p></div>
+                                    <div class="service-card" onclick="setActivePage('laundry', 'Camaşırxana')"><div class="service-icon bg-red"><i data-lucide="washing-machine"></i></div><h3>Camaşırxana</h3><p>Maşın vəziyyəti</p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-side">
+                            <div class="widget-card">
+                                <div class="profile-card-h"><div class="profile-avatar">{{ user_initials }}</div><div class="profile-info"><h3>{{ user_name }}</h3><p>Qarabağ Universiteti</p></div></div>
+                                <div class="profile-details">
+                                    <div class="detail-item"><span class="detail-label">İxtisas</span><span class="detail-value">{{ user_ixtisas }}</span></div>
+                                    <div class="detail-item"><span class="detail-label">Kurs</span><span class="detail-value">{{ user_kurs }}</span></div>
+                                    <div class="detail-item"><span class="detail-label">Otaq nömrəsi</span><span class="detail-value">{{ user_otaq }}</span></div>
+                                    <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value text-green">Aktiv Tələbə</span></div>
+                                </div>
+                            </div>
+
+                            <div class="widget-card">
+                                <div class="widget-header"><h3>Yeməkxana</h3><span id="canteenDay" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">Yüklənir...</span></div>
+                                <div class="accordion active"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="hotel"></i> Yataqxana</span><i data-lucide="chevron-down" class="toggle-icon"></i></div><div class="accordion-body"><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenDormMeal">Yüklənir...</span></li></ul></div></div>
+                                <div class="accordion"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="graduation-cap"></i> Universitet</span><i data-lucide="chevron-down" class="toggle-icon"></i></div><div class="accordion-body"><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenUniMeal">Yüklənir...</span></li></ul></div></div>
+                            </div>
+
+                            <div class="widget-card">
+                                <div class="widget-header"><h3>Camaşırxana</h3></div>
+                                <div id="laundryStatusHome">
+                                    <div class="item-list" id="laundryListHome"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- APPLICATIONS -->
+                <section id="page-applications" class="page-content">
+                    <h2 class="section-title">Müraciətlər</h2>
+                    <div class="app-grid" id="appGrid">
+                        <div class="add-card" onclick="openAppModal()"><i data-lucide="plus"></i><span>Yeni Müraciət</span></div>
+                    </div>
+                </section>
+
+                <!-- MY HOME -->
+                <section id="page-myhome" class="page-content">
+                    <h2 class="section-title">Mənim evim</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:</p>
+                    <div class="apartment-plan" id="myHomeList"></div>
+                </section>
+
+                <!-- ROOMMATE SEARCH -->
+                <section id="page-roommate" class="page-content">
+                    <h2 class="section-title">Otaq Yoldaşı Axtar</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Evi dəyişmək istəyən tələbələr aşağıdakı siyahıdadır. Uyğunluq faizini öyrənmək üçün "Yoxla" düyməsinə basın.</p>
+                    <div id="roommateList" style="display: flex; flex-direction: column; gap: 16px;"></div>
+                </section>
+
+                <!-- ANNOUNCEMENTS & SURVEYS -->
+                <section id="page-announcements" class="page-content">
+                    <h2 class="section-title">Elanlar və Anketlər</h2>
+                    <div class="widgets-grid">
+                        <div class="widget-card"><div class="widget-header"><h3>Rəsmi Elanlar</h3></div><div id="announcementsList"></div></div>
+                        <div class="widget-card"><div class="widget-header"><h3>Aktiv Anketlər</h3></div><div id="surveysList"></div></div>
+                    </div>
+                </section>
+
+                <!-- PAYMENTS -->
+                <section id="page-payments" class="page-content">
+                    <h2 class="section-title">Ödənişlər və Cərimələr</h2>
+                    <div id="paymentsList"></div>
+                </section>
+
+                <!-- CANTEEN -->
+                <section id="page-canteen" class="page-content">
+                    <h2 class="section-title">Yeməkxana</h2>
+                    <div class="widgets-grid">
+                        <div class="widget-card">
+                            <div class="widget-header"><h3>Yataqxana Yeməkxanası</h3><span id="canteenDayFull" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">Yüklənir...</span></div>
+                            <ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenDormMealFull">Yüklənir...</span></li></ul>
+                        </div>
+                        <div class="widget-card">
+                            <div class="widget-header"><h3>Universitet Yeməkxanası</h3></div>
+                            <ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenUniMealFull">Yüklənir...</span></li></ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- LAUNDRY -->
+                <section id="page-laundry" class="page-content">
+                    <h2 class="section-title">Camaşırxana</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Sizin üçün ayrılmış maşınların vəziyyəti:</p>
+                    <div class="apartment-plan" id="laundryList"></div>
+                </section>
+
+                <!-- PROFILE -->
+                <section id="page-profile" class="page-content">
+                    <h2 class="section-title">Mənim Profilim</h2>
+                    <div class="widget-card" style="max-width: 600px; margin: 0 auto;">
+                        <div class="profile-card-h" style="justify-content: center; flex-direction: column; text-align: center;">
+                            <div class="profile-avatar" style="width: 96px; height: 96px; font-size: 32px;" id="profilePageAvatar">{{ user_initials }}</div>
+                            <div class="profile-info" style="text-align: center;"><h3 id="profilePageName">{{ user_name }}</h3><p>Tələbə Profili</p></div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Ad, Soyad</label><input type="text" class="modal-input" id="profileName" value="{{ user_name }}" disabled style="background: #f1f5f9; cursor: not-allowed;"></div>
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Email</label><input type="email" class="modal-input" id="profileEmail" placeholder="Email"></div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <div style="flex: 1;"><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">İxtisas</label><input type="text" class="modal-input" id="profileIxtisas" placeholder="İxtisas"></div>
+                                <div style="width: 100px;"><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Kurs</label><input type="number" class="modal-input" id="profileKurs" placeholder="Kurs"></div>
+                            </div>
+
+                            <div style="border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px;">
+                                <h3 style="font-size: 18px; color: var(--text-primary); margin-bottom: 4px; font-weight: 600;">Özüm haqqında (Xasiyyət və Vərdişlər)</h3>
+                                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 16px;">Bu məlumatlar otaq yoldaşı uyğunluq faizinisi hesablamaq üçün istifadə olunur.</p>
+                            </div>
+
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Yuxu Rejimi (30%)</label><textarea class="modal-textarea" id="profileYuxu" placeholder="Məs: Gecə quşu, adətən gec 1-də yatıram." rows="2"></textarea></div>
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Təmizlik Vərdişləri (30%)</label><textarea class="modal-textarea" id="profileTemizlik" placeholder="Məs: Həftədə 2 dəfə otaq təmizliyi edirəm." rows="2"></textarea></div>
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Sosial Münasibətlər (20%)</label><textarea class="modal-textarea" id="profileSosial" placeholder="Məs: Sakit mühiti sevirəm, az-az qonaq çağırıram." rows="2"></textarea></div>
+                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Həyat Tərzi və Maraqlar (20%)</label><textarea class="modal-textarea" id="profileHayat" placeholder="Məs: Kitab oxumaq, proqramlaşdırma və video oyunlar." rows="2"></textarea></div>
+
+                            <div style="border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px;">
+                                <h3 style="font-size: 18px; color: var(--text-primary); margin-bottom: 16px; font-weight: 600;">Sistem Ayarları</h3>
+                            </div>
+
+                            <div>
+                                <label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Gemini API Açarı (Şəxsi)</label>
+                                <input type="text" class="modal-input" id="profileApiKey" placeholder="AIza...">
+                                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">API açarınız şəxsidir və yalnız sizin AI söhbətləriniz üçün istifadə olunur. <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: var(--ku-green);">Buradan açar əldə edə bilərsiniz</a>.</p>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 16px; background: var(--bg); border-radius: var(--radius-btn); border: 1px solid var(--border); transition: all 0.2s; cursor: pointer;" onmouseover="this.style.borderColor='var(--ku-green)'" onmouseout="this.style.borderColor='var(--border)'">
+                                <i data-lucide="bird" style="width: 24px; height: 24px; color: var(--ku-green);"></i>
+                                <label for="evDeyisme" style="font-size: 14px; font-weight: 500; cursor: pointer; flex: 1;">Evi dəyişmək istəyirəm (Otaq yoldaşı axtarıram)</label>
+                                <input type="checkbox" id="evDeyisme" style="width: 24px; height: 24px; cursor: pointer; accent-color: var(--ku-green);">
+                            </div>
+
+                            <button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); justify-content: center; border: none;" onclick="saveProfile()">
+                                <i data-lucide="save"></i> Dəyişiklikləri Yadda Saxla
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="simple-footer">© {{ current_year }} Qarabağ Universiteti. Bütün hüquqlar qorunur.</footer>
+    </div>
+
+    <!-- Application Modal -->
+    <div class="modal-overlay" id="appModalOverlay">
+        <div class="modal-card">
+            <div class="modal-header"><h3 id="appModalTitle">Yeni Müraciət</h3><i data-lucide="x" onclick="closeModal('appModalOverlay')"></i></div>
+            <div class="modal-body">
+                <input type="hidden" id="editAppId">
+                <input type="text" class="modal-input" id="appTitle" placeholder="Müraciət başlığı (Məs: Pəncərə problemi)">
+                <textarea class="modal-textarea" id="appInput" placeholder="Müraciətinizi qısa şəkildə yazın..."></textarea>
+                <select class="priority-select" id="appPriority"><option value="Aşağı">Aşağı</option><option value="Orta" selected>Orta</option><option value="Yüksək">Yüksək</option></select>
+            </div>
+            <div class="modal-footer"><button class="btn-secondary" style="color: var(--text-primary); border-color: var(--border);" onclick="closeModal('appModalOverlay')">Ləğv et</button><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="saveAppData()"><i data-lucide="send"></i> Göndər</button></div>
+        </div>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <div class="ai-chat-window" id="aiChatWindow">
+        <div class="ai-chat-header"><h3><i data-lucide="bot"></i> Kampus AI</h3><i data-lucide="x" onclick="toggleAiChat()"></i></div>
+        <div class="ai-chat-body" id="aiChatBody"></div>
+        <div class="ai-chat-footer"><input type="text" class="ai-input" id="aiInput" placeholder="Sualınızı yazın..." onkeypress="handleAiKeyPress(event)"><button class="ai-send-btn" onclick="sendAiMessage()"><i data-lucide="send"></i></button></div>
+    </div>
+
+    <button class="ai-float-btn" onclick="toggleAiChat()"><i data-lucide="bot"></i></button>
+
+    <script>
+        const CURRENT_USER_NAME = {{ user_name | tojson }};
+        lucide.createIcons();
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPassword').value;
+            const btn = e.target.querySelector('.login-btn');
+            btn.innerHTML = '<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Yoxlanılır...';
+            lucide.createIcons();
+            fetch('login.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, sifre: pass }) })
+            .then(res => res.json())
+            .then(data => { 
+                if(data.success) window.location.reload(); 
+                else { 
+                    document.getElementById('loginError').style.display = 'block'; 
+                    btn.innerHTML = '<i data-lucide="log-in"></i> Daxil ol';
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        function logout() { window.location.href = 'logout.php'; }
+
+        function toggleSidebar() { 
+            document.getElementById('sidebar').classList.toggle('collapsed'); 
+            document.getElementById('mainWrapper').classList.toggle('expanded'); 
+        }
+
+        function setActivePage(pageId, title) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const targetItem = document.querySelector(`[data-menu="${pageId}"]`);
+            if(targetItem) targetItem.classList.add('active');
+            document.getElementById('pageTitle').innerText = title;
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active-page');
+                page.style.opacity = '0';
+                page.style.transform = 'translateY(16px)';
+            });
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if(targetPage) {
+                targetPage.classList.add('active-page');
+                setTimeout(() => {
+                    targetPage.style.opacity = '1';
+                    targetPage.style.transform = 'translateY(0)';
+                }, 10);
+            }
+
+            if(pageId === 'home') loadHomeData();
+            if(pageId === 'applications') loadApplications();
+            if(pageId === 'roommate') loadRoommates();
+            if(pageId === 'myhome') loadMyHome();
+            if(pageId === 'announcements') loadContents();
+            if(pageId === 'payments') loadPayments();
+            if(pageId === 'canteen') loadCanteen();
+            if(pageId === 'laundry') loadLaundry();
+            if(pageId === 'profile') loadProfile();
+
+            closeProfileMenu(); closeNotifDropdown(); closeContactDropdown();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleProfileMenu(e) { e.stopPropagation(); document.getElementById('profileDropdown').classList.toggle('active'); }
+        function closeProfileMenu() { document.getElementById('profileDropdown').classList.remove('active'); }
+        function toggleNotifDropdown(e) { e.stopPropagation(); document.getElementById('notifDropdown').classList.toggle('active'); if(document.getElementById('notifDropdown').classList.contains('active')) loadNotifDropdown(); }
+        function closeNotifDropdown() { document.getElementById('notifDropdown').classList.remove('active'); }
+        function toggleContactDropdown(e) { e.stopPropagation(); document.getElementById('contactDropdown').classList.toggle('active'); }
+        function closeContactDropdown() { document.getElementById('contactDropdown').classList.remove('active'); }
+
+        window.onclick = function(e) { 
+            if (!e.target.closest('#profileDropdown')) closeProfileMenu();
+            if (!e.target.closest('#notifDropdown') && !e.target.closest('.icon-btn')) closeNotifDropdown();
+            if (!e.target.closest('#contactDropdown') && !e.target.closest('#contactToggle')) closeContactDropdown();
+        };
+
+        function toggleAccordion(el) { 
+            const acc = el.parentElement; 
+            const par = acc.parentElement; 
+            par.querySelectorAll('.accordion').forEach(a => { if (a !== acc) a.classList.remove('active'); }); 
+            acc.classList.toggle('active'); 
+        }
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // ===== APPLICATIONS (CRUD with Edit) =====
+        function loadApplications() {
+            const grid = document.getElementById('appGrid');
+            grid.innerHTML = '<div class="add-card" onclick="openAppModal()"><i data-lucide="plus"></i><span>Yeni Müraciət</span></div>';
+            fetch('get_applications.php').then(res => res.json()).then(data => {
+                if(data.success && data.applications.length > 0) {
+                    data.applications.forEach((app, index) => {
+                        let statusClass = app.status === 'Təsdiqləndi' ? 'approved' : 'pending';
+                        const safeBasliq = app.basliq.replace(/'/g, "\'");
+                        const safeMuraciet = app.muraciet.replace(/'/g, "\'");
+
+                        grid.innerHTML += `
+                            <div class="app-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
+                                <div class="app-card-actions">
+                                    <div class="card-action-btn" onclick="event.stopPropagation(); editAppModal(${app.id}, '${safeBasliq}', '${safeMuraciet}', '${app.priority}')"><i data-lucide="edit-3"></i></div>
+                                    <div class="card-action-btn delete" onclick="event.stopPropagation(); deleteApp(${app.id})"><i data-lucide="trash-2"></i></div>
+                                </div>
+                                <h3>${app.basliq}</h3>
+                                <p><strong>Öncəlik:</strong> ${app.priority}</p>
+                                <p><strong>Tarix:</strong> ${app.tarix}</p>
+                                <p><strong>Müraciət:</strong> ${app.muraciet}</p>
+                                <div class="app-card-status ${statusClass}">${app.status}</div>
+                            </div>`;
+                    });
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        function openAppModal() {
+            document.getElementById('appModalTitle').innerText = "Yeni Müraciət";
+            document.getElementById('editAppId').value = "";
+            document.getElementById('appTitle').value = "";
+            document.getElementById('appInput').value = "";
+            document.getElementById('appPriority').value = "Orta";
+            openModal('appModalOverlay');
+        }
+
+        function editAppModal(id, basliq, muraciet, priority) {
+            document.getElementById('appModalTitle').innerText = "Müraciəti Yenilə";
+            document.getElementById('editAppId').value = id;
+            document.getElementById('appTitle').value = basliq.replace(/^Otaq \d+ - /, '');
+            document.getElementById('appInput').value = muraciet;
+            document.getElementById('appPriority').value = priority;
+            openModal('appModalOverlay');
+        }
+
+        function saveAppData() {
+            const editId = document.getElementById('editAppId').value;
+            const title = document.getElementById('appTitle').value.trim();
+            const text = document.getElementById('appInput').value.trim();
+            const priority = document.getElementById('appPriority').value;
+
+            if(text === '' || title === '') return alert("Boş yerləri doldurun!");
+
+            const url = editId ? 'update_application.php' : 'submit_application.php';
+            const payload = editId 
+                ? { id: editId, basliq: title, muraciet: text, priority: priority } 
+                : { basliq: title, muraciet: text, priority: priority };
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => { 
+                if(data.success) { 
+                    closeModal('appModalOverlay'); 
+                    loadApplications(); 
+                } else {
+                    alert("Xəta: " + (data.message || "Naməlum səhv"));
+                }
+            });
+        }
+
+        function deleteApp(id) { 
+            if(confirm("Silinsin?")) {
+                fetch('delete_application.php', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ id: id }) 
+                })
+                .then(res => res.json())
+                .then(data => { if(data.success) loadApplications(); });
+            }
+        }
+
+        // ===== HOME =====
+        function loadHomeData() { loadHomeAnnouncements(); loadHomeRoommates(); loadNotifDropdown(); loadCanteen(); loadLaundry(); }
+
+        // ===== CANTEEN =====
+		function loadCanteen() {
+		    fetch('get_canteen.php').then(res => res.json()).then(data => {
+		        if(data.success) {
+		            const dayText = "Bugün: " + data.day;
+		            document.getElementById('canteenDay').innerText = dayText;
+		            document.getElementById('canteenDormMeal').innerText = data.dorm;
+		            document.getElementById('canteenUniMeal').innerText = data.uni;
+		            document.getElementById('canteenDayFull').innerText = dayText;
+		            document.getElementById('canteenDormMealFull').innerText = data.dorm;
+		            document.getElementById('canteenUniMealFull').innerText = data.uni;
+		        }
+		    });
+		}
+
+        // ===== LAUNDRY =====
+        function loadLaundry() {
+            fetch('get_laundry.php').then(res => res.json()).then(data => {
+                if(data.success) {
+                    const d = data.data;
+                    const statuses = { 'Yoxdur': 'status-bad', 'Gözlənilir': 'status-warning', 'Hazır': 'status-good' };
+                    const html = `
+                        <div class="room-card" style="animation: fadeInUp 0.4s ease 0s both;">
+                            <div class="bed-icon"><i data-lucide="washing-machine"></i></div>
+                            <div class="room-owner">Maşın 1</div>
+                            <div class="item-list"><div class="item-row"><span class="item-name">Status</span><span class="status-badge ${statuses[d.machine_1_status]}">${d.machine_1_status}</span></div></div>
+                        </div>
+                        <div class="room-card" style="animation: fadeInUp 0.4s ease 0.1s both;">
+                            <div class="bed-icon"><i data-lucide="washing-machine"></i></div>
+                            <div class="room-owner">Maşın 2</div>
+                            <div class="item-list"><div class="item-row"><span class="item-name">Status</span><span class="status-badge ${statuses[d.machine_2_status]}">${d.machine_2_status}</span></div></div>
+                        </div>
+                        <div class="room-card" style="animation: fadeInUp 0.4s ease 0.2s both;">
+                            <div class="bed-icon"><i data-lucide="washing-machine"></i></div>
+                            <div class="room-owner">Maşın 3</div>
+                            <div class="item-list"><div class="item-row"><span class="item-name">Status</span><span class="status-badge ${statuses[d.machine_3_status]}">${d.machine_3_status}</span></div></div>
+                        </div>`;
+
+                    const listMain = document.getElementById('laundryList');
+                    if(listMain) listMain.innerHTML = html;
+
+                    const listHome = document.getElementById('laundryListHome');
+                    if(listHome) listHome.innerHTML = `
+                        <div class="item-row" style="animation: fadeInUp 0.3s ease 0s both;"><span class="item-name">Maşın 1</span><span class="status-badge ${statuses[d.machine_1_status]}">${d.machine_1_status}</span></div>
+                        <div class="item-row" style="animation: fadeInUp 0.3s ease 0.1s both;"><span class="item-name">Maşın 2</span><span class="status-badge ${statuses[d.machine_2_status]}">${d.machine_2_status}</span></div>
+                        <div class="item-row" style="animation: fadeInUp 0.3s ease 0.2s both;"><span class="item-name">Maşın 3</span><span class="status-badge ${statuses[d.machine_3_status]}">${d.machine_3_status}</span></div>`;
+
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // ===== PROFILE =====
+        function loadProfile() {
+            fetch('get_profile.php').then(res => res.json()).then(data => {
+                if(data.success) {
+                    const d = data.data;
+                    document.getElementById('profileName').value = d.ad_soyad || '';
+                    document.getElementById('profileEmail').value = d.email || '';
+                    document.getElementById('profileIxtisas').value = d.ixtisas || '';
+                    document.getElementById('profileKurs').value = d.kurs || '';
+                    document.getElementById('profileApiKey').value = d.api_key || '';
+                    document.getElementById('evDeyisme').checked = d.ev_deyisme_isteyi == 1;
+                    document.getElementById('profileYuxu').value = d.yuxu_rejimi || '';
+                    document.getElementById('profileTemizlik').value = d.temizlik || '';
+                    document.getElementById('profileSosial').value = d.sosial_munasibet || '';
+                    document.getElementById('profileHayat').value = d.hayat_terzi || '';
+                }
+            });
+        }
+        function saveProfile() {
+            fetch('update_profile.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: document.getElementById('profileEmail').value,
+                    ixtisas: document.getElementById('profileIxtisas').value,
+                    kurs: document.getElementById('profileKurs').value,
+                    api_key: document.getElementById('profileApiKey').value,
+                    ev_deyisme_isteyi: document.getElementById('evDeyisme').checked,
+                    yuxu_rejimi: document.getElementById('profileYuxu').value,
+                    temizlik: document.getElementById('profileTemizlik').value,
+                    sosial_munasibet: document.getElementById('profileSosial').value,
+                    hayat_terzi: document.getElementById('profileHayat').value
+                })
+            }).then(res => res.json()).then(data => { 
+                if(data.success) {
+                    const btn = document.querySelector('#page-profile .btn-primary');
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '<i data-lucide="check"></i> Yadda saxlanıldı!';
+                    btn.style.background = 'linear-gradient(135deg, var(--success), #059669)';
+                    lucide.createIcons();
+                    setTimeout(() => {
+                        btn.innerHTML = original;
+                        btn.style.background = '';
+                        lucide.createIcons();
+                    }, 2000);
+                } else {
+                    alert('Xəta: ' + data.message); 
+                }
+            });
+        }
+
+        // ===== ROOMMATES =====
+        function loadHomeRoommates() {
+            fetch('get_roommates.php').then(res => res.json()).then(data => {
+                const list = document.getElementById('homeRoommates');
+                if(!list) return;
+                list.innerHTML = '';
+                if(data.success && data.roommates.length > 0) {
+                    data.roommates.slice(0, 3).forEach((r, index) => {
+                        list.innerHTML += `
+                            <div class="match-card" style="margin-bottom: 12px; animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
+                                <div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div>
+                                <div style="flex: 1;">
+                                    <h4 style="font-size: 16px; font-weight: 600;">${r.ad_soyad}</h4>
+                                    <p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${r.ixtisas}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div id="home-score-${r.id}" style="font-size: 14px; font-weight: 700; color: var(--ku-green); margin-bottom: 4px;">-%</div>
+                                    <button class="btn-contact" onclick="checkHomeCompatibility(${r.id})">Yoxla</button>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); animation: fadeIn 0.3s ease;">Hazırda otaq dəyişmək istəyən yoldaş yoxdur.</p>';
+                }
+            });
+        }
+        async function checkHomeCompatibility(targetId) {
+            const scoreDiv = document.getElementById(`home-score-${targetId}`);
+            scoreDiv.innerText = "...";
+            scoreDiv.style.animation = "pulse 1s infinite";
+            try {
+                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const data = await res.json();
+                scoreDiv.style.animation = "";
+                if(data.success) {
+                    scoreDiv.innerText = data.score + "%";
+                    scoreDiv.style.transform = "scale(1.2)";
+                    setTimeout(() => scoreDiv.style.transform = "scale(1)", 300);
+                }
+                else { scoreDiv.innerText = "Xəta"; alert("Xəta: " + data.message); }
+            } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
+        }
+
+        function loadRoommates() {
+            fetch('get_roommates.php').then(res => res.json()).then(data => {
+                const list = document.getElementById('roommateList');
+                list.innerHTML = '';
+                if(data.success && data.roommates.length > 0) {
+                    data.roommates.forEach((r, index) => {
+                        list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${r.ad_soyad}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${r.ixtisas}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
+                    });
+                    lucide.createIcons();
+                } else {
+                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); animation: fadeIn 0.3s ease;">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>';
+                }
+            });
+        }
+        async function checkCompatibility(targetId) {
+            const scoreDiv = document.getElementById(`score-${targetId}`);
+            scoreDiv.innerText = "...";
+            scoreDiv.style.animation = "pulse 1s infinite";
+            try {
+                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const data = await res.json();
+                scoreDiv.style.animation = "";
+                if(data.success) {
+                    scoreDiv.innerText = data.score + "%";
+                    scoreDiv.style.transform = "scale(1.3)";
+                    setTimeout(() => scoreDiv.style.transform = "scale(1)", 300);
+                }
+                else { scoreDiv.innerText = "Xəta"; alert("Xəta: " + data.message); }
+            } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
+        }
+
+        // ===== MY HOME =====
+        function loadMyHome() {
+            fetch('get_home.php').then(res => res.json()).then(data => {
+                const list = document.getElementById('myHomeList');
+                list.innerHTML = '';
+                if(data.success && data.roommates.length > 0) {
+                    data.roommates.forEach((r, index) => {
+                        let itemsHtml = '';
+                        if(r.items && r.items.length > 0) {
+                            r.items.forEach((item, i) => {
+                                let statusClass = 'status-good'; if (item.status === 'Az zədəli') statusClass = 'status-warning'; if (item.status === 'Zədəli') statusClass = 'status-bad';
+                                itemsHtml += `<div class="item-row" style="animation: fadeInUp 0.3s ease ${i * 0.05}s both;"><span class="item-name">${item.item_name}</span><span class="status-badge ${statusClass}">${item.status}</span></div>`;
+                            });
+                        } else { itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">İnventar yoxdur.</p>'; }
+                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="bed-icon"><i data-lucide="bed-double"></i></div><div class="room-owner">Yataq: ${r.ad_soyad}</div><div class="item-list">${itemsHtml}</div></div>`;
+                    });
+                    lucide.createIcons();
+                } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Otaq yoldaşları tapılmadı.</p>'; }
+            });
+        }
+
+        // ===== NOTIFICATIONS =====
+        function loadNotifDropdown() {
+            fetch('get_notifications.php').then(res => res.json()).then(data => {
+                const content = document.getElementById('notifDropdownContent');
+                content.innerHTML = '';
+                if(data.success && data.notifications.length > 0) {
+                    data.notifications.forEach((n, index) => {
+                        content.innerHTML += `<div class="notif-item" style="animation: fadeInUp 0.3s ease ${index * 0.05}s both;" onclick="setActivePage('${n.redirect}', '${n.redirect_text}')"><div class="notif-icon ${n.bg_color}"><i data-lucide="${n.icon}"></i></div><div class="notif-text"><h5>${n.title}</h5><p>${n.description}</p></div></div>`;
+                    });
+                    lucide.createIcons();
+                } else { content.innerHTML = '<p style="padding: 16px; text-align: center; color: var(--text-secondary); font-size: 14px; animation: fadeIn 0.3s ease;">Heç bir bildiriş yoxdur.</p>'; }
+            });
+        }
+
+        // ===== ANNOUNCEMENTS =====
+        function loadHomeAnnouncements() {
+            fetch('get_contents.php').then(res => res.json()).then(data => {
+                const homeAnn = document.getElementById('homeAnnouncements'); if(!homeAnn) return; homeAnn.innerHTML = '';
+                if(data.success && data.contents.length > 0) {
+                    data.contents.slice(0, 2).forEach((c, index) => {
+                        if(c.type === 'announcement') {
+                            let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
+                            homeAnn.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${c.title}</h4><p>${c.description}</p><div class="notification-meta"><span class="badge ${badgeClass}">${c.priority}</span></div></div></div>`;
+                        }
+                    });
+                    lucide.createIcons();
+                }
+            });
+        }
+        function loadContents() {
+            fetch('get_contents.php').then(res => res.json()).then(data => {
+                if(data.success) {
+                    const annList = document.getElementById('announcementsList'); const surList = document.getElementById('surveysList');
+                    annList.innerHTML = ''; surList.innerHTML = '';
+                    let annIndex = 0, surIndex = 0;
+                    data.contents.forEach(c => {
+                        let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
+                        if(c.type === 'announcement') {
+                            annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${annIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${c.title}</h4><p>${c.description}</p><div class="notification-meta"><span class="badge ${badgeClass}">${c.priority}</span></div></div></div>`;
+                        } else {
+                            surList.innerHTML += `<div class="survey-card" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="service-icon bg-blue" style="margin-bottom: 0;"><i data-lucide="clipboard-check"></i></div><h3>${c.title}</h3><p>${c.description}</p><button class="btn-contact" style="width: 100%; text-align: center; justify-content: center;">İştirak et</button></div>`;
+                        }
+                    });
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // ===== PAYMENTS =====
+        function loadPayments() {
+            fetch('get_penalties.php').then(res => res.json()).then(data => {
+                const list = document.getElementById('paymentsList'); list.innerHTML = '';
+                if(data.success && data.penalties.length > 0) {
+                    data.penalties.forEach((p, index) => {
+                        list.innerHTML += `<div class="payment-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="app-card-actions"><div class="card-action-btn"><i data-lucide="info"></i></div></div><div class="service-icon bg-red" style="margin-bottom: 16px;"><i data-lucide="alert-triangle"></i></div><h3>${p.reason}</h3><p style="margin-bottom: 8px; font-size: 14px;"><strong>Məbləğ:</strong> ${p.amount} AZN</p><p style="margin-bottom: 8px; font-size: 14px;"><strong>Status:</strong> <span style="color: var(--danger); font-weight: 600;">${p.status}</span></p><button class="btn-primary" style="background: linear-gradient(135deg, var(--danger), #dc2626); color: var(--surface); width: 100%; justify-content: center; border: none;"><i data-lucide="credit-card"></i> Cəriməni Ödə</button></div>`;
+                    });
+                    lucide.createIcons();
+                } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Heç bir cərimə qeydə alınmayıb.</p>'; }
+            });
+        }
+
+        // ===== AI CHAT =====
+        function toggleAiChat() { 
+            const win = document.getElementById('aiChatWindow');
+            win.classList.toggle('active');
+            if(win.classList.contains('active') && document.getElementById('aiChatBody').innerHTML === '') {
+                resetAiChat();
+            }
+        }
+        function resetAiChat() {
+            document.getElementById('aiChatBody').innerHTML = `<div class="ai-msg bot" style="animation: fadeInUp 0.4s ease;">Salam, <strong>${CURRENT_USER_NAME}</strong>! Mən Kampus AI köməkçisiyəm. Sualınız nədir?</div>`;
+            aiChatHistory = [{ role: 'model', text: `Salam, ${CURRENT_USER_NAME}! Mən Kampus AI köməkçisiyəm. Sualınız nədir?` }];
+        }
+        let aiChatHistory = [];
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const body = document.getElementById('aiChatBody');
+            const text = input.value;
+            if(text.trim() === '') return;
+            const userMsg = document.createElement('div'); 
+            userMsg.className = 'ai-msg user'; 
+            userMsg.innerText = text; 
+            body.appendChild(userMsg);
+            aiChatHistory.push({ role: 'user', text: text });
+            input.value = ''; 
+            body.scrollTop = body.scrollHeight;
+            const loadingMsg = document.createElement('div'); 
+            loadingMsg.className = 'ai-msg bot loading'; 
+            loadingMsg.innerText = "Gözləyin"; 
+            body.appendChild(loadingMsg); 
+            body.scrollTop = body.scrollHeight;
+            try {
+                const res = await fetch('ai_handler.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'chat', message: text, history: aiChatHistory.slice(-10) })
+                });
+                const responseText = await res.text(); 
+                try {
+                    const data = JSON.parse(responseText);
+                    loadingMsg.classList.remove('loading');
+                    if(data.success) {
+                        loadingMsg.innerText = data.reply;
+                        loadingMsg.style.animation = "fadeInUp 0.3s ease";
+                        aiChatHistory.push({ role: 'model', text: data.reply });
+                    } else {
+                        loadingMsg.innerText = "Xəta: " + (data.message || "Cavab alına bilmədi.");
+                        loadingMsg.style.color = "var(--danger)";
+                    }
+                } catch (parseError) {
+                    loadingMsg.classList.remove('loading');
+                    loadingMsg.innerText = "Server xətası baş verdi.";
+                    loadingMsg.style.color = "var(--danger)";
+                }
+            } catch (error) {
+                loadingMsg.classList.remove('loading');
+                loadingMsg.innerText = "Serverə qoşulmaq mümkün olmadı.";
+                loadingMsg.style.color = "var(--danger)";
+            }
+            body.scrollTop = body.scrollHeight;
+        }
+        function handleAiKeyPress(e) { if(e.key === 'Enter') sendAiMessage(); }
+
+        {% if is_logged_in %} loadHomeData(); {% endif %}
+    </script>
+</body>
+</html>
