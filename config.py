@@ -1,15 +1,18 @@
+import os
 import pymysql
 from pymysql.cursors import DictCursor
 from pymysql.err import OperationalError
 from flask import jsonify
 
 DB_CONFIG = {
-    "host": "sql102.infinityfree.com",
-    "database": "if0_42430459_students",
-    "user": "if0_42430459",
-    "password": "HhYFx4Ser2RXZA",
+    "host": os.getenv("DB_HOST"),
+    "port": int(os.getenv("DB_PORT", 4000)), 
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
     "charset": "utf8mb4",
-    "cursorclass": DictCursor
+    "cursorclass": DictCursor,
+    "ssl": {"ssl": True} 
 }
 
 def get_db_connection():
