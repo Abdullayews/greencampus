@@ -802,7 +802,7 @@
             const btn = e.target.querySelector('.login-btn');
             btn.innerHTML = '<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Yoxlanılır...';
             lucide.createIcons();
-            fetch('login.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, sifre: pass }) })
+            fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, sifre: pass }) })
             .then(res => res.json())
             .then(data => { 
                 if(data.success) window.location.reload(); 
@@ -814,7 +814,7 @@
             });
         }
 
-        function logout() { window.location.href = 'logout.php'; }
+        function logout() { window.location.href = '/logout'; }
 
         function toggleSidebar() { 
             document.getElementById('sidebar').classList.toggle('collapsed'); 
@@ -883,7 +883,7 @@
         function loadApplications() {
             const grid = document.getElementById('appGrid');
             grid.innerHTML = '<div class="add-card" onclick="openAppModal()"><i data-lucide="plus"></i><span>Yeni Müraciət</span></div>';
-            fetch('get_applications.php').then(res => res.json()).then(data => {
+            fetch('/get_applications').then(res => res.json()).then(data => {
                 if(data.success && data.applications.length > 0) {
                     data.applications.forEach((app, index) => {
                         let statusClass = app.status === 'Təsdiqləndi' ? 'approved' : 'pending';
@@ -957,7 +957,7 @@
 
         function deleteApp(id) { 
             if(confirm("Silinsin?")) {
-                fetch('delete_application.php', { 
+                fetch('/delete_application', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ id: id }) 
@@ -972,7 +972,7 @@
 
         // ===== CANTEEN =====
 		function loadCanteen() {
-		    fetch('get_canteen.php').then(res => res.json()).then(data => {
+		    fetch('/get_canteen').then(res => res.json()).then(data => {
 		        if(data.success) {
 		            const dayText = "Bugün: " + data.day;
 		            document.getElementById('canteenDay').innerText = dayText;
@@ -987,7 +987,7 @@
 
         // ===== LAUNDRY =====
         function loadLaundry() {
-            fetch('get_laundry.php').then(res => res.json()).then(data => {
+            fetch('/get_laundry').then(res => res.json()).then(data => {
                 if(data.success) {
                     const d = data.data;
                     const statuses = { 'Yoxdur': 'status-bad', 'Gözlənilir': 'status-warning', 'Hazır': 'status-good' };
@@ -1024,7 +1024,7 @@
 
         // ===== PROFILE =====
         function loadProfile() {
-            fetch('get_profile.php').then(res => res.json()).then(data => {
+            fetch('/get_profile').then(res => res.json()).then(data => {
                 if(data.success) {
                     const d = data.data;
                     document.getElementById('profileName').value = d.ad_soyad || '';
@@ -1041,7 +1041,7 @@
             });
         }
         function saveProfile() {
-            fetch('update_profile.php', {
+            fetch('/update_profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -1075,7 +1075,7 @@
 
         // ===== ROOMMATES =====
         function loadHomeRoommates() {
-            fetch('get_roommates.php').then(res => res.json()).then(data => {
+            fetch('/get_roommates').then(res => res.json()).then(data => {
                 const list = document.getElementById('homeRoommates');
                 if(!list) return;
                 list.innerHTML = '';
@@ -1104,7 +1104,7 @@
             scoreDiv.innerText = "...";
             scoreDiv.style.animation = "pulse 1s infinite";
             try {
-                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const res = await fetch('/ai_handler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
                 const data = await res.json();
                 scoreDiv.style.animation = "";
                 if(data.success) {
@@ -1117,7 +1117,7 @@
         }
 
         function loadRoommates() {
-            fetch('get_roommates.php').then(res => res.json()).then(data => {
+            fetch('/get_roommates').then(res => res.json()).then(data => {
                 const list = document.getElementById('roommateList');
                 list.innerHTML = '';
                 if(data.success && data.roommates.length > 0) {
@@ -1135,7 +1135,7 @@
             scoreDiv.innerText = "...";
             scoreDiv.style.animation = "pulse 1s infinite";
             try {
-                const res = await fetch('ai_handler.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const res = await fetch('/ai_handler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
                 const data = await res.json();
                 scoreDiv.style.animation = "";
                 if(data.success) {
@@ -1149,7 +1149,7 @@
 
         // ===== MY HOME =====
         function loadMyHome() {
-            fetch('get_home.php').then(res => res.json()).then(data => {
+            fetch('/get_home').then(res => res.json()).then(data => {
                 const list = document.getElementById('myHomeList');
                 list.innerHTML = '';
                 if(data.success && data.roommates.length > 0) {
@@ -1170,7 +1170,7 @@
 
         // ===== NOTIFICATIONS =====
         function loadNotifDropdown() {
-            fetch('get_notifications.php').then(res => res.json()).then(data => {
+            fetch('/get_notifications').then(res => res.json()).then(data => {
                 const content = document.getElementById('notifDropdownContent');
                 content.innerHTML = '';
                 if(data.success && data.notifications.length > 0) {
@@ -1184,7 +1184,7 @@
 
         // ===== ANNOUNCEMENTS =====
         function loadHomeAnnouncements() {
-            fetch('get_contents.php').then(res => res.json()).then(data => {
+            fetch('/get_contents').then(res => res.json()).then(data => {
                 const homeAnn = document.getElementById('homeAnnouncements'); if(!homeAnn) return; homeAnn.innerHTML = '';
                 if(data.success && data.contents.length > 0) {
                     data.contents.slice(0, 2).forEach((c, index) => {
@@ -1198,7 +1198,7 @@
             });
         }
         function loadContents() {
-            fetch('get_contents.php').then(res => res.json()).then(data => {
+            fetch('/get_contents').then(res => res.json()).then(data => {
                 if(data.success) {
                     const annList = document.getElementById('announcementsList'); const surList = document.getElementById('surveysList');
                     annList.innerHTML = ''; surList.innerHTML = '';
@@ -1218,7 +1218,7 @@
 
         // ===== PAYMENTS =====
         function loadPayments() {
-            fetch('get_penalties.php').then(res => res.json()).then(data => {
+            fetch('/get_penalties').then(res => res.json()).then(data => {
                 const list = document.getElementById('paymentsList'); list.innerHTML = '';
                 if(data.success && data.penalties.length > 0) {
                     data.penalties.forEach((p, index) => {
@@ -1260,7 +1260,7 @@
             body.appendChild(loadingMsg); 
             body.scrollTop = body.scrollHeight;
             try {
-                const res = await fetch('ai_handler.php', {
+                const res = await fetch('/ai_handler', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'chat', message: text, history: aiChatHistory.slice(-10) })
