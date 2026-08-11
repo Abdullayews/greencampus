@@ -792,6 +792,24 @@
     <button class="ai-float-btn" onclick="toggleAiChat()"><i data-lucide="bot"></i></button>
 
     <script>
+
+        // === Təhlükəsizlik və Validasiya Yardımçıları ===
+        function cleanVal(val) {
+            return (val === '' || val === undefined || val === null) ? null : String(val).trim();
+        }
+        function esc(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        function refreshIcons(container) {
+            if (container && container.querySelectorAll) {
+                lucide.createIcons({ nodes: [container] });
+            } else {
+                lucide.createIcons();
+            }
+        }
         const CURRENT_USER_NAME = {{ user_name | tojson }};
         lucide.createIcons();
 
@@ -802,7 +820,8 @@
             const btn = e.target.querySelector('.login-btn');
             btn.innerHTML = '<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Yoxlanılır...';
             lucide.createIcons();
-            fetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, sifre: pass }) })
+            fetch('/login', {
+                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, sifre: pass }) })
             .then(res => res.json())
             .then(data => { 
                 if(data.success) window.location.reload(); 
@@ -896,14 +915,14 @@
                                     <div class="card-action-btn" onclick="event.stopPropagation(); editAppModal(${app.id}, '${safeBasliq}', '${safeMuraciet}', '${app.priority}')"><i data-lucide="edit-3"></i></div>
                                     <div class="card-action-btn delete" onclick="event.stopPropagation(); deleteApp(${app.id})"><i data-lucide="trash-2"></i></div>
                                 </div>
-                                <h3>${app.basliq}</h3>
-                                <p><strong>Öncəlik:</strong> ${app.priority}</p>
-                                <p><strong>Tarix:</strong> ${app.tarix}</p>
-                                <p><strong>Müraciət:</strong> ${app.muraciet}</p>
-                                <div class="app-card-status ${statusClass}">${app.status}</div>
+                                <h3>${esc(app.basliq)}</h3>
+                                <p><strong>Öncəlik:</strong> ${esc(app.priority)}</p>
+                                <p><strong>Tarix:</strong> ${esc(app.tarix)}</p>
+                                <p><strong>Müraciət:</strong> ${esc(app.muraciet)}</p>
+                                <div class="app-card-status ${statusClass}">${esc(app.status)}</div>
                             </div>`;
                     });
-                    lucide.createIcons();
+                    refreshIcons(grid);
                 }
             });
         }
@@ -934,7 +953,7 @@
 
             if(text === '' || title === '') return alert("Boş yerləri doldurun!");
 
-            const url = editId ? 'update_application.php' : 'submit_application.php';
+            const url = editId ? '/update_application' : '/submit_application';
             const payload = editId 
                 ? { id: editId, basliq: title, muraciet: text, priority: priority } 
                 : { basliq: title, muraciet: text, priority: priority };
@@ -957,7 +976,8 @@
 
         function deleteApp(id) { 
             if(confirm("Silinsin?")) {
-                fetch('/delete_application', { 
+                fetch('/delete_application', {
+                credentials: 'same-origin', 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ id: id }) 
@@ -1017,7 +1037,7 @@
                         <div class="item-row" style="animation: fadeInUp 0.3s ease 0.1s both;"><span class="item-name">Maşın 2</span><span class="status-badge ${statuses[d.machine_2_status]}">${d.machine_2_status}</span></div>
                         <div class="item-row" style="animation: fadeInUp 0.3s ease 0.2s both;"><span class="item-name">Maşın 3</span><span class="status-badge ${statuses[d.machine_3_status]}">${d.machine_3_status}</span></div>`;
 
-                    lucide.createIcons();
+                    refreshIcons(listMain || listHome);
                 }
             });
         }
@@ -1042,6 +1062,7 @@
         }
         function saveProfile() {
             fetch('/update_profile', {
+                credentials: 'same-origin',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -1085,8 +1106,8 @@
                             <div class="match-card" style="margin-bottom: 12px; animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
                                 <div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div>
                                 <div style="flex: 1;">
-                                    <h4 style="font-size: 16px; font-weight: 600;">${r.ad_soyad}</h4>
-                                    <p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${r.ixtisas}</p>
+                                    <h4 style="font-size: 16px; font-weight: 600;">${esc(r.ad_soyad)}</h4>
+                                    <p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p>
                                 </div>
                                 <div style="text-align: right;">
                                     <div id="home-score-${r.id}" style="font-size: 14px; font-weight: 700; color: var(--ku-green); margin-bottom: 4px;">-%</div>
@@ -1104,7 +1125,8 @@
             scoreDiv.innerText = "...";
             scoreDiv.style.animation = "pulse 1s infinite";
             try {
-                const res = await fetch('/ai_handler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const res = await fetch('/ai_handler', {
+                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
                 const data = await res.json();
                 scoreDiv.style.animation = "";
                 if(data.success) {
@@ -1122,9 +1144,9 @@
                 list.innerHTML = '';
                 if(data.success && data.roommates.length > 0) {
                     data.roommates.forEach((r, index) => {
-                        list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${r.ad_soyad}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${r.ixtisas}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
+                        list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
                     });
-                    lucide.createIcons();
+                    refreshIcons(list);
                 } else {
                     list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); animation: fadeIn 0.3s ease;">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>';
                 }
@@ -1135,7 +1157,8 @@
             scoreDiv.innerText = "...";
             scoreDiv.style.animation = "pulse 1s infinite";
             try {
-                const res = await fetch('/ai_handler', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
+                const res = await fetch('/ai_handler', {
+                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
                 const data = await res.json();
                 scoreDiv.style.animation = "";
                 if(data.success) {
@@ -1158,12 +1181,12 @@
                         if(r.items && r.items.length > 0) {
                             r.items.forEach((item, i) => {
                                 let statusClass = 'status-good'; if (item.status === 'Az zədəli') statusClass = 'status-warning'; if (item.status === 'Zədəli') statusClass = 'status-bad';
-                                itemsHtml += `<div class="item-row" style="animation: fadeInUp 0.3s ease ${i * 0.05}s both;"><span class="item-name">${item.item_name}</span><span class="status-badge ${statusClass}">${item.status}</span></div>`;
+                                itemsHtml += `<div class="item-row" style="animation: fadeInUp 0.3s ease ${i * 0.05}s both;"><span class="item-name">${esc(item.item_name)}</span><span class="status-badge ${statusClass}">${esc(item.status)}</span></div>`;
                             });
                         } else { itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">İnventar yoxdur.</p>'; }
-                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="bed-icon"><i data-lucide="bed-double"></i></div><div class="room-owner">Yataq: ${r.ad_soyad}</div><div class="item-list">${itemsHtml}</div></div>`;
+                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="bed-icon"><i data-lucide="bed-double"></i></div><div class="room-owner">Yataq: ${esc(r.ad_soyad)}</div><div class="item-list">${itemsHtml}</div></div>`;
                     });
-                    lucide.createIcons();
+                    refreshIcons(list);
                 } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Otaq yoldaşları tapılmadı.</p>'; }
             });
         }
@@ -1175,9 +1198,9 @@
                 content.innerHTML = '';
                 if(data.success && data.notifications.length > 0) {
                     data.notifications.forEach((n, index) => {
-                        content.innerHTML += `<div class="notif-item" style="animation: fadeInUp 0.3s ease ${index * 0.05}s both;" onclick="setActivePage('${n.redirect}', '${n.redirect_text}')"><div class="notif-icon ${n.bg_color}"><i data-lucide="${n.icon}"></i></div><div class="notif-text"><h5>${n.title}</h5><p>${n.description}</p></div></div>`;
+                        content.innerHTML += `<div class="notif-item" style="animation: fadeInUp 0.3s ease ${index * 0.05}s both;" onclick="setActivePage('${n.redirect}', '${n.redirect_text}')"><div class="notif-icon ${n.bg_color}"><i data-lucide="${n.icon}"></i></div><div class="notif-text"><h5>${esc(n.title)}</h5><p>${esc(n.description)}</p></div></div>`;
                     });
-                    lucide.createIcons();
+                    refreshIcons(content);
                 } else { content.innerHTML = '<p style="padding: 16px; text-align: center; color: var(--text-secondary); font-size: 14px; animation: fadeIn 0.3s ease;">Heç bir bildiriş yoxdur.</p>'; }
             });
         }
@@ -1190,7 +1213,7 @@
                     data.contents.slice(0, 2).forEach((c, index) => {
                         if(c.type === 'announcement') {
                             let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
-                            homeAnn.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${c.title}</h4><p>${c.description}</p><div class="notification-meta"><span class="badge ${badgeClass}">${c.priority}</span></div></div></div>`;
+                            homeAnn.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
                         }
                     });
                     lucide.createIcons();
@@ -1206,12 +1229,12 @@
                     data.contents.forEach(c => {
                         let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
                         if(c.type === 'announcement') {
-                            annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${annIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${c.title}</h4><p>${c.description}</p><div class="notification-meta"><span class="badge ${badgeClass}">${c.priority}</span></div></div></div>`;
+                            annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${annIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
                         } else {
-                            surList.innerHTML += `<div class="survey-card" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="service-icon bg-blue" style="margin-bottom: 0;"><i data-lucide="clipboard-check"></i></div><h3>${c.title}</h3><p>${c.description}</p><button class="btn-contact" style="width: 100%; text-align: center; justify-content: center;">İştirak et</button></div>`;
+                            surList.innerHTML += `<div class="survey-card" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="service-icon bg-blue" style="margin-bottom: 0;"><i data-lucide="clipboard-check"></i></div><h3>${esc(c.title)}</h3><p>${esc(c.description)}</p><button class="btn-contact" style="width: 100%; text-align: center; justify-content: center;">İştirak et</button></div>`;
                         }
                     });
-                    lucide.createIcons();
+                    refreshIcons(annList);
                 }
             });
         }
@@ -1222,9 +1245,9 @@
                 const list = document.getElementById('paymentsList'); list.innerHTML = '';
                 if(data.success && data.penalties.length > 0) {
                     data.penalties.forEach((p, index) => {
-                        list.innerHTML += `<div class="payment-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="app-card-actions"><div class="card-action-btn"><i data-lucide="info"></i></div></div><div class="service-icon bg-red" style="margin-bottom: 16px;"><i data-lucide="alert-triangle"></i></div><h3>${p.reason}</h3><p style="margin-bottom: 8px; font-size: 14px;"><strong>Məbləğ:</strong> ${p.amount} AZN</p><p style="margin-bottom: 8px; font-size: 14px;"><strong>Status:</strong> <span style="color: var(--danger); font-weight: 600;">${p.status}</span></p><button class="btn-primary" style="background: linear-gradient(135deg, var(--danger), #dc2626); color: var(--surface); width: 100%; justify-content: center; border: none;"><i data-lucide="credit-card"></i> Cəriməni Ödə</button></div>`;
+                        list.innerHTML += `<div class="payment-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="app-card-actions"><div class="card-action-btn"><i data-lucide="info"></i></div></div><div class="service-icon bg-red" style="margin-bottom: 16px;"><i data-lucide="alert-triangle"></i></div><h3>${esc(p.reason)}</h3><p style="margin-bottom: 8px; font-size: 14px;"><strong>Məbləğ:</strong> ${esc(p.amount)} AZN</p><p style="margin-bottom: 8px; font-size: 14px;"><strong>Status:</strong> <span style="color: var(--danger); font-weight: 600;">${esc(p.status)}</span></p><button class="btn-primary" style="background: linear-gradient(135deg, var(--danger), #dc2626); color: var(--surface); width: 100%; justify-content: center; border: none;"><i data-lucide="credit-card"></i> Cəriməni Ödə</button></div>`;
                     });
-                    lucide.createIcons();
+                    refreshIcons(list);
                 } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Heç bir cərimə qeydə alınmayıb.</p>'; }
             });
         }
@@ -1261,6 +1284,7 @@
             body.scrollTop = body.scrollHeight;
             try {
                 const res = await fetch('/ai_handler', {
+                credentials: 'same-origin',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ type: 'chat', message: text, history: aiChatHistory.slice(-10) })
