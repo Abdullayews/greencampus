@@ -773,7 +773,7 @@ def ai_handler():
     if not data or 'type' not in data:
         return fail("Yanlış sorğu formatı.")
 
-    model = "gemini-1.5-flash-latest"
+    model = "gemini-3.1-flash-lite"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
     contents = []
