@@ -87,6 +87,16 @@ def clean_val(val):
     return val if val else None
 
 
+def get_room_number_for_student(cur, user_id):
+    """Tələbənin otaq nömrəsini tapır."""
+    cur.execute(
+        "SELECT id FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
+        (user_id, user_id, user_id, user_id, user_id, user_id)
+    )
+    room = cur.fetchone()
+    return room['id'] if room else 'Bilinmir'
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
@@ -203,7 +213,7 @@ def login():
 @app.route('/logout', methods=['GET'])
 def logout():
     """
-    Tələbə çıxışı
+    Tələbə çıxışı — yalnız tələbə session key-ləri silinir (admin panelə təsir etmir)
     ---
     tags:
       - Auth
@@ -211,7 +221,11 @@ def logout():
       302:
         description: Ana səhifəyə yönləndirir
     """
-    session.clear()
+    session.pop('student_id', None)
+    session.pop('user_name', None)
+    session.pop('ixtisas', None)
+    session.pop('kurs', None)
+    session.pop('otaq_nomresi', None)
     return redirect('/')
 
 
@@ -534,13 +548,7 @@ def submit_application(cur):
     if not basliq or not muraciet:
         return fail("Başlıq və müraciət boş ola bilməz!")
 
-    cur.execute(
-        "SELECT id FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
-        (user_id, user_id, user_id, user_id, user_id, user_id)
-    )
-    room = cur.fetchone()
-    room_number = room['id'] if room else 'Bilinmir'
-
+    room_number = get_room_number_for_student(cur, user_id)
     full_basliq = f"Otaq {room_number} - {basliq}"
 
     # status göndərilmir — DB DEFAULT 'Gözləmədə' edir
@@ -590,9 +598,13 @@ def update_application(cur):
     if not basliq or not muraciet:
         return fail("Başlıq və müraciət boş ola bilməz!")
 
+    # Otaq nömrəsini tapıb prefiks əlavə et (submit_application ilə tutarlılıq)
+    room_number = get_room_number_for_student(cur, user_id)
+    full_basliq = f"Otaq {room_number} - {basliq}"
+
     cur.execute(
         "UPDATE applications SET basliq = %s, muraciet = %s, priority = %s WHERE id = %s AND student_id = %s",
-        (basliq, muraciet, priority, app_id, user_id)
+        (full_basliq, muraciet, priority, app_id, user_id)
     )
     return ok(message="Müraciət yeniləndi!")
 
@@ -761,7 +773,7 @@ def ai_handler():
     if not data or 'type' not in data:
         return fail("Yanlış sorğu formatı.")
 
-    model = "gemini-3.1-flash-lite"
+    model = "gemini-1.5-flash-latest"
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
     contents = []
@@ -803,8 +815,13 @@ def ai_handler():
         if len(users) < 2:
             return fail("Tələbə məlumatları tapılmadı.")
 
-        me = users[0]
-        target = users[1]
+        # DB sırası qaranti deyil — explicit olaraq ID-yə görə tap
+        try:
+            me = next(u for u in users if u['id'] == session['student_id'])
+            target = next(u for u in users if u['id'] == target_id)
+        except StopIteration:
+            return fail("Tələbə məlumatları tapılmadı.")
+
         match_prompt = f"Tələbə 1 ({me['ad_soyad']}): Yuxu: {me['yuxu_rejimi']}, Təmizlik: {me['temizlik']}, Sosial: {me['sosial_munasibet']}, Həyat: {me['hayat_terzi']}.\n"
         match_prompt += f"Tələbə 2 ({target['ad_soyad']}): Yuxu: {target['yuxu_rejimi']}, Təmizlik: {target['temizlik']}, Sosial: {target['sosial_munasibet']}, Həyat: {target['hayat_terzi']}.\n"
         match_prompt += "Bu iki tələbənin otaq yoldaşı olaraq neçə faiz (0-100) uyğun olduğunu hesabla. Yalnız rəqəmi qaytar."
