@@ -1,7 +1,7 @@
 import os
 import re
 import secrets
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 
 import requests
@@ -12,7 +12,7 @@ from config import get_db_connection
 
 app = Flask(__name__)
 
-# --- Session secret key ---
+# --- Secret key — dəyişməz olmalıdır, yoxsa bütün sessiyalar ölür ---
 _secret_key = os.environ.get('SECRET_KEY')
 if not _secret_key:
     _key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret_key.txt')
@@ -24,6 +24,9 @@ if not _secret_key:
         with open(_key_path, 'w') as f:
             f.write(_secret_key)
 app.secret_key = _secret_key
+
+# --- Sessiya avtomatik bitmir (daimi sessiya, ~10 il) ---
+app.permanent_session_lifetime = timedelta(days=3650)
 
 
 # ---------------------------------------------------------------------------
@@ -77,7 +80,7 @@ def with_db(f):
 
 
 def clean_val(val):
-    """Boş string və ya undefined dəyərləri None etmək (ENUM xətalarının qarşısını almaq üçün)"""
+    """Boş dəyərləri None etmək (ENUM xətalarının qarşısını almaq üçün)."""
     if val is None:
         return None
     val = str(val).strip()
@@ -85,14 +88,12 @@ def clean_val(val):
 
 
 def get_room_number_for_student(cur, user_id):
-    """Tələbənin otaq nömrəsini tapır (room_slots üzərindən, indeks seek)."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
     room = cur.fetchone()
     return room['room_id'] if room else 'Bilinmir'
 
 
 def get_ev_status(cur, user_id):
-    """Tələbənin ev statusu: 'Ev seçilib' / 'Ev seçilməyib' / 'Rədd edilib'."""
     cur.execute("SELECT ev FROM students WHERE id = %s", (user_id,))
     row = cur.fetchone()
     if not row:
@@ -101,7 +102,6 @@ def get_ev_status(cur, user_id):
 
 
 def get_my_group_id(cur, user_id):
-    """Tələbənin qrup ID-si (yoxdursa None)."""
     cur.execute("SELECT group_id FROM students WHERE id = %s", (user_id,))
     row = cur.fetchone()
     return row.get('group_id') if row else None
@@ -122,7 +122,6 @@ def dissolve_group_if_empty(cur, group_id):
 
 @app.route('/', methods=['GET'])
 def index():
-    """Tələbə portalı ana səhifəsi."""
     user_name = session.get('user_name', '')
     user_ixtisas = session.get('ixtisas', '')
     user_kurs = session.get('kurs', '')
@@ -161,7 +160,6 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    """Tələbə girişi."""
     data = request.get_json() or {}
     email = data.get('email', '')
     sifre = data.get('sifre', '')
@@ -178,20 +176,20 @@ def login():
             cursor.execute(sql, (email,))
             user = cursor.fetchone()
 
-            if user:
-                if user['sifre'] == sifre:
-                    session['student_id'] = user['id']
-                    session['user_name'] = user['ad_soyad']
-                    session['ixtisas'] = user['ixtisas']
-                    session['kurs'] = user['kurs']
-                    session['otaq_nomresi'] = user.get('otaq_nomresi') or 'Yoxdur'
-
-                    user.pop('sifre', None)
-                    return ok(data=user, message="Giriş uğurludur!")
-                else:
-                    return fail("Şifrə yanlışdır!")
-            else:
+            if not user:
                 return fail(f"Bu email databasedə yoxdur: {email}")
+            if user['sifre'] != sifre:
+                return fail("Şifrə yanlışdır!")
+
+            session.permanent = True  # sessiya avtomatik bitmir
+            session['student_id'] = user['id']
+            session['user_name'] = user['ad_soyad']
+            session['ixtisas'] = user['ixtisas']
+            session['kurs'] = user['kurs']
+            session['otaq_nomresi'] = user.get('otaq_nomresi') or 'Yoxdur'
+
+            user.pop('sifre', None)
+            return ok(data=user, message="Giriş uğurludur!")
     except Exception as e:
         return fail(f"DB Xətası: {e}", 500)
     finally:
@@ -200,12 +198,7 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    """Tələbə çıxışı — yalnız tələbə session key-ləri silinir (admin panelə təsir etmir)."""
-    session.pop('student_id', None)
-    session.pop('user_name', None)
-    session.pop('ixtisas', None)
-    session.pop('kurs', None)
-    session.pop('otaq_nomresi', None)
+    session.clear()
     return redirect('/')
 
 
@@ -218,10 +211,10 @@ def logout():
 @with_db
 def get_home(cur):
     """
-    Mənim evim.
+    Mənim evim:
       - 'Rədd edilib'   → yalnız mesaj
-      - 'Ev seçilməyib' → ev seçmə planı datası (qrup + ixtisas filtrləri)
-      - 'Ev seçilib'    → otaq və otaq yoldaşları (+ qrup təmizliyi)
+      - 'Ev seçilməyib' → ev seçmə planı datası
+      - 'Ev seçilib'    → otaq və otaq yoldaşları
     """
     user_id = session['student_id']
 
@@ -233,7 +226,6 @@ def get_home(cur):
         return ok(ev_status=ev_status, message="Siz yataqxanada yaşamırsınız")
 
     if ev_status != 'Ev seçilib':
-        # ---- EV SEÇİLMƏYİB: ev seçmə planı datası ----
         my_group_id = get_my_group_id(cur, user_id)
         my_group = None
         if my_group_id:
@@ -251,7 +243,6 @@ def get_home(cur):
         return ok(ev_status=ev_status, my_group=my_group, ixtisaslar=ixtisaslar)
 
     # ---- EV SEÇİLİB ----
-    # Qayda: ev seçildikdə qrup silinir (əgər qrupda qalıbsa təmizlə)
     gid = get_my_group_id(cur, user_id)
     if gid:
         cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
@@ -297,10 +288,9 @@ def get_home(cur):
 @login_required
 @with_db
 def get_applications(cur):
-    """Tələbənin ərizə siyahısı (notlar ilə)."""
     user_id = session['student_id']
 
-    # Təsdiqlənmiş, amma notu olmayan müraciətlər üçün SQL-də notlar hissəsi yaradılır
+    # Təsdiqlənmiş, notu olmayan müraciətlər üçün default qeyd yaradılır
     cur.execute(
         "UPDATE applications SET notlar = 'Müraciətiniz təsdiqləndi.' "
         "WHERE student_id = %s AND status = 'Təsdiqləndi' AND notlar IS NULL",
@@ -315,15 +305,13 @@ def get_applications(cur):
         ORDER BY created_at DESC
     """
     cur.execute(sql, (user_id,))
-    applications = cur.fetchall()
-    return ok(applications=applications)
+    return ok(applications=cur.fetchall())
 
 
 @app.route('/get_canteen', methods=['GET'])
 @login_required
 @with_db
 def get_canteen(cur):
-    """Bugünkü yeməkxana menyusu."""
     days_az = {
         1: 'Bazar ertəsi', 2: 'Çərşənbə axşamı', 3: 'Çərşənbə',
         4: 'Cümə axşamı', 5: 'Cümə', 6: 'Şənbə', 7: 'Bazar'
@@ -336,7 +324,6 @@ def get_canteen(cur):
 
     dorm_meal = 'Restoran bağlıdır'
     uni_meal = 'Restoran bağlıdır'
-
     for meal in meals:
         if meal['location'] == 'Yataqxana':
             dorm_meal = meal['meal_name']
@@ -350,22 +337,19 @@ def get_canteen(cur):
 @login_required
 @with_db
 def get_contents(cur):
-    """Aktiv elan və sorğu siyahısı."""
     cur.execute("""
         SELECT id, type, title, description, priority, status
         FROM contents
         WHERE status = 'Aktiv'
         ORDER BY created_at DESC
     """)
-    contents = cur.fetchall()
-    return ok(contents=contents)
+    return ok(contents=cur.fetchall())
 
 
 @app.route('/get_laundry', methods=['GET'])
 @login_required
 @with_db
 def get_laundry(cur):
-    """Tələbənin camaşırxana statusu."""
     cur.execute("SELECT * FROM laundry WHERE student_id = %s", (session['student_id'],))
     data = cur.fetchone()
 
@@ -383,7 +367,6 @@ def get_laundry(cur):
 @login_required
 @with_db
 def get_notifications(cur):
-    """Bildirişlər (elan, sorğu, cərimə sayı)."""
     user_id = session['student_id']
 
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'announcement'")
@@ -406,22 +389,19 @@ def get_notifications(cur):
 @login_required
 @with_db
 def get_penalties(cur):
-    """Tələbənin cərimə siyahısı."""
     cur.execute("""
         SELECT id, amount, reason, status
         FROM penalties
         WHERE student_id = %s
         ORDER BY created_at DESC
     """, (session['student_id'],))
-    penalties = cur.fetchall()
-    return ok(penalties=penalties)
+    return ok(penalties=cur.fetchall())
 
 
 @app.route('/get_profile', methods=['GET'])
 @login_required
 @with_db
 def get_profile(cur):
-    """Tələbə profil məlumatları."""
     sql = """
         SELECT s.id, s.ad_soyad, s.email, s.ixtisas, s.kurs, s.api_key, s.ev_deyisme_isteyi,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
@@ -430,15 +410,13 @@ def get_profile(cur):
         WHERE s.id = %s
     """
     cur.execute(sql, (session['student_id'],))
-    data = cur.fetchone()
-    return ok(data=data)
+    return ok(data=cur.fetchone())
 
 
 @app.route('/get_roommates', methods=['GET'])
 @login_required
 @with_db
 def get_roommates(cur):
-    """Otaq yoldaşı axtarışı (ev dəyişmək istəyən tələbələr)."""
     cur.execute("""
         SELECT s.id, s.ad_soyad, s.ixtisas,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
@@ -446,8 +424,7 @@ def get_roommates(cur):
         LEFT JOIN students_profiles p ON s.id = p.student_id
         WHERE s.ev_deyisme_isteyi = 1 AND s.id != %s
     """, (session['student_id'],))
-    roommates = cur.fetchall()
-    return ok(roommates=roommates)
+    return ok(roommates=cur.fetchall())
 
 
 # ---------------------------------------------------------------------------
@@ -458,7 +435,6 @@ def get_roommates(cur):
 @login_required
 @with_db
 def get_available_rooms(cur):
-    """Boş yeri olan evlər — ev seçmə planının sol paneli."""
     cur.execute("""
         SELECT r.id AS room_id,
                (r.capacity - COALESCE(SUM(rs.student_id IS NOT NULL), 0)) AS free_count,
@@ -485,7 +461,6 @@ def get_available_rooms(cur):
 @login_required
 @with_db
 def search_students(cur):
-    """Tələbə axtarışı — bütün filtrlər SQL səviyyəsində tətbiq olunur (optimizasiya)."""
     user_id = session['student_id']
     q = (request.args.get('q') or '').strip()
     ixtisas = clean_val(request.args.get('ixtisas'))
@@ -517,7 +492,6 @@ def search_students(cur):
 @login_required
 @with_db
 def get_groups(cur):
-    """Qruplar (id artan sıra ilə) + üzvlər. q: qrup ID və ya üzvün adı."""
     q = (request.args.get('q') or '').strip()
 
     sql = """
@@ -559,7 +533,6 @@ def get_groups(cur):
 @login_required
 @with_db
 def submit_application(cur):
-    """Yeni ərizə göndər."""
     user_id = session['student_id']
     data = request.get_json() or {}
 
@@ -584,7 +557,6 @@ def submit_application(cur):
 @login_required
 @with_db
 def update_application(cur):
-    """Ərizəni yenilə."""
     user_id = session['student_id']
     data = request.get_json() or {}
 
@@ -610,7 +582,6 @@ def update_application(cur):
 @login_required
 @with_db
 def delete_application(cur):
-    """Ərizəni sil."""
     user_id = session['student_id']
     data = request.get_json() or {}
     app_id = data.get('id', 0)
@@ -623,7 +594,6 @@ def delete_application(cur):
 @login_required
 @with_db
 def update_profile(cur):
-    """Profili yenilə."""
     data = request.get_json() or {}
     user_id = session['student_id']
 
@@ -660,7 +630,6 @@ def update_profile(cur):
 @login_required
 @with_db
 def update_api_key(cur):
-    """Yeni API açarı yarat."""
     new_key = secrets.token_hex(16)
     cur.execute("UPDATE students SET api_key = %s WHERE id = %s", (new_key, session['student_id']))
     return ok(api_key=new_key, message="API açarı yeniləndi!")
@@ -674,7 +643,6 @@ def update_api_key(cur):
 @login_required
 @with_db
 def create_group(cur):
-    """Yeni qrup yaradılır — id SQL-də avtomatik artır."""
     user_id = session['student_id']
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
@@ -692,7 +660,6 @@ def create_group(cur):
 @login_required
 @with_db
 def join_group(cur):
-    """Mövcud qrupa qoşul."""
     user_id = session['student_id']
     data = request.get_json() or {}
     group_id = data.get('group_id', 0)
@@ -717,7 +684,6 @@ def join_group(cur):
 @login_required
 @with_db
 def leave_group(cur):
-    """Qrupdan çıx — qrupda heç kim qalmazsa qrup silinir."""
     user_id = session['student_id']
     gid = get_my_group_id(cur, user_id)
     if gid is None:
@@ -732,7 +698,6 @@ def leave_group(cur):
 @login_required
 @with_db
 def add_group_member(cur):
-    """Axtarışda tapılan tələbəni mənim qrupuma əlavə et."""
     user_id = session['student_id']
     data = request.get_json() or {}
     student_id = data.get('student_id', 0)
@@ -762,7 +727,6 @@ def add_group_member(cur):
 @login_required
 @with_db
 def select_home(cur):
-    """Ev seç — qrupdursa bütün qrup birlikdə yerləşir və qrup silinir."""
     user_id = session['student_id']
     data = request.get_json() or {}
     room_id = data.get('room_id', 0)
@@ -772,7 +736,6 @@ def select_home(cur):
 
     gid = get_my_group_id(cur, user_id)
 
-    # Yerləşəcək şəxslər: mən + qrup üzvlərim (ev seçilməyib olanlar)
     member_ids = [user_id]
     if gid is not None:
         cur.execute(
@@ -811,7 +774,6 @@ def select_home(cur):
         tuple(member_ids)
     )
 
-    # Qayda: ev seçildikdə qrup silinir
     if gid is not None:
         cur.execute("DELETE FROM student_groups WHERE id = %s", (gid,))
 
@@ -825,7 +787,6 @@ def select_home(cur):
 @app.route('/ai_handler', methods=['POST'])
 @login_required
 def ai_handler():
-    """AI köməkçi (chat və ya otaq yoldaşı uyğunluğu)."""
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
