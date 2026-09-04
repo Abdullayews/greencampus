@@ -390,7 +390,7 @@
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-card { width: 100%; max-width: 500px; background: var(--surface); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.9) translateY(20px); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
-        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; }
+        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between, align-items: center; }
         .modal-header h3 { font-size: 20px; font-weight: 600; }
         .modal-header i { width: 24px; height: 24px; cursor: pointer; transition: transform 0.2s; }
         .modal-header i:hover { transform: rotate(90deg); }
@@ -551,7 +551,6 @@
             .welcome-content h2 { font-size: 24px; }
             .service-grid { gap: 16px; }
             .app-grid { justify-content: center; }
-            #topBarDate { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
@@ -722,10 +721,7 @@
     <!-- MAIN WRAPPER -->
     <div class="main-wrapper" id="mainWrapper">
         <header class="top-bar">
-            <div style="display: flex; align-items: baseline; gap: 14px; min-width: 0;">
-                <h1 id="pageTitle">Ana Səhifə</h1>
-                <span id="topBarDate" style="font-size: 12.5px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
-            </div>
+            <h1 id="pageTitle">Ana Səhifə</h1>
             <div class="top-bar-actions">
                 <div style="position: relative;">
                     <button class="icon-btn" onclick="toggleNotifDropdown(event)" aria-label="Bildirişlər"><i data-lucide="bell"></i><span class="notification-dot"></span></button>
@@ -982,16 +978,6 @@
         }
         const CURRENT_USER_NAME = {{ user_name | tojson }};
         lucide.createIcons();
-
-        // === Top-bar tarixi ===
-        (function() {
-            const el = document.getElementById('topBarDate');
-            if (el) {
-                el.textContent = new Date().toLocaleDateString('az-AZ', {
-                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-                });
-            }
-        })();
 
         function handleLogin(e) {
             e.preventDefault();
@@ -1720,12 +1706,15 @@
                     data.contents.forEach(c => {
                         let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
                         if(c.type === 'announcement') {
+                            // ELANLAR
                             annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${annIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
                         } else {
-                            surList.innerHTML += `<div class="survey-card" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="service-icon bg-blue" style="margin-bottom: 0;"><i data-lucide="clipboard-check"></i></div><h3>${esc(c.title)}</h3><p>${esc(c.description)}</p><button class="btn-contact" style="width: 100%; text-align: center; justify-content: center;">İştirak et</button></div>`;
+                            // ANKETLƏR — elanlarla eyni notification-item stilində
+                            surList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="clipboard-check"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span><button class="btn-contact" style="padding: 6px 14px; font-size: 12px;">İştirak et</button></div></div></div>`;
                         }
                     });
                     refreshIcons(annList);
+                    refreshIcons(surList);
                 }
             });
         }
