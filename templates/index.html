@@ -551,10 +551,113 @@
             .welcome-content h2 { font-size: 24px; }
             .service-grid { gap: 16px; }
             .app-grid { justify-content: center; }
+            #topBarDate { display: none; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
+
+        /* ============================================================
+           VİZUAL YENİLƏMƏ PAKETİ — köhnə stillərin üzərinə yazır
+           (funksionallıq dəyişmir, yalnız görünüş yaxşılaşır)
+           ============================================================ */
+
+        /* --- Rəng palitrası və kölgələr incələşir --- */
+        :root {
+            --ku-green: #3E8E7E;
+            --ku-dark-green: #123B34;
+            --ku-soft-green: #DCF2C9;
+            --bg: #F4F7F6;
+            --shadow-md: 0 10px 28px rgba(18, 59, 52, .10);
+            --shadow-lg: 0 18px 44px rgba(18, 59, 52, .14);
+        }
+
+        /* Arxa fon — incə nöqtə şəbəkəsi (dərinlik hissi) */
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(rgba(68, 118, 108, .05) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+
+        /* --- LOGIN EKRANI --- */
+        .login-overlay { background: linear-gradient(125deg, #0E2E29 0%, var(--ku-dark-green) 45%, #2E7A6C 100%); }
+        .login-card { border-radius: 20px; padding: 44px 40px; animation: bounceIn 0.6s var(--transition-bounce) both; box-shadow: 0 24px 60px rgba(0,0,0,0.35); }
+        .login-logo-icon { border-radius: 20px; box-shadow: 0 10px 26px rgba(68, 118, 108, 0.25); }
+        .login-btn { border-radius: 12px; box-shadow: 0 6px 18px rgba(62, 142, 126, 0.35); }
+        .input-group input { border-radius: 12px; }
+        .login-error { border-radius: 10px; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { box-shadow: 1px 0 14px rgba(18, 59, 52, 0.04); }
+        .nav-item { border-radius: 10px; }
+        .nav-item.active { border-radius: 12px; background: linear-gradient(135deg, #0E2E29, var(--ku-green)); }
+        .nav-item.active i { transform: scale(1.08); }
+
+        /* --- TOP BAR (şüşə effekti) --- */
+        .top-bar { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .top-bar h1 { letter-spacing: -0.02em; }
+        .icon-btn { border-radius: 12px; }
+
+        /* --- KARTLAR — yumşaq künc + dərin hover kölgələri --- */
+        .widget-card { border-radius: 16px; }
+        .widget-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .room-card { border-radius: 16px; }
+        .service-card { border-radius: 16px; }
+        .service-card:hover { box-shadow: 0 16px 36px rgba(18, 59, 52, 0.13); }
+        .service-icon { border-radius: 14px; }
+        .match-card { border-radius: 12px; }
+        .notification-item { border-radius: 12px; }
+        .app-card { border-radius: 16px; }
+        .add-card { border-radius: 16px; }
+        .payment-card { border-radius: 16px; }
+        .survey-card { border-radius: 16px; }
+        .app-card-note { border-radius: 10px; }
+
+        /* --- WELCOME BANNER — zəngin qradiyent --- */
+        .welcome-banner { border-radius: 18px; background: linear-gradient(120deg, #2E7A6C 0%, var(--ku-dark-green) 55%, #0E2E29 100%); }
+        .welcome-content h2 { font-size: 34px; letter-spacing: -0.02em; }
+        .btn-primary { border-radius: 12px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10); }
+        .btn-secondary { border-radius: 12px; }
+
+        /* --- BAŞLIQLAR --- */
+        .section-title { letter-spacing: -0.01em; }
+        .section-title::after { width: 52px; height: 4px; border-radius: 3px; }
+
+        /* --- MODAL & FORM --- */
+        .modal-card { border-radius: 20px; }
+        .modal-header { border-radius: 20px 20px 0 0; }
+        .modal-input, .modal-textarea, .priority-select { border-radius: 12px; }
+        .modal-input:focus, .modal-textarea:focus, .priority-select:focus { box-shadow: 0 0 0 5px rgba(62, 142, 126, 0.12); }
+
+        /* --- STATUS / BADGE-lər --- */
+        .status-badge { letter-spacing: 0.02em; }
+        .badge { border-radius: 999px; }
+
+        /* --- EV SEÇMƏ PLANI --- */
+        .hp-box { border-radius: 16px; }
+        .hp-room-card { border-radius: 12px; }
+        .hp-select-btn { border-radius: 10px; box-shadow: 0 4px 12px rgba(62, 142, 126, 0.25); }
+        .hp-student-row { border-radius: 10px; }
+        .hp-group-card { border-radius: 12px; }
+        .hp-btn { border-radius: 10px; }
+        .hp-btn-secondary { border-radius: 8px; }
+        .hp-my-group { border-radius: 12px; }
+        .hp-empty { color: #8FA6A0; }
+        .home-status-message { font-size: 19px; color: #7C948E; }
+
+        /* --- AI CHAT --- */
+        .ai-chat-window { border-radius: 20px; }
+        .ai-msg { border-radius: 16px 16px 16px 6px; }
+        .ai-msg.user { border-radius: 16px 16px 6px 16px; }
+        .ai-float-btn { box-shadow: 0 10px 28px rgba(62, 142, 126, 0.45); }
+
+        /* --- SCROLLBAR (yaşıl tema) --- */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-thumb { background: #A9CFC4; border: 3px solid var(--bg); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7FB5A6; }
+
+        /* --- FOKUS HALQASI --- */
+        *:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; border-radius: 6px; }
     </style>
 </head>
 <body>
@@ -619,7 +722,10 @@
     <!-- MAIN WRAPPER -->
     <div class="main-wrapper" id="mainWrapper">
         <header class="top-bar">
-            <h1 id="pageTitle">Ana Səhifə</h1>
+            <div style="display: flex; align-items: baseline; gap: 14px; min-width: 0;">
+                <h1 id="pageTitle">Ana Səhifə</h1>
+                <span id="topBarDate" style="font-size: 12.5px; color: var(--text-secondary); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
+            </div>
             <div class="top-bar-actions">
                 <div style="position: relative;">
                     <button class="icon-btn" onclick="toggleNotifDropdown(event)" aria-label="Bildirişlər"><i data-lucide="bell"></i><span class="notification-dot"></span></button>
@@ -876,6 +982,16 @@
         }
         const CURRENT_USER_NAME = {{ user_name | tojson }};
         lucide.createIcons();
+
+        // === Top-bar tarixi ===
+        (function() {
+            const el = document.getElementById('topBarDate');
+            if (el) {
+                el.textContent = new Date().toLocaleDateString('az-AZ', {
+                    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+                });
+            }
+        })();
 
         function handleLogin(e) {
             e.preventDefault();
