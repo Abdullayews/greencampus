@@ -85,13 +85,10 @@ def clean_val(val):
 
 
 def get_room_number_for_student(cur, user_id):
-    """Tələbənin otaq nömrəsini tapır."""
-    cur.execute(
-        "SELECT id FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
-        (user_id, user_id, user_id, user_id, user_id, user_id)
-    )
+    """Tələbənin otaq nömrəsini tapır (room_slots üzərindən, indeks seek)."""
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
     room = cur.fetchone()
-    return room['id'] if room else 'Bilinmir'
+    return room['room_id'] if room else 'Bilinmir'
 
 
 def get_ev_status(cur, user_id):
@@ -173,11 +170,9 @@ def login():
     try:
         with conn.cursor() as cursor:
             sql = """
-                SELECT s.id, s.ad_soyad, s.sifre, s.ixtisas, s.kurs, r.id as otaq_nomresi
+                SELECT s.id, s.ad_soyad, s.sifre, s.ixtisas, s.kurs, rs.room_id as otaq_nomresi
                 FROM students s
-                LEFT JOIN rooms r ON s.id = r.telebe_1_id OR s.id = r.telebe_2_id
-                    OR s.id = r.telebe_3_id OR s.id = r.telebe_4_id
-                    OR s.id = r.telebe_5_id OR s.id = r.telebe_6_id
+                LEFT JOIN room_slots rs ON rs.student_id = s.id
                 WHERE s.email = %s
             """
             cursor.execute(sql, (email,))
@@ -262,48 +257,36 @@ def get_home(cur):
         cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
         dissolve_group_if_empty(cur, gid)
 
-    cur.execute(
-        "SELECT * FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
-        (user_id, user_id, user_id, user_id, user_id, user_id)
-    )
-    room = cur.fetchone()
-
-    if not room:
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row:
         return fail("Sizin otaq tapılmadı")
+    room_number = row['room_id']
 
-    room_number = room['id']
-    student_ids = []
-    positions = {}
+    cur.execute("""
+        SELECT rs.slot, rs.student_id, rs.yataq_status, rs.skaf_status, rs.oturacaq_status,
+               s.ad_soyad
+        FROM room_slots rs
+        JOIN students s ON s.id = rs.student_id
+        WHERE rs.room_id = %s
+        ORDER BY rs.slot ASC
+    """, (room_number,))
+    slots = cur.fetchall()
 
-    for i in range(1, 7):
-        col = f"telebe_{i}_id"
-        if room.get(col):
-            student_ids.append(room[col])
-            positions[room[col]] = i
-
-    if not student_ids:
+    if not slots:
         return fail("Otaqda tələbə yoxdur")
 
-    placeholders = ','.join(['%s'] * len(student_ids))
-    cur.execute(
-        f"SELECT id, ad_soyad FROM students WHERE id IN ({placeholders}) ORDER BY ad_soyad ASC",
-        tuple(student_ids)
-    )
-    students = cur.fetchall()
-
     roommates = []
-    for student in students:
-        sid = student['id']
-        pos = positions[sid]
+    for slot in slots:
         items = [
-            {"item_name": "Yataq", "status": room.get(f"yataq_{pos}_status", 'Bilinmir')},
-            {"item_name": "Oturacaq", "status": room.get(f"oturacaq_{pos}_status", 'Bilinmir')},
-            {"item_name": "Şkaf", "status": room.get(f"skaf_{pos}_status", 'Bilinmir')}
+            {"item_name": "Yataq", "status": slot.get('yataq_status') or 'Bilinmir'},
+            {"item_name": "Oturacaq", "status": slot.get('oturacaq_status') or 'Bilinmir'},
+            {"item_name": "Şkaf", "status": slot.get('skaf_status') or 'Bilinmir'}
         ]
         items.sort(key=lambda x: x['item_name'])
         roommates.append({
-            "id": sid,
-            "ad_soyad": student['ad_soyad'],
+            "id": slot['student_id'],
+            "ad_soyad": slot['ad_soyad'],
             "items": items
         })
 
@@ -476,31 +459,24 @@ def get_roommates(cur):
 @with_db
 def get_available_rooms(cur):
     """Boş yeri olan evlər — ev seçmə planının sol paneli."""
-    cur.execute("SELECT * FROM rooms ORDER BY id ASC")
+    cur.execute("""
+        SELECT r.id AS room_id,
+               (r.capacity - COALESCE(SUM(rs.student_id IS NOT NULL), 0)) AS free_count,
+               COALESCE(GROUP_CONCAT(s.ad_soyad ORDER BY rs.slot SEPARATOR ', '), '') AS occupants_str
+        FROM rooms r
+        LEFT JOIN room_slots rs ON rs.room_id = r.id
+        LEFT JOIN students s ON s.id = rs.student_id
+        GROUP BY r.id, r.capacity
+        HAVING (r.capacity - COALESCE(SUM(rs.student_id IS NOT NULL), 0)) > 0
+        ORDER BY r.id ASC
+    """)
     rooms = cur.fetchall()
 
-    occupant_names = {}
-    all_ids = []
-    prepared = []
-    for room in rooms:
-        free_slots = [i for i in range(1, 7) if room.get(f'telebe_{i}_id') is None]
-        if not free_slots:
-            continue
-        occ_ids = [room[f'telebe_{i}_id'] for i in range(1, 7) if room.get(f'telebe_{i}_id')]
-        all_ids.extend(occ_ids)
-        prepared.append({"id": room['id'], "free_count": len(free_slots), "occupant_ids": occ_ids})
-
-    if all_ids:
-        placeholders = ','.join(['%s'] * len(all_ids))
-        cur.execute(f"SELECT id, ad_soyad FROM students WHERE id IN ({placeholders})", tuple(all_ids))
-        for row in cur.fetchall():
-            occupant_names[row['id']] = row['ad_soyad']
-
     result = [{
-        "id": r['id'],
+        "id": r['room_id'],
         "free_count": r['free_count'],
-        "occupants": [occupant_names.get(oid, 'Bilinmir') for oid in r['occupant_ids']]
-    } for r in prepared]
+        "occupants": [x for x in (r['occupants_str'] or '').split(', ') if x]
+    } for r in rooms]
 
     return ok(rooms=result)
 
@@ -807,12 +783,16 @@ def select_home(cur):
         if user_id not in member_ids:
             member_ids.append(user_id)
 
-    cur.execute("SELECT * FROM rooms WHERE id = %s", (room_id,))
-    room = cur.fetchone()
-    if not room:
+    cur.execute("SELECT id FROM rooms WHERE id = %s", (room_id,))
+    if not cur.fetchone():
         return fail("Ev tapılmadı!")
 
-    free_slots = [i for i in range(1, 7) if room.get(f'telebe_{i}_id') is None]
+    cur.execute(
+        "SELECT slot FROM room_slots WHERE room_id = %s AND student_id IS NULL ORDER BY slot ASC",
+        (room_id,)
+    )
+    free_slots = [r['slot'] for r in cur.fetchall()]
+
     if len(free_slots) < len(member_ids):
         return fail(
             f"Bu evdə yalnız {len(free_slots)} boş yer var, "
@@ -821,8 +801,8 @@ def select_home(cur):
 
     for student_id, slot in zip(member_ids, free_slots):
         cur.execute(
-            f"UPDATE rooms SET telebe_{slot}_id = %s WHERE id = %s",
-            (student_id, room_id)
+            "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s",
+            (student_id, room_id, slot)
         )
 
     placeholders = ','.join(['%s'] * len(member_ids))
