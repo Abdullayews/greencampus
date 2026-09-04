@@ -103,6 +103,22 @@ def get_ev_status(cur, user_id):
     return row.get('ev') or 'Ev seçilməyib'
 
 
+def get_my_group_id(cur, user_id):
+    """Tələbənin qrup ID-si (yoxdursa None)."""
+    cur.execute("SELECT group_id FROM students WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    return row.get('group_id') if row else None
+
+
+def dissolve_group_if_empty(cur, group_id):
+    """Qrupda heç kim qalmadıqda qrupu silir."""
+    if group_id is None:
+        return
+    cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
+    if cur.fetchone()['c'] == 0:
+        cur.execute("DELETE FROM student_groups WHERE id = %s", (group_id,))
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
@@ -208,14 +224,12 @@ def logout():
 def get_home(cur):
     """
     Mənim evim.
-    Əvvəlcə students.ev statusu yoxlanılır:
-      - 'Rədd edilib'   → yalnız mesaj (frontend ortada bir sətr göstərir)
-      - 'Ev seçilməyib' → yalnız status (məzmun sonradan əlavə olunacaq)
-      - 'Ev seçilib'    → otaq və otaq yoldaşları (əvvəlki məntiq)
+      - 'Rədd edilib'   → yalnız mesaj
+      - 'Ev seçilməyib' → ev seçmə planı datası (qrup + ixtisas filtrləri)
+      - 'Ev seçilib'    → otaq və otaq yoldaşları (+ qrup təmizliyi)
     """
     user_id = session['student_id']
 
-    # 1) Ev statusunun yoxlanması
     ev_status = get_ev_status(cur, user_id)
     if ev_status is None:
         return fail("Tələbə tapılmadı")
@@ -224,10 +238,30 @@ def get_home(cur):
         return ok(ev_status=ev_status, message="Siz yataqxanada yaşamırsınız")
 
     if ev_status != 'Ev seçilib':
-        # 'Ev seçilməyib' — bu hal üçün davranış sonradan müəyyənləşəcək
-        return ok(ev_status=ev_status)
+        # ---- EV SEÇİLMƏYİB: ev seçmə planı datası ----
+        my_group_id = get_my_group_id(cur, user_id)
+        my_group = None
+        if my_group_id:
+            cur.execute(
+                "SELECT id, ad_soyad, ixtisas, kurs FROM students WHERE group_id = %s ORDER BY ad_soyad ASC",
+                (my_group_id,)
+            )
+            my_group = {"id": my_group_id, "members": cur.fetchall()}
 
-    # 2) 'Ev seçilib' — otaq və otaq yoldaşları
+        cur.execute(
+            "SELECT DISTINCT ixtisas FROM students WHERE ixtisas IS NOT NULL AND ixtisas != '' ORDER BY ixtisas ASC"
+        )
+        ixtisaslar = [r['ixtisas'] for r in cur.fetchall()]
+
+        return ok(ev_status=ev_status, my_group=my_group, ixtisaslar=ixtisaslar)
+
+    # ---- EV SEÇİLİB ----
+    # Qayda: ev seçildikdə qrup silinir (əgər qrupda qalıbsa təmizlə)
+    gid = get_my_group_id(cur, user_id)
+    if gid:
+        cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
+        dissolve_group_if_empty(cur, gid)
+
     cur.execute(
         "SELECT * FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
         (user_id, user_id, user_id, user_id, user_id, user_id)
@@ -280,15 +314,24 @@ def get_home(cur):
 @login_required
 @with_db
 def get_applications(cur):
-    """Tələbənin ərizə siyahısı."""
+    """Tələbənin ərizə siyahısı (notlar ilə)."""
+    user_id = session['student_id']
+
+    # Təsdiqlənmiş, amma notu olmayan müraciətlər üçün SQL-də notlar hissəsi yaradılır
+    cur.execute(
+        "UPDATE applications SET notlar = 'Müraciətiniz təsdiqləndi.' "
+        "WHERE student_id = %s AND status = 'Təsdiqləndi' AND notlar IS NULL",
+        (user_id,)
+    )
+
     sql = """
-        SELECT id, basliq, muraciet, priority, status,
+        SELECT id, basliq, muraciet, priority, status, notlar,
                DATE_FORMAT(created_at, '%%d.%%m.%%Y') as tarix
         FROM applications
         WHERE student_id = %s
         ORDER BY created_at DESC
     """
-    cur.execute(sql, (session['student_id'],))
+    cur.execute(sql, (user_id,))
     applications = cur.fetchall()
     return ok(applications=applications)
 
@@ -425,6 +468,114 @@ def get_roommates(cur):
 
 
 # ---------------------------------------------------------------------------
+# Ev seçmə planı (GET)
+# ---------------------------------------------------------------------------
+
+@app.route('/get_available_rooms', methods=['GET'])
+@login_required
+@with_db
+def get_available_rooms(cur):
+    """Boş yeri olan evlər — ev seçmə planının sol paneli."""
+    cur.execute("SELECT * FROM rooms ORDER BY id ASC")
+    rooms = cur.fetchall()
+
+    occupant_names = {}
+    all_ids = []
+    prepared = []
+    for room in rooms:
+        free_slots = [i for i in range(1, 7) if room.get(f'telebe_{i}_id') is None]
+        if not free_slots:
+            continue
+        occ_ids = [room[f'telebe_{i}_id'] for i in range(1, 7) if room.get(f'telebe_{i}_id')]
+        all_ids.extend(occ_ids)
+        prepared.append({"id": room['id'], "free_count": len(free_slots), "occupant_ids": occ_ids})
+
+    if all_ids:
+        placeholders = ','.join(['%s'] * len(all_ids))
+        cur.execute(f"SELECT id, ad_soyad FROM students WHERE id IN ({placeholders})", tuple(all_ids))
+        for row in cur.fetchall():
+            occupant_names[row['id']] = row['ad_soyad']
+
+    result = [{
+        "id": r['id'],
+        "free_count": r['free_count'],
+        "occupants": [occupant_names.get(oid, 'Bilinmir') for oid in r['occupant_ids']]
+    } for r in prepared]
+
+    return ok(rooms=result)
+
+
+@app.route('/search_students', methods=['GET'])
+@login_required
+@with_db
+def search_students(cur):
+    """Tələbə axtarışı — bütün filtrlər SQL səviyyəsində tətbiq olunur (optimizasiya)."""
+    user_id = session['student_id']
+    q = (request.args.get('q') or '').strip()
+    ixtisas = clean_val(request.args.get('ixtisas'))
+    kurs = clean_val(request.args.get('kurs'))
+
+    sql = """
+        SELECT s.id, s.ad_soyad, s.ixtisas, s.kurs
+        FROM students s
+        WHERE s.id != %s AND s.ev = 'Ev seçilməyib' AND s.group_id IS NULL
+    """
+    params = [user_id]
+
+    if q:
+        sql += " AND s.ad_soyad LIKE %s"
+        params.append(f"%{q}%")
+    if ixtisas:
+        sql += " AND s.ixtisas = %s"
+        params.append(ixtisas)
+    if kurs:
+        sql += " AND s.kurs = %s"
+        params.append(kurs)
+
+    sql += " ORDER BY s.ad_soyad ASC LIMIT 30"
+    cur.execute(sql, tuple(params))
+    return ok(students=cur.fetchall())
+
+
+@app.route('/get_groups', methods=['GET'])
+@login_required
+@with_db
+def get_groups(cur):
+    """Qruplar (id artan sıra ilə) + üzvlər. q: qrup ID və ya üzvün adı."""
+    q = (request.args.get('q') or '').strip()
+
+    sql = """
+        SELECT g.id AS group_id, s.id AS student_id, s.ad_soyad, s.ixtisas, s.kurs
+        FROM student_groups g
+        JOIN students s ON s.group_id = g.id
+    """
+    params = []
+    if q:
+        if q.isdigit():
+            sql += " WHERE g.id = %s OR s.ad_soyad LIKE %s"
+            params.extend([int(q), f"%{q}%"])
+        else:
+            sql += " WHERE s.ad_soyad LIKE %s"
+            params.append(f"%{q}%")
+    sql += " ORDER BY g.id ASC, s.ad_soyad ASC"
+
+    cur.execute(sql, tuple(params))
+    rows = cur.fetchall()
+
+    groups = {}
+    for row in rows:
+        gid = row['group_id']
+        if gid not in groups:
+            groups[gid] = {"id": gid, "members": []}
+        groups[gid]['members'].append({
+            "id": row['student_id'], "ad_soyad": row['ad_soyad'],
+            "ixtisas": row['ixtisas'], "kurs": row['kurs']
+        })
+
+    return ok(groups=list(groups.values()))
+
+
+# ---------------------------------------------------------------------------
 # Mutations (POST)
 # ---------------------------------------------------------------------------
 
@@ -538,6 +689,158 @@ def update_api_key(cur):
     cur.execute("UPDATE students SET api_key = %s WHERE id = %s", (new_key, session['student_id']))
     return ok(api_key=new_key, message="API açarı yeniləndi!")
 
+
+# ---------------------------------------------------------------------------
+# Qruplar (POST)
+# ---------------------------------------------------------------------------
+
+@app.route('/create_group', methods=['POST'])
+@login_required
+@with_db
+def create_group(cur):
+    """Yeni qrup yaradılır — id SQL-də avtomatik artır."""
+    user_id = session['student_id']
+
+    if get_ev_status(cur, user_id) != 'Ev seçilməyib':
+        return fail("Yalnız ev seçməmiş tələbələr qrup yarada bilər!")
+    if get_my_group_id(cur, user_id) is not None:
+        return fail("Siz artıq bir qrupdasınız!")
+
+    cur.execute("INSERT INTO student_groups (created_at) VALUES (NOW())")
+    group_id = cur.lastrowid
+    cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
+    return ok(group_id=group_id, message=f"Qrup #{group_id} yaradıldı!")
+
+
+@app.route('/join_group', methods=['POST'])
+@login_required
+@with_db
+def join_group(cur):
+    """Mövcud qrupa qoşul."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    group_id = data.get('group_id', 0)
+
+    if get_ev_status(cur, user_id) != 'Ev seçilməyib':
+        return fail("Yalnız ev seçməmiş tələbələr qrupa qoşula bilər!")
+    if get_my_group_id(cur, user_id) is not None:
+        return fail("Siz artıq bir qrupdasınız! Əvvəlcə qrupdan çıxın.")
+
+    cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
+    count = cur.fetchone()['c']
+    if count == 0:
+        return fail("Belə bir qrup yoxdur və ya artıq boşdur!")
+    if count >= 6:
+        return fail("Qrup doludur (maksimum 6 üzv)!")
+
+    cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
+    return ok(message="Qrupa qoşuldunuz!")
+
+
+@app.route('/leave_group', methods=['POST'])
+@login_required
+@with_db
+def leave_group(cur):
+    """Qrupdan çıx — qrupda heç kim qalmazsa qrup silinir."""
+    user_id = session['student_id']
+    gid = get_my_group_id(cur, user_id)
+    if gid is None:
+        return fail("Siz heç bir qrupda deyilsiniz!")
+
+    cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
+    dissolve_group_if_empty(cur, gid)
+    return ok(message="Qrupdan çıxdınız!")
+
+
+@app.route('/add_group_member', methods=['POST'])
+@login_required
+@with_db
+def add_group_member(cur):
+    """Axtarışda tapılan tələbəni mənim qrupuma əlavə et."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    student_id = data.get('student_id', 0)
+
+    gid = get_my_group_id(cur, user_id)
+    if gid is None:
+        return fail("Əvvəlcə qrup yaradın və ya bir qrupa qoşulun!")
+
+    cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (gid,))
+    if cur.fetchone()['c'] >= 6:
+        return fail("Qrup doludur (maksimum 6 üzv)!")
+
+    cur.execute("SELECT ev, group_id FROM students WHERE id = %s", (student_id,))
+    target = cur.fetchone()
+    if not target:
+        return fail("Tələbə tapılmadı!")
+    if target['ev'] != 'Ev seçilməyib':
+        return fail("Bu tələbənin artıq evi var!")
+    if target['group_id'] is not None:
+        return fail("Bu tələbə artıq başqa qrupdadır!")
+
+    cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (gid, student_id))
+    return ok(message="Üzv qrupa əlavə olundu!")
+
+
+@app.route('/select_home', methods=['POST'])
+@login_required
+@with_db
+def select_home(cur):
+    """Ev seç — qrupdursa bütün qrup birlikdə yerləşir və qrup silinir."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    room_id = data.get('room_id', 0)
+
+    if get_ev_status(cur, user_id) != 'Ev seçilməyib':
+        return fail("Sizin artıq eviniz seçilib!")
+
+    gid = get_my_group_id(cur, user_id)
+
+    # Yerləşəcək şəxslər: mən + qrup üzvlərim (ev seçilməyib olanlar)
+    member_ids = [user_id]
+    if gid is not None:
+        cur.execute(
+            "SELECT id FROM students WHERE group_id = %s AND ev = 'Ev seçilməyib' ORDER BY id ASC",
+            (gid,)
+        )
+        member_ids = [row['id'] for row in cur.fetchall()]
+        if user_id not in member_ids:
+            member_ids.append(user_id)
+
+    cur.execute("SELECT * FROM rooms WHERE id = %s", (room_id,))
+    room = cur.fetchone()
+    if not room:
+        return fail("Ev tapılmadı!")
+
+    free_slots = [i for i in range(1, 7) if room.get(f'telebe_{i}_id') is None]
+    if len(free_slots) < len(member_ids):
+        return fail(
+            f"Bu evdə yalnız {len(free_slots)} boş yer var, "
+            f"yerləşəcək şəxs sayı isə {len(member_ids)}-dir!"
+        )
+
+    for student_id, slot in zip(member_ids, free_slots):
+        cur.execute(
+            f"UPDATE rooms SET telebe_{slot}_id = %s WHERE id = %s",
+            (student_id, room_id)
+        )
+
+    placeholders = ','.join(['%s'] * len(member_ids))
+    cur.execute(
+        f"UPDATE students SET ev = 'Ev seçilib', group_id = NULL WHERE id IN ({placeholders})",
+        tuple(member_ids)
+    )
+
+    # Qayda: ev seçildikdə qrup silinir
+    if gid is not None:
+        cur.execute("DELETE FROM student_groups WHERE id = %s", (gid,))
+
+    return ok(message=f"Ev {room_id} seçildi! Qrupunuzla birlikdə yerləşdirildiniz.")
+
+
+# ---------------------------------------------------------------------------
+# AI
+# ---------------------------------------------------------------------------
 
 @app.route('/ai_handler', methods=['POST'])
 @login_required
