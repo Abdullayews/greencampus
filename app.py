@@ -6,7 +6,6 @@ from functools import wraps
 
 import requests
 from flask import Flask, session, request, jsonify, redirect, render_template
-from flasgger import Swagger
 from pymysql.err import IntegrityError
 
 from config import get_db_connection
@@ -25,8 +24,6 @@ if not _secret_key:
         with open(_key_path, 'w') as f:
             f.write(_secret_key)
 app.secret_key = _secret_key
-
-Swagger(app)
 
 
 # ---------------------------------------------------------------------------
@@ -97,21 +94,22 @@ def get_room_number_for_student(cur, user_id):
     return room['id'] if room else 'Bilinmir'
 
 
+def get_ev_status(cur, user_id):
+    """Tələbənin ev statusu: 'Ev seçilib' / 'Ev seçilməyib' / 'Rədd edilib'."""
+    cur.execute("SELECT ev FROM students WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row:
+        return None
+    return row.get('ev') or 'Ev seçilməyib'
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
 
 @app.route('/', methods=['GET'])
 def index():
-    """
-    Tələbə portalı ana səhifəsi
-    ---
-    tags:
-      - Səhifələr
-    responses:
-      200:
-        description: HTML səhifə
-    """
+    """Tələbə portalı ana səhifəsi."""
     user_name = session.get('user_name', '')
     user_ixtisas = session.get('ixtisas', '')
     user_kurs = session.get('kurs', '')
@@ -150,28 +148,7 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    """
-    Tələbə girişi
-    ---
-    tags:
-      - Auth
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            email:
-              type: string
-              example: "test@example.com"
-            sifre:
-              type: string
-              example: "12345"
-    responses:
-      200:
-        description: Giriş nəticəsi
-    """
+    """Tələbə girişi."""
     data = request.get_json() or {}
     email = data.get('email', '')
     sifre = data.get('sifre', '')
@@ -212,15 +189,7 @@ def login():
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    """
-    Tələbə çıxışı — yalnız tələbə session key-ləri silinir (admin panelə təsir etmir)
-    ---
-    tags:
-      - Auth
-    responses:
-      302:
-        description: Ana səhifəyə yönləndirir
-    """
+    """Tələbə çıxışı — yalnız tələbə session key-ləri silinir (admin panelə təsir etmir)."""
     session.pop('student_id', None)
     session.pop('user_name', None)
     session.pop('ixtisas', None)
@@ -238,15 +207,27 @@ def logout():
 @with_db
 def get_home(cur):
     """
-    Tələbənin otaq və otaq yoldaşları məlumatı
-    ---
-    tags:
-      - Dashboard
-    responses:
-      200:
-        description: Otaq məlumatları
+    Mənim evim.
+    Əvvəlcə students.ev statusu yoxlanılır:
+      - 'Rədd edilib'   → yalnız mesaj (frontend ortada bir sətr göstərir)
+      - 'Ev seçilməyib' → yalnız status (məzmun sonradan əlavə olunacaq)
+      - 'Ev seçilib'    → otaq və otaq yoldaşları (əvvəlki məntiq)
     """
     user_id = session['student_id']
+
+    # 1) Ev statusunun yoxlanması
+    ev_status = get_ev_status(cur, user_id)
+    if ev_status is None:
+        return fail("Tələbə tapılmadı")
+
+    if ev_status == 'Rədd edilib':
+        return ok(ev_status=ev_status, message="Siz yataqxanada yaşamırsınız")
+
+    if ev_status != 'Ev seçilib':
+        # 'Ev seçilməyib' — bu hal üçün davranış sonradan müəyyənləşəcək
+        return ok(ev_status=ev_status)
+
+    # 2) 'Ev seçilib' — otaq və otaq yoldaşları
     cur.execute(
         "SELECT * FROM rooms WHERE telebe_1_id = %s OR telebe_2_id = %s OR telebe_3_id = %s OR telebe_4_id = %s OR telebe_5_id = %s OR telebe_6_id = %s",
         (user_id, user_id, user_id, user_id, user_id, user_id)
@@ -292,22 +273,14 @@ def get_home(cur):
             "items": items
         })
 
-    return ok(room_number=room_number, roommates=roommates)
+    return ok(ev_status=ev_status, room_number=room_number, roommates=roommates)
 
 
 @app.route('/get_applications', methods=['GET'])
 @login_required
 @with_db
 def get_applications(cur):
-    """
-    Tələbənin ərizə siyahısı
-    ---
-    tags:
-      - Ərizələr
-    responses:
-      200:
-        description: Ərizə siyahısı
-    """
+    """Tələbənin ərizə siyahısı."""
     sql = """
         SELECT id, basliq, muraciet, priority, status,
                DATE_FORMAT(created_at, '%%d.%%m.%%Y') as tarix
@@ -324,15 +297,7 @@ def get_applications(cur):
 @login_required
 @with_db
 def get_canteen(cur):
-    """
-    Bugünkü yeməkxana menyusu
-    ---
-    tags:
-      - Yeməkxana
-    responses:
-      200:
-        description: Menyu məlumatları
-    """
+    """Bugünkü yeməkxana menyusu."""
     days_az = {
         1: 'Bazar ertəsi', 2: 'Çərşənbə axşamı', 3: 'Çərşənbə',
         4: 'Cümə axşamı', 5: 'Cümə', 6: 'Şənbə', 7: 'Bazar'
@@ -359,15 +324,7 @@ def get_canteen(cur):
 @login_required
 @with_db
 def get_contents(cur):
-    """
-    Aktiv elan və sorğu siyahısı
-    ---
-    tags:
-      - Məzmun
-    responses:
-      200:
-        description: Elan/sorğu siyahısı
-    """
+    """Aktiv elan və sorğu siyahısı."""
     cur.execute("""
         SELECT id, type, title, description, priority, status
         FROM contents
@@ -382,15 +339,7 @@ def get_contents(cur):
 @login_required
 @with_db
 def get_laundry(cur):
-    """
-    Tələbənin camaşırxana statusu
-    ---
-    tags:
-      - Camaşırxana
-    responses:
-      200:
-        description: Maşın statusları
-    """
+    """Tələbənin camaşırxana statusu."""
     cur.execute("SELECT * FROM laundry WHERE student_id = %s", (session['student_id'],))
     data = cur.fetchone()
 
@@ -408,15 +357,7 @@ def get_laundry(cur):
 @login_required
 @with_db
 def get_notifications(cur):
-    """
-    Bildirişlər (elan, sorğu, cərimə sayı)
-    ---
-    tags:
-      - Bildirişlər
-    responses:
-      200:
-        description: Bildiriş siyahısı
-    """
+    """Bildirişlər (elan, sorğu, cərimə sayı)."""
     user_id = session['student_id']
 
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'announcement'")
@@ -439,15 +380,7 @@ def get_notifications(cur):
 @login_required
 @with_db
 def get_penalties(cur):
-    """
-    Tələbənin cərimə siyahısı
-    ---
-    tags:
-      - Cərimələr
-    responses:
-      200:
-        description: Cərimə siyahısı
-    """
+    """Tələbənin cərimə siyahısı."""
     cur.execute("""
         SELECT id, amount, reason, status
         FROM penalties
@@ -462,15 +395,7 @@ def get_penalties(cur):
 @login_required
 @with_db
 def get_profile(cur):
-    """
-    Tələbə profil məlumatları
-    ---
-    tags:
-      - Profil
-    responses:
-      200:
-        description: Profil məlumatları
-    """
+    """Tələbə profil məlumatları."""
     sql = """
         SELECT s.id, s.ad_soyad, s.email, s.ixtisas, s.kurs, s.api_key, s.ev_deyisme_isteyi,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
@@ -487,15 +412,7 @@ def get_profile(cur):
 @login_required
 @with_db
 def get_roommates(cur):
-    """
-    Otaq yoldaşı axtarışı (ev dəyişmək istəyən tələbələr)
-    ---
-    tags:
-      - Otaq Yoldaşları
-    responses:
-      200:
-        description: Tələbə siyahısı
-    """
+    """Otaq yoldaşı axtarışı (ev dəyişmək istəyən tələbələr)."""
     cur.execute("""
         SELECT s.id, s.ad_soyad, s.ixtisas,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
@@ -515,29 +432,7 @@ def get_roommates(cur):
 @login_required
 @with_db
 def submit_application(cur):
-    """
-    Yeni ərizə göndər
-    ---
-    tags:
-      - Ərizələr
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            basliq:
-              type: string
-            muraciet:
-              type: string
-            priority:
-              type: string
-              example: "Orta"
-    responses:
-      200:
-        description: Nəticə
-    """
+    """Yeni ərizə göndər."""
     user_id = session['student_id']
     data = request.get_json() or {}
 
@@ -551,7 +446,6 @@ def submit_application(cur):
     room_number = get_room_number_for_student(cur, user_id)
     full_basliq = f"Otaq {room_number} - {basliq}"
 
-    # status göndərilmir — DB DEFAULT 'Gözləmədə' edir
     cur.execute(
         "INSERT INTO applications (student_id, basliq, muraciet, priority) VALUES (%s, %s, %s, %s)",
         (user_id, full_basliq, muraciet, priority)
@@ -563,30 +457,7 @@ def submit_application(cur):
 @login_required
 @with_db
 def update_application(cur):
-    """
-    Ərizəni yenilə
-    ---
-    tags:
-      - Ərizələr
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            id:
-              type: integer
-            basliq:
-              type: string
-            muraciet:
-              type: string
-            priority:
-              type: string
-    responses:
-      200:
-        description: Nəticə
-    """
+    """Ərizəni yenilə."""
     user_id = session['student_id']
     data = request.get_json() or {}
 
@@ -598,7 +469,6 @@ def update_application(cur):
     if not basliq or not muraciet:
         return fail("Başlıq və müraciət boş ola bilməz!")
 
-    # Otaq nömrəsini tapıb prefiks əlavə et (submit_application ilə tutarlılıq)
     room_number = get_room_number_for_student(cur, user_id)
     full_basliq = f"Otaq {room_number} - {basliq}"
 
@@ -613,24 +483,7 @@ def update_application(cur):
 @login_required
 @with_db
 def delete_application(cur):
-    """
-    Ərizəni sil
-    ---
-    tags:
-      - Ərizələr
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            id:
-              type: integer
-    responses:
-      200:
-        description: Nəticə
-    """
+    """Ərizəni sil."""
     user_id = session['student_id']
     data = request.get_json() or {}
     app_id = data.get('id', 0)
@@ -643,40 +496,7 @@ def delete_application(cur):
 @login_required
 @with_db
 def update_profile(cur):
-    """
-    Profili yenilə
-    ---
-    tags:
-      - Profil
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            email:
-              type: string
-            ixtisas:
-              type: string
-            kurs:
-              type: string
-            api_key:
-              type: string
-            ev_deyisme_isteyi:
-              type: integer
-            yuxu_rejimi:
-              type: string
-            temizlik:
-              type: string
-            sosial_munasibet:
-              type: string
-            hayat_terzi:
-              type: string
-    responses:
-      200:
-        description: Nəticə
-    """
+    """Profili yenilə."""
     data = request.get_json() or {}
     user_id = session['student_id']
 
@@ -713,15 +533,7 @@ def update_profile(cur):
 @login_required
 @with_db
 def update_api_key(cur):
-    """
-    Yeni API açarı yarat
-    ---
-    tags:
-      - Profil
-    responses:
-      200:
-        description: Yeni API açarı
-    """
+    """Yeni API açarı yarat."""
     new_key = secrets.token_hex(16)
     cur.execute("UPDATE students SET api_key = %s WHERE id = %s", (new_key, session['student_id']))
     return ok(api_key=new_key, message="API açarı yeniləndi!")
@@ -730,31 +542,7 @@ def update_api_key(cur):
 @app.route('/ai_handler', methods=['POST'])
 @login_required
 def ai_handler():
-    """
-    AI köməkçi (chat və ya otaq yoldaşı uyğunluğu)
-    ---
-    tags:
-      - AI
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          properties:
-            type:
-              type: string
-              example: "chat"
-            message:
-              type: string
-            history:
-              type: array
-            target_id:
-              type: integer
-    responses:
-      200:
-        description: AI cavabı
-    """
+    """AI köməkçi (chat və ya otaq yoldaşı uyğunluğu)."""
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
@@ -815,7 +603,6 @@ def ai_handler():
         if len(users) < 2:
             return fail("Tələbə məlumatları tapılmadı.")
 
-        # DB sırası qaranti deyil — explicit olaraq ID-yə görə tap
         try:
             me = next(u for u in users if u['id'] == session['student_id'])
             target = next(u for u in users if u['id'] == target_id)
