@@ -17,7 +17,7 @@
             --radius-btn: 8px; --radius-card: 12px; --radius-badge: 999px;
             --radius-modal: 16px; --radius-avatar: 50%;
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0, 0.2, 1);
             --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -418,6 +418,68 @@
         .status-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
         .status-bad { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
 
+        /* === MY HOME STATUS MESAJI === */
+        .home-status-message {
+            grid-column: 1 / -1;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 80px 24px;
+            margin: 0;
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* === EV SEÇMƏ PLANI === */
+        .home-plan-layout { display: flex; gap: 24px; align-items: stretch; flex-wrap: wrap; animation: fadeInUp 0.4s ease; }
+        .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; }
+        .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; }
+        .hp-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; }
+        .hp-left .hp-box { flex: 1; }
+        .hp-right .hp-box { flex: 1 1 0; min-height: 320px; }
+        .hp-box-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .hp-box-title i { width: 20px; height: 20px; color: var(--ku-green); }
+        .hp-scroll { overflow-y: auto; max-height: 420px; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+        .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 16px; background: var(--bg); transition: all var(--transition-fast); }
+        .hp-room-card:hover { border-color: var(--ku-green); transform: translateX(4px); }
+        .hp-room-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .hp-room-name { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+        .hp-free-badge { padding: 4px 12px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .hp-room-occs { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+        .hp-select-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; font-weight: 600; cursor: pointer; transition: all var(--transition-fast); }
+        .hp-select-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+        .hp-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .hp-input { flex: 2 1 140px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; transition: all var(--transition-fast); }
+        .hp-select { flex: 1 1 110px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
+        .hp-input:focus, .hp-select:focus { border-color: var(--ku-green); background: var(--surface); }
+        .hp-btn { padding: 10px 16px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all var(--transition-fast); }
+        .hp-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+        .hp-btn i { width: 14px; height: 14px; }
+        .hp-btn-secondary { padding: 8px 14px; background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all var(--transition-fast); }
+        .hp-btn-secondary:hover { border-color: var(--ku-green); color: var(--ku-green); }
+        .hp-student-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg); border-radius: var(--radius-btn); border: 1px solid var(--border); transition: all var(--transition-fast); }
+        .hp-student-row:hover { border-color: var(--ku-green); }
+        .hp-student-info { flex: 1; min-width: 0; }
+        .hp-student-info h5 { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .hp-student-info p { font-size: 12px; color: var(--text-secondary); }
+        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; }
+        .hp-group-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 14px; background: var(--bg); transition: all var(--transition-fast); }
+        .hp-group-card:hover { border-color: var(--ku-green); }
+        .hp-group-card.mine { border-color: var(--ku-green); background: linear-gradient(90deg, #f0fdf4, var(--bg)); }
+        .hp-group-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+        .hp-group-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+        .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; color: var(--text-primary); margin: 0 6px 6px 0; }
+        .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
+        .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
+        .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
+        .app-card-note { margin-top: 10px; padding: 12px 14px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); border-left: 4px solid var(--ku-green); border-radius: var(--radius-btn); font-size: 13px; color: var(--ku-dark-green); font-weight: 500; line-height: 1.5; animation: fadeIn 0.3s ease; }
+        .app-card-note strong { font-weight: 700; }
+        @media (max-width: 1023px) {
+            .home-plan-layout { flex-direction: column; }
+            .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
+        }
+
         /* === SURVEY === */
         .survey-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; box-shadow: var(--shadow-xs); display: flex; flex-direction: column; gap: 16px; transition: all var(--transition-base); }
         .survey-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-sm); border-color: var(--ku-green); }
@@ -531,7 +593,7 @@
         <nav class="nav-menu">
             <a class="nav-item active" data-menu="home" onclick="setActivePage('home', 'Ana Səhifə')" tabindex="0" role="button" aria-label="Ana Səhifə"><i data-lucide="home"></i> <span>Ana Səhifə</span></a>
             <a class="nav-item" data-menu="applications" onclick="setActivePage('applications', 'Müraciətlər')" tabindex="0" role="button" aria-label="Müraciətlər"><i data-lucide="clipboard-list"></i> <span>Müraciətlər</span></a>
-            <a class="nav-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')" tabindex="0" role="button" aria-label="Mənim evim"><i data-lucide="door-open"></i> <span>Mənim evim</span></a>
+            <a class="nav-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')" tabindex="0" role="button" aria-label="Mənim evim"><i data-lucide="house"></i> <span>Mənim evim</span></a>
             <a class="nav-item" data-menu="roommate" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')" tabindex="0" role="button" aria-label="Otaq Yoldaşı Axtar"><i data-lucide="search"></i> <span>Otaq Yoldaşı Axtar</span></a>
             <a class="nav-item" data-menu="announcements" onclick="setActivePage('announcements', 'Elanlar')" tabindex="0" role="button" aria-label="Elanlar"><i data-lucide="megaphone"></i> <span>Elanlar</span></a>
             <a class="nav-item" data-menu="payments" onclick="setActivePage('payments', 'Ödənişlər')" tabindex="0" role="button" aria-label="Ödənişlər"><i data-lucide="wallet"></i> <span>Ödənişlər</span></a>
@@ -663,8 +725,8 @@
 
                 <!-- MY HOME -->
                 <section id="page-myhome" class="page-content">
-                    <h2 class="section-title">Mənim evim</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:</p>
+                    <h2 class="section-title" id="myHomeTitle">Mənim evim</h2>
+                    <p id="myHomeDescription" style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:</p>
                     <div class="apartment-plan" id="myHomeList"></div>
                 </section>
 
@@ -898,7 +960,7 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // ===== APPLICATIONS (CRUD with Edit) =====
+        // ===== APPLICATIONS (CRUD with Edit + notlar) =====
         function loadApplications() {
             const grid = document.getElementById('appGrid');
             grid.innerHTML = '<div class="add-card" onclick="openAppModal()"><i data-lucide="plus"></i><span>Yeni Müraciət</span></div>';
@@ -920,6 +982,7 @@
                                 <p><strong>Tarix:</strong> ${esc(app.tarix)}</p>
                                 <p><strong>Müraciət:</strong> ${esc(app.muraciet)}</p>
                                 <div class="app-card-status ${statusClass}">${esc(app.status)}</div>
+                                ${app.notlar ? `<div class="app-card-note"><strong>Qeyd:</strong> ${esc(app.notlar)}</div>` : ''}
                             </div>`;
                     });
                     refreshIcons(grid);
@@ -991,19 +1054,19 @@
         function loadHomeData() { loadHomeAnnouncements(); loadHomeRoommates(); loadNotifDropdown(); loadCanteen(); loadLaundry(); }
 
         // ===== CANTEEN =====
-		function loadCanteen() {
-		    fetch('/get_canteen').then(res => res.json()).then(data => {
-		        if(data.success) {
-		            const dayText = "Bugün: " + data.day;
-		            document.getElementById('canteenDay').innerText = dayText;
-		            document.getElementById('canteenDormMeal').innerText = data.dorm;
-		            document.getElementById('canteenUniMeal').innerText = data.uni;
-		            document.getElementById('canteenDayFull').innerText = dayText;
-		            document.getElementById('canteenDormMealFull').innerText = data.dorm;
-		            document.getElementById('canteenUniMealFull').innerText = data.uni;
-		        }
-		    });
-		}
+        function loadCanteen() {
+            fetch('/get_canteen').then(res => res.json()).then(data => {
+                if(data.success) {
+                    const dayText = "Bugün: " + data.day;
+                    document.getElementById('canteenDay').innerText = dayText;
+                    document.getElementById('canteenDormMeal').innerText = data.dorm;
+                    document.getElementById('canteenUniMeal').innerText = data.uni;
+                    document.getElementById('canteenDayFull').innerText = dayText;
+                    document.getElementById('canteenDormMealFull').innerText = data.dorm;
+                    document.getElementById('canteenUniMealFull').innerText = data.uni;
+                }
+            });
+        }
 
         // ===== LAUNDRY =====
         function loadLaundry() {
@@ -1170,12 +1233,41 @@
             } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
         }
 
-        // ===== MY HOME =====
+        // ===== MY HOME (3 hal + ev seçmə planı) =====
+        let hpState = { myGroupId: null };
+
         function loadMyHome() {
             fetch('/get_home').then(res => res.json()).then(data => {
                 const list = document.getElementById('myHomeList');
+                const title = document.getElementById('myHomeTitle');
+                const desc = document.getElementById('myHomeDescription');
+
+                if (title) title.style.display = '';
+                if (desc) { desc.style.display = ''; desc.innerText = 'Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:'; }
                 list.innerHTML = '';
-                if(data.success && data.roommates.length > 0) {
+
+                if (!data.success) {
+                    list.innerHTML = `<p class="home-status-message">${esc(data.message || 'Məlumat yüklənə bilmədi.')}</p>`;
+                    return;
+                }
+
+                // 1) RƏDD EDİLİB
+                if (data.ev_status === 'Rədd edilib') {
+                    if (title) title.style.display = 'none';
+                    if (desc) desc.style.display = 'none';
+                    list.innerHTML = '<p class="home-status-message">Siz yataqxanada yaşamırsınız</p>';
+                    return;
+                }
+
+                // 2) EV SEÇİLMƏYİB → ev seçmə planı UI
+                if (data.ev_status !== 'Ev seçilib') {
+                    if (desc) desc.innerText = 'Ev seçmə planı — soldan ev seçin, sağda tələbə axtarın və ya qrup qurun:';
+                    renderHomePlan(data);
+                    return;
+                }
+
+                // 3) EV SEÇİLİB — otaq yoldaşları
+                if (data.roommates && data.roommates.length > 0) {
                     data.roommates.forEach((r, index) => {
                         let itemsHtml = '';
                         if(r.items && r.items.length > 0) {
@@ -1188,6 +1280,241 @@
                     });
                     refreshIcons(list);
                 } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Otaq yoldaşları tapılmadı.</p>'; }
+            });
+        }
+
+        // ===== EV SEÇMƏ PLANI =====
+        function renderHomePlan(data) {
+            hpState.myGroupId = data.my_group ? data.my_group.id : null;
+
+            document.getElementById('myHomeList').innerHTML = `
+                <div class="home-plan-layout">
+                    <div class="hp-left">
+                        <div class="hp-box">
+                            <div class="hp-box-title"><i data-lucide="house"></i> Seçilə biləcək evlər</div>
+                            <div class="hp-scroll" id="hpRooms"><div class="hp-empty">Yüklənir...</div></div>
+                        </div>
+                    </div>
+                    <div class="hp-right">
+                        <div class="hp-box">
+                            <div class="hp-box-title"><i data-lucide="user-search"></i> Tələbə axtarışı</div>
+                            <div class="hp-search-row">
+                                <input type="text" class="hp-input" id="hpStudentQ" placeholder="Ad Soyad..." onkeypress="if(event.key==='Enter')searchPlanStudents()">
+                                <select class="hp-select" id="hpFilterIxtisas"><option value="">Bütün ixtisaslar</option></select>
+                                <select class="hp-select" id="hpFilterKurs">
+                                    <option value="">Bütün kurslar</option>
+                                    <option value="1">1 kurs</option><option value="2">2 kurs</option>
+                                    <option value="3">3 kurs</option><option value="4">4 kurs</option>
+                                    <option value="5">5 kurs</option><option value="6">6 kurs</option>
+                                </select>
+                                <button class="hp-btn" onclick="searchPlanStudents()"><i data-lucide="search"></i> Axtar</button>
+                            </div>
+                            <div class="hp-scroll" id="hpStudents"><div class="hp-empty">Axtarın...</div></div>
+                        </div>
+                        <div class="hp-box">
+                            <div class="hp-box-title"><i data-lucide="users"></i> Qruplar</div>
+                            <div class="hp-search-row">
+                                <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup ID və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
+                                <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
+                                <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
+                            </div>
+                            <div id="hpMyGroup"></div>
+                            <div class="hp-scroll" id="hpGroups"><div class="hp-empty">Yüklənir...</div></div>
+                        </div>
+                    </div>
+                </div>`;
+            refreshIcons(document.getElementById('myHomeList'));
+
+            // ixtisas filtrlərini DB-dən gələn siyahı ilə doldur
+            const ixtSel = document.getElementById('hpFilterIxtisas');
+            (data.ixtisaslar || []).forEach(ix => {
+                const opt = document.createElement('option');
+                opt.value = ix; opt.innerText = ix;
+                ixtSel.appendChild(opt);
+            });
+
+            renderMyGroup(data.my_group);
+            loadPlanRooms();
+            searchPlanStudents();
+            searchPlanGroups();
+        }
+
+        function renderMyGroup(myGroup) {
+            const box = document.getElementById('hpMyGroup');
+            if (!box) return;
+            if (myGroup) {
+                hpState.myGroupId = myGroup.id;
+                const chips = myGroup.members.map(m =>
+                    `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}</span>`
+                ).join('');
+                box.innerHTML = `
+                    <div class="hp-my-group">
+                        <div class="hp-group-head">
+                            <span class="hp-group-name">Qrup #${myGroup.id} (${myGroup.members.length} üzv)</span>
+                            <button class="hp-btn-secondary" onclick="leavePlanGroup()">Qrupdan çıx</button>
+                        </div>
+                        <div>${chips}</div>
+                    </div>`;
+            } else {
+                hpState.myGroupId = null;
+                box.innerHTML = '<div class="hp-empty" style="padding: 6px 0 10px;">Sizin qrupunuz yoxdur — üzv əlavə etmək üçün "+ Qrup yarat" düyməsini basın.</div>';
+            }
+            refreshIcons(box);
+        }
+
+        function loadPlanRooms() {
+            fetch('/get_available_rooms').then(res => res.json()).then(data => {
+                const box = document.getElementById('hpRooms');
+                if (!box) return;
+                if (data.success && data.rooms.length > 0) {
+                    box.innerHTML = data.rooms.map(r => `
+                        <div class="hp-room-card">
+                            <div class="hp-room-head">
+                                <span class="hp-room-name">Ev ${r.id}</span>
+                                <span class="hp-free-badge">${r.free_count} boş yer</span>
+                            </div>
+                            <div class="hp-room-occs">${r.occupants.length ? 'Yaşayanlar: ' + esc(r.occupants.join(', ')) : 'Boş ev'}</div>
+                            <button class="hp-select-btn" onclick="selectPlanHome(${r.id}, ${r.free_count})">Bu evi seç</button>
+                        </div>`).join('');
+                } else {
+                    box.innerHTML = '<div class="hp-empty">Boş yeri olan ev yoxdur.</div>';
+                }
+            });
+        }
+
+        function selectPlanHome(roomId, freeCount) {
+            const withGroup = hpState.myGroupId ? ' (qrupunuzla birlikdə)' : '';
+            if (!confirm(`Ev ${roomId} seçilsin${withGroup}?`)) return;
+            fetch('/select_home', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ room_id: roomId })
+            }).then(res => res.json()).then(data => {
+                if (data.success) { alert(data.message); loadMyHome(); }
+                else alert('Xəta: ' + data.message);
+            });
+        }
+
+        function searchPlanStudents() {
+            const q = document.getElementById('hpStudentQ').value.trim();
+            const ix = document.getElementById('hpFilterIxtisas').value;
+            const kurs = document.getElementById('hpFilterKurs').value;
+            const box = document.getElementById('hpStudents');
+            box.innerHTML = '<div class="hp-empty">Axtarılır...</div>';
+
+            const params = new URLSearchParams();
+            params.set('q', q); params.set('ixtisas', ix); params.set('kurs', kurs);
+
+            fetch('/search_students?' + params.toString()).then(res => res.json()).then(data => {
+                if (data.success && data.students.length > 0) {
+                    box.innerHTML = data.students.map(s => `
+                        <div class="hp-student-row">
+                            <div class="hp-student-info">
+                                <h5>${esc(s.ad_soyad)}</h5>
+                                <p>${esc(s.ixtisas || '')} • ${esc(s.kurs || '-')} kurs</p>
+                            </div>
+                            <div class="hp-score" id="hp-score-${s.id}">-%</div>
+                            <button class="hp-btn-secondary" onclick="checkPlanCompat(${s.id})">Yoxla</button>
+                            ${hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="addPlanMember(${s.id})">Əlavə et</button>` : ''}
+                        </div>`).join('');
+                } else {
+                    box.innerHTML = '<div class="hp-empty">Nəticə tapılmadı.</div>';
+                }
+            });
+        }
+
+        async function checkPlanCompat(targetId) {
+            const scoreDiv = document.getElementById(`hp-score-${targetId}`);
+            if (!scoreDiv) return;
+            scoreDiv.innerText = '...';
+            try {
+                const res = await fetch('/ai_handler', {
+                    credentials: 'same-origin', method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'match', target_id: targetId })
+                });
+                const data = await res.json();
+                if (data.success) { scoreDiv.innerText = data.score + '%'; }
+                else { scoreDiv.innerText = 'Xəta'; alert('Xəta: ' + data.message); }
+            } catch (err) { scoreDiv.innerText = 'Xəta'; }
+        }
+
+        function addPlanMember(studentId) {
+            fetch('/add_group_member', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId })
+            }).then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); }
+                else alert('Xəta: ' + data.message);
+            });
+        }
+
+        function refreshPlanState() {
+            fetch('/get_home').then(res => res.json()).then(data => {
+                if (data.success && data.ev_status === 'Ev seçilməyib') {
+                    renderMyGroup(data.my_group);
+                } else { loadMyHome(); }
+            });
+        }
+
+        function createPlanGroup() {
+            fetch('/create_group', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); }
+                else alert('Xəta: ' + data.message);
+            });
+        }
+
+        function joinPlanGroup(groupId) {
+            fetch('/join_group', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ group_id: groupId })
+            }).then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); }
+                else alert('Xəta: ' + data.message);
+            });
+        }
+
+        function leavePlanGroup() {
+            if (!confirm('Qrupdan çıxmaq istədiyinizə əminsiniz?')) return;
+            fetch('/leave_group', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); }
+                else alert('Xəta: ' + data.message);
+            });
+        }
+
+        function searchPlanGroups() {
+            const q = document.getElementById('hpGroupQ').value.trim();
+            const box = document.getElementById('hpGroups');
+            box.innerHTML = '<div class="hp-empty">Axtarılır...</div>';
+            fetch('/get_groups?q=' + encodeURIComponent(q)).then(res => res.json()).then(data => {
+                if (data.success && data.groups.length > 0) {
+                    box.innerHTML = data.groups.map(g => {
+                        const mine = g.id === hpState.myGroupId;
+                        const chips = g.members.map(m =>
+                            `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}</span>`).join('');
+                        return `
+                            <div class="hp-group-card ${mine ? 'mine' : ''}">
+                                <div class="hp-group-head">
+                                    <span class="hp-group-name">Qrup #${g.id} (${g.members.length} üzv)${mine ? ' — sizin' : ''}</span>
+                                    ${!mine && !hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="joinPlanGroup(${g.id})">Qoşul</button>` : ''}
+                                </div>
+                                <div>${chips}</div>
+                            </div>`;
+                    }).join('');
+                    refreshIcons(box);
+                } else {
+                    box.innerHTML = '<div class="hp-empty">Qrup tapılmadı.</div>';
+                }
             });
         }
 
