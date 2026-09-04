@@ -435,15 +435,29 @@ def get_roommates(cur):
 @login_required
 @with_db
 def get_available_rooms(cur):
+    """Boş yeri olan evlər — ev seçmə planının sol paneli."""
+    # Self-heal: slot sətirləri yaradılmamış evlər üçün avtomatik yaradılır
+    cur.execute("""
+        INSERT IGNORE INTO room_slots (room_id, slot)
+        SELECT r.id, s.slot
+        FROM rooms r
+        JOIN (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
+              UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) s ON s.slot <= r.capacity
+        LEFT JOIN room_slots rs ON rs.room_id = r.id AND rs.slot = s.slot
+        WHERE rs.room_id IS NULL
+    """)
+
+    # Boş yerlər REAL boş slotlara görə hesablanır (select_home ilə eyni məntiq)
     cur.execute("""
         SELECT r.id AS room_id,
-               (r.capacity - COALESCE(SUM(rs.student_id IS NOT NULL), 0)) AS free_count,
-               COALESCE(GROUP_CONCAT(s.ad_soyad ORDER BY rs.slot SEPARATOR ', '), '') AS occupants_str
+               COALESCE(SUM(rs.student_id IS NULL), 0) AS free_count,
+               COALESCE(GROUP_CONCAT(CASE WHEN rs.student_id IS NOT NULL THEN s.ad_soyad END
+                                      ORDER BY rs.slot SEPARATOR ', '), '') AS occupants_str
         FROM rooms r
         LEFT JOIN room_slots rs ON rs.room_id = r.id
         LEFT JOIN students s ON s.id = rs.student_id
-        GROUP BY r.id, r.capacity
-        HAVING (r.capacity - COALESCE(SUM(rs.student_id IS NOT NULL), 0)) > 0
+        GROUP BY r.id
+        HAVING COALESCE(SUM(rs.student_id IS NULL), 0) > 0
         ORDER BY r.id ASC
     """)
     rooms = cur.fetchall()
@@ -749,6 +763,14 @@ def select_home(cur):
     cur.execute("SELECT id FROM rooms WHERE id = %s", (room_id,))
     if not cur.fetchone():
         return fail("Ev tapılmadı!")
+
+    # Əmin ol: bu evin slot sətirləri mövcuddur (daimi qoruma)
+    cur.execute("""
+        INSERT IGNORE INTO room_slots (room_id, slot)
+        SELECT %s, s.slot
+        FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
+              UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) s
+    """, (room_id,))
 
     cur.execute(
         "SELECT slot FROM room_slots WHERE room_id = %s AND student_id IS NULL ORDER BY slot ASC",
