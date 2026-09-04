@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yaşıl Kampus | Tələbə Yataqxanası Platforması</title>
+    <title>Yaşıl Kampus</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -17,7 +17,7 @@
             --radius-btn: 8px; --radius-card: 12px; --radius-badge: 999px;
             --radius-modal: 16px; --radius-avatar: 50%;
             --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 250ms cubic-bezier(0.4, 0, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -382,6 +382,8 @@
         .app-card-status { margin-top: auto; display: inline-block; padding: 6px 14px; background: var(--bg); border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; color: var(--text-secondary); width: fit-content; transition: all 0.2s; }
         .app-card-status.approved { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
         .app-card-status.pending { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .app-card-note { margin-top: 10px; padding: 12px 14px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); border-left: 4px solid var(--ku-green); border-radius: var(--radius-btn); font-size: 13px; color: var(--ku-dark-green); font-weight: 500; line-height: 1.5; animation: fadeIn 0.3s ease; }
+        .app-card-note strong { font-weight: 700; }
 
         /* === MODAL === */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 24px; opacity: 0; transition: opacity 0.3s ease; }
@@ -431,16 +433,16 @@
             animation: fadeIn 0.4s ease;
         }
 
-        /* === EV SEÇMƏ PLANI === */
-        .home-plan-layout { display: flex; gap: 24px; align-items: stretch; flex-wrap: wrap; animation: fadeInUp 0.4s ease; }
-        .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; }
-        .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; }
-        .hp-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; }
+        /* === EV SEÇMƏ PLANI (ekran hündürlüyünü tam tutur) === */
+        .home-plan-layout { display: flex; gap: 24px; align-items: stretch; height: calc(100vh - 230px); min-height: 480px; animation: fadeInUp 0.4s ease; }
+        .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; min-height: 0; }
+        .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+        .hp-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; min-height: 0; }
         .hp-left .hp-box { flex: 1; }
-        .hp-right .hp-box { flex: 1 1 0; min-height: 320px; }
+        .hp-right .hp-box { flex: 1 1 0; min-height: 0; }
         .hp-box-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .hp-box-title i { width: 20px; height: 20px; color: var(--ku-green); }
-        .hp-scroll { overflow-y: auto; max-height: 420px; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+        .hp-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
         .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 16px; background: var(--bg); transition: all var(--transition-fast); }
         .hp-room-card:hover { border-color: var(--ku-green); transform: translateX(4px); }
         .hp-room-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -473,11 +475,10 @@
         .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
         .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
-        .app-card-note { margin-top: 10px; padding: 12px 14px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); border-left: 4px solid var(--ku-green); border-radius: var(--radius-btn); font-size: 13px; color: var(--ku-dark-green); font-weight: 500; line-height: 1.5; animation: fadeIn 0.3s ease; }
-        .app-card-note strong { font-weight: 700; }
         @media (max-width: 1023px) {
-            .home-plan-layout { flex-direction: column; }
+            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; }
             .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
+            .hp-scroll { max-height: 420px; }
         }
 
         /* === SURVEY === */
@@ -593,7 +594,7 @@
         <nav class="nav-menu">
             <a class="nav-item active" data-menu="home" onclick="setActivePage('home', 'Ana Səhifə')" tabindex="0" role="button" aria-label="Ana Səhifə"><i data-lucide="home"></i> <span>Ana Səhifə</span></a>
             <a class="nav-item" data-menu="applications" onclick="setActivePage('applications', 'Müraciətlər')" tabindex="0" role="button" aria-label="Müraciətlər"><i data-lucide="clipboard-list"></i> <span>Müraciətlər</span></a>
-            <a class="nav-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')" tabindex="0" role="button" aria-label="Mənim evim"><i data-lucide="house"></i> <span>Mənim evim</span></a>
+            <a class="nav-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')" tabindex="0" role="button" aria-label="Mənim evim"><i data-lucide="door-open"></i> <span>Mənim evim</span></a>
             <a class="nav-item" data-menu="roommate" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')" tabindex="0" role="button" aria-label="Otaq Yoldaşı Axtar"><i data-lucide="search"></i> <span>Otaq Yoldaşı Axtar</span></a>
             <a class="nav-item" data-menu="announcements" onclick="setActivePage('announcements', 'Elanlar')" tabindex="0" role="button" aria-label="Elanlar"><i data-lucide="megaphone"></i> <span>Elanlar</span></a>
             <a class="nav-item" data-menu="payments" onclick="setActivePage('payments', 'Ödənişlər')" tabindex="0" role="button" aria-label="Ödənişlər"><i data-lucide="wallet"></i> <span>Ödənişlər</span></a>
@@ -734,6 +735,7 @@
                 <section id="page-roommate" class="page-content">
                     <h2 class="section-title">Otaq Yoldaşı Axtar</h2>
                     <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Evi dəyişmək istəyən tələbələr aşağıdakı siyahıdadır. Uyğunluq faizini öyrənmək üçün "Yoxla" düyməsinə basın.</p>
+                    <div id="roommateStatusMsg" style="margin-bottom: 16px;"></div>
                     <div id="roommateList" style="display: flex; flex-direction: column; gap: 16px;"></div>
                 </section>
 
@@ -1201,20 +1203,67 @@
             } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
         }
 
+        function renderRoommateList(data) {
+            const list = document.getElementById('roommateList');
+            list.innerHTML = '';
+            if(data.success && data.roommates.length > 0) {
+                data.roommates.forEach((r, index) => {
+                    list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
+                });
+                refreshIcons(list);
+            } else {
+                list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); animation: fadeIn 0.3s ease;">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>';
+            }
+        }
+
         function loadRoommates() {
-            fetch('/get_roommates').then(res => res.json()).then(data => {
-                const list = document.getElementById('roommateList');
-                list.innerHTML = '';
-                if(data.success && data.roommates.length > 0) {
-                    data.roommates.forEach((r, index) => {
-                        list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
-                    });
-                    refreshIcons(list);
-                } else {
-                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); animation: fadeIn 0.3s ease;">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>';
+            const msgBox = document.getElementById('roommateStatusMsg');
+            if (msgBox) msgBox.innerHTML = '';
+
+            // Əvvəlcə istifadəçinin ev statusunu yoxla
+            fetch('/get_home').then(res => res.json()).then(home => {
+
+                // RƏDD EDİLİB — qırmızı mesaj
+                if (home.success && home.ev_status === 'Rədd edilib') {
+                    if (msgBox) {
+                        msgBox.innerHTML = `
+                            <div class="notification-item danger" style="animation: fadeInUp 0.4s ease both;">
+                                <div class="notification-icon"><i data-lucide="x-circle"></i></div>
+                                <div class="notification-content">
+                                    <h4>Siz yataqxanada yaşamırsınız</h4>
+                                    <p>Otaq yoldaşı axtarışı yalnız yataqxanada yaşayan tələbələr üçün nəzərdə tutulub.</p>
+                                </div>
+                            </div>`;
+                        refreshIcons(msgBox);
+                    }
+                    return;
                 }
+
+                // EV SEÇİLMƏYİB — sarı mesaj + keçid düyməsi
+                if (home.success && home.ev_status !== 'Ev seçilib') {
+                    if (msgBox) {
+                        msgBox.innerHTML = `
+                            <div class="notification-item warning" style="animation: fadeInUp 0.4s ease both;">
+                                <div class="notification-icon"><i data-lucide="house"></i></div>
+                                <div class="notification-content">
+                                    <h4>Hələ ev seçməmisiniz</h4>
+                                    <p>Otaq yoldaşı axtara bilmək üçün əvvəlcə "Mənim evim" bölməsindən ev seçin.</p>
+                                    <button class="btn-contact" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="setActivePage('myhome', 'Mənim evim')"><i data-lucide="door-open"></i> Ev seçməyə keç</button>
+                                </div>
+                            </div>`;
+                        refreshIcons(msgBox);
+                    }
+                    return;
+                }
+
+                // EV SEÇİLİB — normal siyahı
+                fetch('/get_roommates').then(res => res.json()).then(renderRoommateList);
+
+            }).catch(() => {
+                fetch('/get_roommates').then(res => res.json()).then(renderRoommateList);
             });
         }
+
         async function checkCompatibility(targetId) {
             const scoreDiv = document.getElementById(`score-${targetId}`);
             scoreDiv.innerText = "...";
@@ -1325,7 +1374,6 @@
                 </div>`;
             refreshIcons(document.getElementById('myHomeList'));
 
-            // ixtisas filtrlərini DB-dən gələn siyahı ilə doldur
             const ixtSel = document.getElementById('hpFilterIxtisas');
             (data.ixtisaslar || []).forEach(ix => {
                 const opt = document.createElement('option');
