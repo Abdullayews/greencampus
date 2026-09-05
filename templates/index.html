@@ -26,83 +26,32 @@
         body { font-family: 'Poppins', Tahoma, sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
         /* === ANIMATIONS === */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(24px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.8; }
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes ripple {
-            to { transform: scale(4); opacity: 0; }
-        }
-        @keyframes bounceIn {
-            0% { opacity: 0; transform: scale(0.3); }
-            50% { transform: scale(1.05); }
-            70% { transform: scale(0.9); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes typing {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.8; } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes typing { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
         .animate-fade-in-up { animation: fadeInUp 0.5s var(--transition-base) forwards; opacity: 0; }
         .animate-fade-in { animation: fadeIn 0.4s var(--transition-base) forwards; opacity: 0; }
         .animate-slide-in-left { animation: slideInLeft 0.4s var(--transition-base) forwards; opacity: 0; }
         .animate-slide-in-right { animation: slideInRight 0.4s var(--transition-base) forwards; opacity: 0; }
         .animate-bounce-in { animation: bounceIn 0.5s var(--transition-bounce) forwards; }
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-        .delay-400 { animation-delay: 400ms; }
+        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; } .delay-400 { animation-delay: 400ms; }
         .delay-500 { animation-delay: 500ms; }
 
         /* === SKELETON LOADING === */
-        .skeleton {
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: var(--radius-btn);
-        }
+        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-btn); }
         .skeleton-text { height: 16px; margin-bottom: 8px; }
         .skeleton-title { height: 20px; width: 60%; margin-bottom: 12px; }
         .skeleton-circle { width: 48px; height: 48px; border-radius: 50%; }
@@ -232,15 +181,8 @@
 
         /* === WELCOME BANNER === */
         .welcome-banner { background: linear-gradient(135deg, var(--ku-green) 0%, var(--ku-dark-green) 100%); border-radius: var(--radius-card); padding: 40px; color: var(--surface); position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); animation: fadeInUp 0.5s ease; }
-        .welcome-banner::before {
-            content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: float 6s ease-in-out infinite;
-        }
-        .welcome-banner::after {
-            content: ''; position: absolute; bottom: -30%; left: -5%; width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(211, 232, 191, 0.15) 0%, transparent 70%);
-        }
+        .welcome-banner::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: float 6s ease-in-out infinite; }
+        .welcome-banner::after { content: ''; position: absolute; bottom: -30%; left: -5%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(211, 232, 191, 0.15) 0%, transparent 70%); }
         .welcome-content { position: relative; z-index: 2; }
         .welcome-content h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; animation: fadeInUp 0.5s ease 0.1s both; }
         .welcome-content p { font-size: 16px; opacity: 0.9; max-width: 500px; margin-bottom: 28px; font-weight: 400; animation: fadeInUp 0.5s ease 0.2s both; }
@@ -390,7 +332,7 @@
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-card { width: 100%; max-width: 500px; background: var(--surface); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.9) translateY(20px); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
-        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between, align-items: center; }
+        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { font-size: 20px; font-weight: 600; }
         .modal-header i { width: 24px; height: 24px; cursor: pointer; transition: transform 0.2s; }
         .modal-header i:hover { transform: rotate(90deg); }
@@ -433,7 +375,7 @@
             animation: fadeIn 0.4s ease;
         }
 
-        /* === EV SEÇMƏ PLANI (ekran hündürlüyünü tam tutur) === */
+        /* === EV SEÇMƏ PLANI === */
         .home-plan-layout { display: flex; gap: 24px; align-items: stretch; height: calc(100vh - 230px); min-height: 480px; animation: fadeInUp 0.4s ease; }
         .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; min-height: 0; }
         .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
@@ -498,7 +440,7 @@
         /* === AI CHAT === */
         .ai-chat-window { position: fixed; bottom: 96px; right: 32px; width: 380px; height: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); z-index: 200; display: none; flex-direction: column; overflow: hidden; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .ai-chat-window.active { display: flex; transform: scale(1) translateY(0); opacity: 1; }
-        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
+        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between, align-items: center; }
         .ai-chat-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .ai-chat-header i { width: 22px; height: 22px; cursor: pointer; transition: transform 0.2s; }
         .ai-chat-header i:hover { transform: rotate(90deg); }
@@ -557,11 +499,8 @@
         }
 
         /* ============================================================
-           VİZUAL YENİLƏMƏ PAKETİ — köhnə stillərin üzərinə yazır
-           (funksionallıq dəyişmir, yalnız görünüş yaxşılaşır)
+           VİZUAL YENİLƏMƏ PAKETİ
            ============================================================ */
-
-        /* --- Rəng palitrası və kölgələr incələşir --- */
         :root {
             --ku-green: #3E8E7E;
             --ku-dark-green: #123B34;
@@ -570,34 +509,24 @@
             --shadow-md: 0 10px 28px rgba(18, 59, 52, .10);
             --shadow-lg: 0 18px 44px rgba(18, 59, 52, .14);
         }
-
-        /* Arxa fon — incə nöqtə şəbəkəsi (dərinlik hissi) */
         body {
             background-color: var(--bg);
             background-image: radial-gradient(rgba(68, 118, 108, .05) 1px, transparent 1px);
             background-size: 22px 22px;
         }
-
-        /* --- LOGIN EKRANI --- */
         .login-overlay { background: linear-gradient(125deg, #0E2E29 0%, var(--ku-dark-green) 45%, #2E7A6C 100%); }
         .login-card { border-radius: 20px; padding: 44px 40px; animation: bounceIn 0.6s var(--transition-bounce) both; box-shadow: 0 24px 60px rgba(0,0,0,0.35); }
         .login-logo-icon { border-radius: 20px; box-shadow: 0 10px 26px rgba(68, 118, 108, 0.25); }
         .login-btn { border-radius: 12px; box-shadow: 0 6px 18px rgba(62, 142, 126, 0.35); }
         .input-group input { border-radius: 12px; }
         .login-error { border-radius: 10px; }
-
-        /* --- SIDEBAR --- */
         .sidebar { box-shadow: 1px 0 14px rgba(18, 59, 52, 0.04); }
         .nav-item { border-radius: 10px; }
         .nav-item.active { border-radius: 12px; background: linear-gradient(135deg, #0E2E29, var(--ku-green)); }
         .nav-item.active i { transform: scale(1.08); }
-
-        /* --- TOP BAR (şüşə effekti) --- */
         .top-bar { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .top-bar h1 { letter-spacing: -0.02em; }
         .icon-btn { border-radius: 12px; }
-
-        /* --- KARTLAR — yumşaq künc + dərin hover kölgələri --- */
         .widget-card { border-radius: 16px; }
         .widget-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
         .room-card { border-radius: 16px; }
@@ -611,28 +540,18 @@
         .payment-card { border-radius: 16px; }
         .survey-card { border-radius: 16px; }
         .app-card-note { border-radius: 10px; }
-
-        /* --- WELCOME BANNER — zəngin qradiyent --- */
         .welcome-banner { border-radius: 18px; background: linear-gradient(120deg, #2E7A6C 0%, var(--ku-dark-green) 55%, #0E2E29 100%); }
         .welcome-content h2 { font-size: 34px; letter-spacing: -0.02em; }
         .btn-primary { border-radius: 12px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.10); }
         .btn-secondary { border-radius: 12px; }
-
-        /* --- BAŞLIQLAR --- */
         .section-title { letter-spacing: -0.01em; }
         .section-title::after { width: 52px; height: 4px; border-radius: 3px; }
-
-        /* --- MODAL & FORM --- */
         .modal-card { border-radius: 20px; }
         .modal-header { border-radius: 20px 20px 0 0; }
         .modal-input, .modal-textarea, .priority-select { border-radius: 12px; }
         .modal-input:focus, .modal-textarea:focus, .priority-select:focus { box-shadow: 0 0 0 5px rgba(62, 142, 126, 0.12); }
-
-        /* --- STATUS / BADGE-lər --- */
         .status-badge { letter-spacing: 0.02em; }
         .badge { border-radius: 999px; }
-
-        /* --- EV SEÇMƏ PLANI --- */
         .hp-box { border-radius: 16px; }
         .hp-room-card { border-radius: 12px; }
         .hp-select-btn { border-radius: 10px; box-shadow: 0 4px 12px rgba(62, 142, 126, 0.25); }
@@ -643,20 +562,28 @@
         .hp-my-group { border-radius: 12px; }
         .hp-empty { color: #8FA6A0; }
         .home-status-message { font-size: 19px; color: #7C948E; }
-
-        /* --- AI CHAT --- */
         .ai-chat-window { border-radius: 20px; }
         .ai-msg { border-radius: 16px 16px 16px 6px; }
         .ai-msg.user { border-radius: 16px 16px 6px 16px; }
         .ai-float-btn { box-shadow: 0 10px 28px rgba(62, 142, 126, 0.45); }
-
-        /* --- SCROLLBAR (yaşıl tema) --- */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-thumb { background: #A9CFC4; border: 3px solid var(--bg); border-radius: 8px; }
         ::-webkit-scrollbar-thumb:hover { background: #7FB5A6; }
-
-        /* --- FOKUS HALQASI --- */
         *:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; border-radius: 6px; }
+
+        /* ============================================================
+           EV SEÇİMİ: GRID FORMATI (4 sütun, dəyişkən sətir sayı)
+           ============================================================ */
+        #hpRooms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        #hpRooms .hp-room-card { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+        #hpRooms .hp-room-head { margin-bottom: 0; }
+        #hpRooms .hp-room-name { font-size: 14px; }
+        #hpRooms .hp-free-badge { font-size: 11px; padding: 3px 10px; }
+        #hpRooms .hp-room-occs { font-size: 12px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        #hpRooms .hp-select-btn { font-size: 12.5px; padding: 8px; }
+        @media (max-width: 1450px) { #hpRooms { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (max-width: 1150px) { #hpRooms { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (max-width: 767px)  { #hpRooms { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -724,7 +651,7 @@
             <h1 id="pageTitle">Ana Səhifə</h1>
             <div class="top-bar-actions">
                 <div style="position: relative;">
-                    <button class="icon-btn" onclick="toggleNotifDropdown(event)" aria-label="Bildirişlər"><i data-lucide="bell"></i><span class="notification-dot"></span></button>
+                    <button class="icon-btn" onclick="toggleNotifDropdown(event)" aria-label="Bildirişlər"><i data-lucide="bell"></i><span class="notification-dot" id="notificationDot"></span></button>
                     <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()">
                         <div id="notifDropdownContent">Yüklənir...</div>
                     </div>
@@ -828,15 +755,23 @@
 
                 <!-- MY HOME -->
                 <section id="page-myhome" class="page-content">
-                    <h2 class="section-title" id="myHomeTitle">Mənim evim</h2>
-                    <p id="myHomeDescription" style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:</p>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
+                        <div style="min-width: 0;">
+                            <h2 class="section-title" id="myHomeTitle" style="margin-bottom: 12px;">Mənim evim</h2>
+                            <p id="myHomeDescription" style="color: var(--text-secondary); font-size: 14px; margin: 0;">Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:</p>
+                        </div>
+                        <button id="leaveHomeBtn" class="hp-btn" style="display: none; padding: 12px 20px; font-size: 13px; background: linear-gradient(135deg, var(--danger), #dc2626);" onclick="requestLeaveHome()">
+                            <i data-lucide="log-out"></i> Evdən çıx
+                        </button>
+                    </div>
                     <div class="apartment-plan" id="myHomeList"></div>
+                    <div id="myHomeRequests" style="margin-top: 24px;"></div>
                 </section>
 
                 <!-- ROOMMATE SEARCH -->
                 <section id="page-roommate" class="page-content">
                     <h2 class="section-title">Otaq Yoldaşı Axtar</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Evi dəyişmək istəyən tələbələr aşağıdakı siyahıdadır. Uyğunluq faizini öyrənmək üçün "Yoxla" düyməsinə basın.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 14px;">Evi dəyişmək istəyən tələbələr aşağıdakı siyahıdadır. Evə dəvət etmək üçün "Dəvət et" düyməsinə basın.</p>
                     <div id="roommateStatusMsg" style="margin-bottom: 16px;"></div>
                     <div id="roommateList" style="display: flex; flex-direction: column; gap: 16px;"></div>
                 </section>
@@ -959,7 +894,7 @@
 
     <script>
 
-        // === Təhlükəsizlik və Validasiya Yardımçıları ===
+        // === Yardımçılar ===
         function cleanVal(val) {
             return (val === '' || val === undefined || val === null) ? null : String(val).trim();
         }
@@ -1064,7 +999,7 @@
         }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // ===== APPLICATIONS (CRUD with Edit + notlar) =====
+        // ===== APPLICATIONS =====
         function loadApplications() {
             const grid = document.getElementById('appGrid');
             grid.innerHTML = '<div class="add-card" onclick="openAppModal()"><i data-lucide="plus"></i><span>Yeni Müraciət</span></div>';
@@ -1305,12 +1240,25 @@
             } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
         }
 
+        // Otaq yoldaşı AXTARIŞ SƏHİFƏSİ — "Dəvət et" düymələri
         function renderRoommateList(data) {
             const list = document.getElementById('roommateList');
             list.innerHTML = '';
             if(data.success && data.roommates.length > 0) {
                 data.roommates.forEach((r, index) => {
-                    list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;"><div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3><p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p></div></div><div style="display: flex; align-items: center; gap: 12px;"><div id="score-${r.id}" style="font-size: 24px; font-weight: 700; color: var(--ku-green); width: 60px; text-align: center; transition: all 0.3s;">-%</div><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="checkCompatibility(${r.id})"><i data-lucide="sparkles"></i> Yoxla</button></div></div>`;
+                    const actionHtml = (r.ev === 'Ev seçilməyib')
+                        ? `<button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="inviteRoommate(${r.id})"><i data-lucide="user-plus"></i> Dəvət et</button>`
+                        : `<span class="badge badge-warning">Hal-hazırda evdədir</span>`;
+                    list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div>
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3>
+                                <p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">${esc(r.ixtisas)}</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">${actionHtml}</div>
+                    </div>`;
                 });
                 refreshIcons(list);
             } else {
@@ -1322,10 +1270,9 @@
             const msgBox = document.getElementById('roommateStatusMsg');
             if (msgBox) msgBox.innerHTML = '';
 
-            // Əvvəlcə istifadəçinin ev statusunu yoxla
             fetch('/get_home').then(res => res.json()).then(home => {
 
-                // RƏDD EDİLİB — qırmızı mesaj
+                // RƏDD EDİLİB
                 if (home.success && home.ev_status === 'Rədd edilib') {
                     if (msgBox) {
                         msgBox.innerHTML = `
@@ -1341,7 +1288,7 @@
                     return;
                 }
 
-                // EV SEÇİLMƏYİB — sarı mesaj + keçid düyməsi
+                // EV SEÇİLMƏYİB
                 if (home.success && home.ev_status !== 'Ev seçilib') {
                     if (msgBox) {
                         msgBox.innerHTML = `
@@ -1349,7 +1296,7 @@
                                 <div class="notification-icon"><i data-lucide="house"></i></div>
                                 <div class="notification-content">
                                     <h4>Hələ ev seçməmisiniz</h4>
-                                    <p>Otaq yoldaşı axtara bilmək üçün əvvəlcə "Mənim evim" bölməsindən ev seçin.</p>
+                                    <p>Başqa tələbələri evinizə dəvət etmək üçün əvvəlcə "Mənim evim" bölməsindən ev seçin.</p>
                                     <button class="btn-contact" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;" onclick="setActivePage('myhome', 'Mənim evim')"><i data-lucide="door-open"></i> Ev seçməyə keç</button>
                                 </div>
                             </div>`;
@@ -1358,7 +1305,7 @@
                     return;
                 }
 
-                // EV SEÇİLİB — normal siyahı
+                // EV SEÇİLİB — siyahı (dəvət düymələri ilə)
                 fetch('/get_roommates').then(res => res.json()).then(renderRoommateList);
 
             }).catch(() => {
@@ -1366,25 +1313,7 @@
             });
         }
 
-        async function checkCompatibility(targetId) {
-            const scoreDiv = document.getElementById(`score-${targetId}`);
-            scoreDiv.innerText = "...";
-            scoreDiv.style.animation = "pulse 1s infinite";
-            try {
-                const res = await fetch('/ai_handler', {
-                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: targetId }) });
-                const data = await res.json();
-                scoreDiv.style.animation = "";
-                if(data.success) {
-                    scoreDiv.innerText = data.score + "%";
-                    scoreDiv.style.transform = "scale(1.3)";
-                    setTimeout(() => scoreDiv.style.transform = "scale(1)", 300);
-                }
-                else { scoreDiv.innerText = "Xəta"; alert("Xəta: " + data.message); }
-            } catch (err) { scoreDiv.innerText = "Xəta"; alert("Server xətası."); }
-        }
-
-        // ===== MY HOME (3 hal + ev seçmə planı) =====
+        // ===== MY HOME (3 hal + plan + qovma + çıxma) =====
         let hpState = { myGroupId: null };
 
         function loadMyHome() {
@@ -1392,13 +1321,17 @@
                 const list = document.getElementById('myHomeList');
                 const title = document.getElementById('myHomeTitle');
                 const desc = document.getElementById('myHomeDescription');
+                const leaveBtn = document.getElementById('leaveHomeBtn');
 
                 if (title) title.style.display = '';
                 if (desc) { desc.style.display = ''; desc.innerText = 'Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:'; }
+                if (leaveBtn) leaveBtn.style.display = 'none';
                 list.innerHTML = '';
 
                 if (!data.success) {
                     list.innerHTML = `<p class="home-status-message">${esc(data.message || 'Məlumat yüklənə bilmədi.')}</p>`;
+                    const reqBox = document.getElementById('myHomeRequests');
+                    if (reqBox) reqBox.innerHTML = '';
                     return;
                 }
 
@@ -1407,30 +1340,211 @@
                     if (title) title.style.display = 'none';
                     if (desc) desc.style.display = 'none';
                     list.innerHTML = '<p class="home-status-message">Siz yataqxanada yaşamırsınız</p>';
+                    const reqBox = document.getElementById('myHomeRequests');
+                    if (reqBox) reqBox.innerHTML = '';
                     return;
                 }
 
-                // 2) EV SEÇİLMƏYİB → ev seçmə planı UI
+                // 2) EV SEÇİLMƏYİB → plan + dəvət tələbləri
                 if (data.ev_status !== 'Ev seçilib') {
                     if (desc) desc.innerText = 'Ev seçmə planı — soldan ev seçin, sağda tələbə axtarın və ya qrup qurun:';
                     renderHomePlan(data);
+                    loadMyHomeRequests();
                     return;
                 }
 
-                // 3) EV SEÇİLİB — otaq yoldaşları
+                // 3) EV SEÇİLİB — kartlar + qovma + tələblər
+                if (leaveBtn) leaveBtn.style.display = '';
+                const myId = data.my_id;
+
                 if (data.roommates && data.roommates.length > 0) {
                     data.roommates.forEach((r, index) => {
+                        const safeName = String(r.ad_soyad).replace(/'/g, "\\'");
                         let itemsHtml = '';
-                        if(r.items && r.items.length > 0) {
+                        if (r.items && r.items.length > 0) {
                             r.items.forEach((item, i) => {
-                                let statusClass = 'status-good'; if (item.status === 'Az zədəli') statusClass = 'status-warning'; if (item.status === 'Zədəli') statusClass = 'status-bad';
+                                let statusClass = 'status-good';
+                                if (item.status === 'Az zədəli') statusClass = 'status-warning';
+                                if (item.status === 'Zədəli') statusClass = 'status-bad';
                                 itemsHtml += `<div class="item-row" style="animation: fadeInUp 0.3s ease ${i * 0.05}s both;"><span class="item-name">${esc(item.item_name)}</span><span class="status-badge ${statusClass}">${esc(item.status)}</span></div>`;
                             });
-                        } else { itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">İnventar yoxdur.</p>'; }
-                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="bed-icon"><i data-lucide="bed-double"></i></div><div class="room-owner">Yataq: ${esc(r.ad_soyad)}</div><div class="item-list">${itemsHtml}</div></div>`;
+                        } else {
+                            itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400;">İnventar yoxdur.</p>';
+                        }
+                        const kickBtn = (r.id !== myId)
+                            ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;">
+                                   <button class="hp-btn-secondary" style="color: var(--danger); border-color: #fecaca;" onclick="requestKickRoommate(${r.id}, '${safeName}')"><i data-lucide="user-x"></i> Qov</button>
+                               </div>`
+                            : '';
+                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
+                            <div class="bed-icon"><i data-lucide="bed-double"></i></div>
+                            <div class="room-owner">Yataq: ${esc(r.ad_soyad)}${r.id === myId ? ' (siz)' : ''}</div>
+                            <div class="item-list">${itemsHtml}</div>
+                            ${kickBtn}
+                        </div>`;
                     });
                     refreshIcons(list);
-                } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Otaq yoldaşları tapılmadı.</p>'; }
+                } else {
+                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary); font-weight: 400; animation: fadeIn 0.3s ease;">Otaq yoldaşları tapılmadı.</p>';
+                }
+                loadMyHomeRequests();
+            });
+        }
+
+        // ===== TƏLBƏLƏR (dəvət / qovma / çıxma) =====
+        function loadMyHomeRequests() {
+            fetch('/get_requests').then(res => res.json()).then(data => {
+                const box = document.getElementById('myHomeRequests');
+                if (!box) return;
+                if (!data.success || !data.requests || data.requests.length === 0) {
+                    box.innerHTML = '';
+                    return;
+                }
+                const items = data.requests.map((req, i) => renderRequestItem(req, i)).join('');
+                box.innerHTML = `
+                    <h2 class="section-title" style="font-size: 20px;">Tələblər</h2>
+                    <div>${items}</div>`;
+                refreshIcons(box);
+            });
+        }
+
+        function renderRequestItem(req, i) {
+            const anim = `animation: fadeInUp 0.4s ease ${i * 0.08}s both;`;
+
+            if (req.type === 'invite') {
+                if (req.am_target) {
+                    return `
+                    <div class="notification-item info" style="${anim}">
+                        <div class="notification-icon"><i data-lucide="mail-check"></i></div>
+                        <div class="notification-content">
+                            <h4>${esc(req.requester_name)} səni Ev ${req.room_id}-ə dəvət edir</h4>
+                            <p>Dəvəti qəbul etsəniz həmin evdə yerləşdiriləcəksiniz.</p>
+                            <div class="notification-meta">
+                                <button class="btn-contact" onclick="respondInvite(${req.id}, true)"><i data-lucide="check"></i> Qəbul et</button>
+                                <button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="respondInvite(${req.id}, false)"><i data-lucide="x"></i> Rədd et</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+                return `
+                <div class="notification-item" style="${anim}">
+                    <div class="notification-icon"><i data-lucide="mail"></i></div>
+                    <div class="notification-content">
+                        <h4>Yeni dəvət göndərilib</h4>
+                        <p>${esc(req.requester_name)}, ${esc(req.target_name)} adlı tələbəni evə dəvət edib — cavab gözlənilir.</p>
+                    </div>
+                </div>`;
+            }
+
+            if (req.type === 'kick') {
+                if (req.am_target) {
+                    return `
+                    <div class="notification-item danger" style="${anim}">
+                        <div class="notification-icon"><i data-lucide="user-x"></i></div>
+                        <div class="notification-content">
+                            <h4>${esc(req.requester_name)} səni evdən qovmaq tələbi verib</h4>
+                            <p>Evdəki digər sakinlərin hamısı təsdiq etsə, evdən çıxarılacaqsınız.</p>
+                        </div>
+                    </div>`;
+                }
+                const voteHtml = req.can_vote
+                    ? `<button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')"><i data-lucide="check"></i> Təsdiq</button>
+                       <button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')"><i data-lucide="x"></i> Rədd</button>`
+                    : (req.my_vote ? `<span class="badge badge-info">Səsiniz: ${esc(req.my_vote)}</span>` : '');
+                const waiting = req.waiting && req.waiting.length ? `<p style="font-size: 12px; color: var(--text-secondary);">Gözlənilir: ${esc(req.waiting.join(', '))}</p>` : '';
+                return `
+                <div class="notification-item warning" style="${anim}">
+                    <div class="notification-icon"><i data-lucide="user-x"></i></div>
+                    <div class="notification-content">
+                        <h4>${esc(req.requester_name)}, ${esc(req.target_name)}ni evdən qovmaq istəyir</h4>
+                        ${waiting}
+                        <div class="notification-meta">${voteHtml}</div>
+                    </div>
+                </div>`;
+            }
+
+            if (req.type === 'leave') {
+                if (req.am_target) {
+                    return `
+                    <div class="notification-item" style="${anim}">
+                        <div class="notification-icon"><i data-lucide="log-out"></i></div>
+                        <div class="notification-content">
+                            <h4>Evdən çıxma tələbiniz gözləmədədir</h4>
+                            <p>Evdəki sakinlərin hamısı təsdiq etsə, evdən çıxacaqsınız.</p>
+                        </div>
+                    </div>`;
+                }
+                const voteHtml = req.can_vote
+                    ? `<button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')"><i data-lucide="check"></i> Təsdiq</button>
+                       <button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')"><i data-lucide="x"></i> Rədd</button>`
+                    : (req.my_vote ? `<span class="badge badge-info">Səsiniz: ${esc(req.my_vote)}</span>` : '');
+                const waiting = req.waiting && req.waiting.length ? `<p style="font-size: 12px; color: var(--text-secondary);">Gözlənilir: ${esc(req.waiting.join(', '))}</p>` : '';
+                return `
+                <div class="notification-item" style="${anim}">
+                    <div class="notification-icon"><i data-lucide="log-out"></i></div>
+                    <div class="notification-content">
+                        <h4>${esc(req.target_name)} evdən çıxmaq istəyir</h4>
+                        ${waiting}
+                        <div class="notification-meta">${voteHtml}</div>
+                    </div>
+                </div>`;
+            }
+            return '';
+        }
+
+        function inviteRoommate(studentId) {
+            fetch('/invite_roommate', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId })
+            }).then(res => res.json()).then(data => {
+                alert(data.success ? data.message : 'Xəta: ' + data.message);
+            });
+        }
+
+        function respondInvite(reqId, accept) {
+            fetch('/respond_invite', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request_id: reqId, accept: accept })
+            }).then(res => res.json()).then(data => {
+                alert(data.success ? data.message : 'Xəta: ' + data.message);
+                loadMyHome();
+            });
+        }
+
+        function requestKickRoommate(studentId, name) {
+            if (!confirm(`${name} qovulsun? Evinizdəki bütün digər sakinlər təsdiq etməlidir.`)) return;
+            fetch('/request_kick', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_id: studentId })
+            }).then(res => res.json()).then(data => {
+                alert(data.success ? data.message : 'Xəta: ' + data.message);
+                loadMyHome();
+            });
+        }
+
+        function requestLeaveHome() {
+            if (!confirm('Evdən çıxmaq istədiyinizə əminsiniz? Evdə tək olsanız dərhal çıxacaqsınız, yoxsa ev yoldaşlarınızın təsdiqi gözləniləcək.')) return;
+            fetch('/request_leave', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(res => res.json()).then(data => {
+                alert(data.success ? data.message : 'Xəta: ' + data.message);
+                loadMyHome();
+            });
+        }
+
+        function voteRequest(reqId, vote) {
+            fetch('/vote_request', {
+                credentials: 'same-origin', method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ request_id: reqId, vote: vote })
+            }).then(res => res.json()).then(data => {
+                alert(data.success ? data.message : 'Xəta: ' + data.message);
+                loadMyHome();
             });
         }
 
@@ -1512,19 +1626,20 @@
             refreshIcons(box);
         }
 
+        // EV SEÇİMİ — GRID FORMATDA (4 sütun × N sətir)
         function loadPlanRooms() {
             fetch('/get_available_rooms').then(res => res.json()).then(data => {
                 const box = document.getElementById('hpRooms');
                 if (!box) return;
                 if (data.success && data.rooms.length > 0) {
                     box.innerHTML = data.rooms.map(r => `
-                        <div class="hp-room-card">
+                        <div class="hp-room-card" title="${r.occupants.length ? 'Yaşayanlar: ' + esc(r.occupants.join(', ')) : 'Boş ev'}">
                             <div class="hp-room-head">
                                 <span class="hp-room-name">Ev ${r.id}</span>
-                                <span class="hp-free-badge">${r.free_count} boş yer</span>
+                                <span class="hp-free-badge">${r.free_count} boş</span>
                             </div>
-                            <div class="hp-room-occs">${r.occupants.length ? 'Yaşayanlar: ' + esc(r.occupants.join(', ')) : 'Boş ev'}</div>
-                            <button class="hp-select-btn" onclick="selectPlanHome(${r.id}, ${r.free_count})">Bu evi seç</button>
+                            <div class="hp-room-occs">${r.occupants.length ? esc(r.occupants.join(', ')) : 'Boş ev'}</div>
+                            <button class="hp-select-btn" onclick="selectPlanHome(${r.id}, ${r.free_count})">Seç</button>
                         </div>`).join('');
                 } else {
                     box.innerHTML = '<div class="hp-empty">Boş yeri olan ev yoxdur.</div>';
@@ -1672,6 +1787,8 @@
         function loadNotifDropdown() {
             fetch('/get_notifications').then(res => res.json()).then(data => {
                 const content = document.getElementById('notifDropdownContent');
+                const dot = document.getElementById('notificationDot');
+                if (dot) dot.style.display = (data.success && data.notifications && data.notifications.length > 0) ? '' : 'none';
                 content.innerHTML = '';
                 if(data.success && data.notifications.length > 0) {
                     data.notifications.forEach((n, index) => {
@@ -1706,10 +1823,8 @@
                     data.contents.forEach(c => {
                         let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
                         if(c.type === 'announcement') {
-                            // ELANLAR
                             annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${annIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
                         } else {
-                            // ANKETLƏR — elanlarla eyni notification-item stilində
                             surList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}" style="animation: fadeInUp 0.4s ease ${surIndex++ * 0.1}s both;"><div class="notification-icon"><i data-lucide="clipboard-check"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span><button class="btn-contact" style="padding: 6px 14px; font-size: 12px;">İştirak et</button></div></div></div>`;
                         }
                     });
