@@ -1,6 +1,7 @@
 import os
 import re
 import secrets
+import logging
 from datetime import datetime, timedelta
 from functools import wraps
 
@@ -27,6 +28,12 @@ app.secret_key = _secret_key
 
 # --- Sessiya avtomatik bitmir (daimi sessiya, ~10 il) ---
 app.permanent_session_lifetime = timedelta(days=3650)
+
+# --- Gəlişdirmə: cookie konfiqurasiyası + logging ---
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+log = logging.getLogger('student')
+logging.basicConfig(level=logging.INFO)
 
 
 # ---------------------------------------------------------------------------
@@ -73,6 +80,7 @@ def with_db(f):
             return fail(f"Məlumat uyğunsuzluğu: {e}", 400)
         except Exception as e:
             conn.rollback()
+            log.exception("Əməliyyat xətası")  # Gəlişdirmə: 500-lər Render logs-da görünür
             return fail(f"Əməliyyat xətası: {e}", 500)
         finally:
             conn.close()
@@ -85,6 +93,14 @@ def clean_val(val):
         return None
     val = str(val).strip()
     return val if val else None
+
+
+def as_int(val, default=None):
+    """Gəlişdirmə: ID məcburi int-yə çevrilir, alınmazsa default."""
+    try:
+        return int(val)
+    except (TypeError, ValueError):
+        return default
 
 
 def get_room_number_for_student(cur, user_id):
@@ -263,6 +279,7 @@ def login():
             user.pop('sifre', None)
             return ok(data=user, message="Giriş uğurludur!")
     except Exception as e:
+        log.exception("Login xətası")
         return fail(f"DB Xətası: {e}", 500)
     finally:
         conn.close()
@@ -363,6 +380,7 @@ def get_home(cur):
 def get_applications(cur):
     user_id = session['student_id']
 
+    # Təsdiqlənmiş, notu olmayan müraciətlər üçün SQL-də notlar hissəsi yaradılır
     cur.execute(
         "UPDATE applications SET notlar = 'Müraciətiniz təsdiqləndi.' "
         "WHERE student_id = %s AND status = 'Təsdiqləndi' AND notlar IS NULL",
@@ -758,7 +776,7 @@ def update_application(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
 
-    app_id = data.get('id', 0)
+    app_id = as_int(data.get('id'), 0)
     basliq = (data.get('basliq') or '').strip()
     muraciet = (data.get('muraciet') or '').strip()
     priority = clean_val(data.get('priority')) or 'Orta'
@@ -782,7 +800,7 @@ def update_application(cur):
 def delete_application(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
-    app_id = data.get('id', 0)
+    app_id = as_int(data.get('id'), 0)
 
     cur.execute("DELETE FROM applications WHERE id = %s AND student_id = %s", (app_id, user_id))
     return ok(message="Müraciət silindi!")
@@ -852,7 +870,6 @@ def create_group(cur):
     group_id = cur.lastrowid
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
 
-    # Yaradılan qrupun canlı sıra nömrəsini qaytar
     seq = get_live_group_seq(cur, group_id, get_cins(cur, user_id))
     return ok(group_id=seq, message=f"Qrup #{seq} yaradıldı!")
 
@@ -863,7 +880,7 @@ def create_group(cur):
 def join_group(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
-    seq = data.get('group_id', 0)
+    seq = as_int(data.get('group_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Yalnız ev seçməmiş tələbələr qrupa qoşula bilər!")
@@ -914,7 +931,7 @@ def leave_group(cur):
 def add_group_member(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
-    student_id = data.get('student_id', 0)
+    student_id = as_int(data.get('student_id'), 0)
 
     gid = get_my_group_id(cur, user_id)
     if gid is None:
@@ -950,7 +967,7 @@ def add_group_member(cur):
 def select_home(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
-    room_id = data.get('room_id', 0)
+    room_id = as_int(data.get('room_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Sizin artıq eviniz seçilib!")
@@ -1037,7 +1054,7 @@ def invite_roommate(cur):
     """Evdə yaşayan sakin, eyni cinsdən ev seçməmiş tələbəni evinə dəvət edir."""
     user_id = session['student_id']
     data = request.get_json() or {}
-    target_id = data.get('student_id', 0)
+    target_id = as_int(data.get('student_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilib':
         return fail("Dəvət etmək üçün əvvəlcə evdə yaşamalısınız!")
@@ -1090,7 +1107,7 @@ def respond_invite(cur):
     """Dəvət edilən şəxs dəvəti qəbul/rədd edir."""
     user_id = session['student_id']
     data = request.get_json() or {}
-    req_id = data.get('request_id', 0)
+    req_id = as_int(data.get('request_id'), 0)
     accept = bool(data.get('accept', False))
 
     cur.execute(
@@ -1159,7 +1176,7 @@ def request_kick(cur):
     """Ev sakini başqa sakini qovma tələbi verir — evdəkilərin hamısı təsdiq etməlidir."""
     user_id = session['student_id']
     data = request.get_json() or {}
-    target_id = data.get('student_id', 0)
+    target_id = as_int(data.get('student_id'), 0)
 
     if target_id == user_id:
         return fail("Özünüzü qova bilməzsiniz — 'Evdən çıx' düyməsini istifadə edin.")
@@ -1239,7 +1256,7 @@ def vote_request(cur):
     """Ev sakini qovma/çıxma tələbinə səs verir."""
     user_id = session['student_id']
     data = request.get_json() or {}
-    req_id = data.get('request_id', 0)
+    req_id = as_int(data.get('request_id'), 0)
     vote = 'Təsdiq' if data.get('vote') == 'Təsdiq' else 'Rədd'
 
     cur.execute("SELECT * FROM home_requests WHERE id = %s AND status = 'Gözləmədə'", (req_id,))
@@ -1327,7 +1344,7 @@ def ai_handler():
 
     elif req_type == 'match':
         system_prompt = "Sən bir uyğunluq hesablama aparatısan. İstifadəçiyə yalnız 0 ilə 100 arasında tam rəqəm qaytarırsan."
-        target_id = data.get('target_id', 0)
+        target_id = as_int(data.get('target_id'), 0)
 
         conn = get_db_connection()
         try:
