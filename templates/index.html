@@ -415,6 +415,7 @@
         .hp-group-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
         .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; color: var(--text-primary); margin: 0 6px 6px 0; }
         .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
+        .hp-member-chip strong { color: var(--ku-green); }
         .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
         @media (max-width: 1023px) {
@@ -440,7 +441,7 @@
         /* === AI CHAT === */
         .ai-chat-window { position: fixed; bottom: 96px; right: 32px; width: 380px; height: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); z-index: 200; display: none; flex-direction: column; overflow: hidden; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .ai-chat-window.active { display: flex; transform: scale(1) translateY(0); opacity: 1; }
-        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between, align-items: center; }
+        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
         .ai-chat-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .ai-chat-header i { width: 22px; height: 22px; cursor: pointer; transition: transform 0.2s; }
         .ai-chat-header i:hover { transform: rotate(90deg); }
@@ -1315,6 +1316,7 @@
 
         // ===== MY HOME (3 hal + plan + qovma + çıxma) =====
         let hpState = { myGroupId: null };
+        let MY_ID = null;
 
         function loadMyHome() {
             fetch('/get_home').then(res => res.json()).then(data => {
@@ -1550,7 +1552,8 @@
 
         // ===== EV SEÇMƏ PLANI =====
         function renderHomePlan(data) {
-            hpState.myGroupId = data.my_group ? data.my_group.id : null;
+            MY_ID = data.my_id || null;
+            hpState.myGroupId = data.my_group ? (data.my_group.real_id || data.my_group.id) : null;
 
             document.getElementById('myHomeList').innerHTML = `
                 <div class="home-plan-layout">
@@ -1579,7 +1582,7 @@
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="users"></i> Qruplar</div>
                             <div class="hp-search-row">
-                                <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup ID və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
+                                <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup sırası və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
                                 <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
                                 <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
                             </div>
@@ -1607,9 +1610,9 @@
             const box = document.getElementById('hpMyGroup');
             if (!box) return;
             if (myGroup) {
-                hpState.myGroupId = myGroup.id;
+                hpState.myGroupId = myGroup.real_id || myGroup.id;
                 const chips = myGroup.members.map(m =>
-                    `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}</span>`
+                    `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`
                 ).join('');
                 box.innerHTML = `
                     <div class="hp-my-group">
@@ -1734,11 +1737,11 @@
             });
         }
 
-        function joinPlanGroup(groupId) {
+        function joinPlanGroup(seq) {
             fetch('/join_group', {
                 credentials: 'same-origin', method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ group_id: groupId })
+                body: JSON.stringify({ group_id: seq })
             }).then(res => res.json()).then(data => {
                 if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); }
                 else alert('Xəta: ' + data.message);
@@ -1764,9 +1767,9 @@
             fetch('/get_groups?q=' + encodeURIComponent(q)).then(res => res.json()).then(data => {
                 if (data.success && data.groups.length > 0) {
                     box.innerHTML = data.groups.map(g => {
-                        const mine = g.id === hpState.myGroupId;
+                        const mine = (g.real_id || g.id) === hpState.myGroupId;
                         const chips = g.members.map(m =>
-                            `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}</span>`).join('');
+                            `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`).join('');
                         return `
                             <div class="hp-group-card ${mine ? 'mine' : ''}">
                                 <div class="hp-group-head">
