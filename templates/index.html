@@ -443,8 +443,7 @@
         .ai-chat-window.active { display: flex; transform: scale(1) translateY(0); opacity: 1; }
         .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
         .ai-chat-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .ai-chat-header i { width: 22px; height: 22px; cursor: pointer; transition: transform 0.2s; }
-        .ai-chat-header i:hover { transform: rotate(90deg); }
+        .ai-chat-header h3 i { width: 22px; height: 22px; }
         .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: linear-gradient(180deg, var(--bg) 0%, #f1f5f9 100%); display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
         .ai-msg { max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.6; font-weight: 400; animation: fadeInUp 0.3s ease; position: relative; }
         .ai-msg.user { background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(68, 118, 108, 0.25); }
@@ -886,7 +885,7 @@
 
     <!-- AI Chat Widget -->
     <div class="ai-chat-window" id="aiChatWindow">
-        <div class="ai-chat-header"><h3><i data-lucide="bot"></i> Kampus AI</h3><i data-lucide="x" onclick="toggleAiChat()"></i></div>
+        <div class="ai-chat-header"><h3><i data-lucide="bot"></i> Kampus AI</h3></div>
         <div class="ai-chat-body" id="aiChatBody"></div>
         <div class="ai-chat-footer"><input type="text" class="ai-input" id="aiInput" placeholder="Sualınızı yazın..." onkeypress="handleAiKeyPress(event)"><button class="ai-send-btn" onclick="sendAiMessage()"><i data-lucide="send"></i></button></div>
     </div>
