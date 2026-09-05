@@ -350,7 +350,7 @@
         .hp-student-info { flex: 1; min-width: 0; }
         .hp-student-info h5 { font-size: 14px; font-weight: 600; }
         .hp-student-info p { font-size: 12px; color: var(--text-secondary); }
-        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; }
+        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; flex-shrink: 0; }
         .hp-group-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 14px; background: var(--bg); }
         .hp-group-card.mine { border-color: var(--ku-green); background: linear-gradient(90deg, #f0fdf4, var(--bg)); }
         .hp-group-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
@@ -362,10 +362,10 @@
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
         @media (max-width: 1399px) { .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 1023px) {
-            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; }
+            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; gap: 16px; }
             .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
-            .hp-scroll { max-height: 420px; }
-            .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); max-height: 420px; }
+            .hp-scroll { max-height: 380px; }
+            .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); max-height: 380px; }
         }
 
         /* === SURVEY === */
@@ -435,25 +435,28 @@
             .app-card, .add-card { width: 100%; min-height: 200px; }
             .apartment-plan { grid-template-columns: 1fr; }
             .room-card { padding: 20px; }
-            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); max-height: 420px; }
+            .hp-box { padding: 14px; }
+            .hp-box-title { font-size: 15px; margin-bottom: 10px; }
+            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 360px; }
             .hp-room-card { padding: 10px; }
             .hp-room-name { font-size: 14px; }
-            .hp-search-row { gap: 8px; }
-            .hp-search-row .hp-input { flex: 1 1 100%; font-size: 16px; }
-            .hp-search-students .hp-select { flex: 1 1 calc(50% - 4px); font-size: 16px; min-width: 0; }
-            .hp-search-students .hp-btn { flex: 1 1 100%; justify-content: center; }
-            .hp-search-groups .hp-btn, .hp-search-groups .hp-btn-secondary { flex: 1 1 calc(50% - 4px); justify-content: center; }
+            .hp-scroll { max-height: 360px; }
+            .hp-search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+            .hp-search-row .hp-input { grid-column: 1 / -1; width: 100%; min-width: 0; font-size: 16px; flex: none; }
+            .hp-search-row .hp-select { width: 100%; min-width: 0; font-size: 16px; flex: none; }
+            .hp-search-students .hp-btn { grid-column: 1 / -1; width: 100%; justify-content: center; flex: none; }
+            .hp-search-groups .hp-btn, .hp-search-groups .hp-btn-secondary { width: 100%; justify-content: center; flex: none; }
             .hp-student-row { flex-wrap: wrap; row-gap: 8px; }
             .hp-student-info { flex: 1 1 100%; min-width: 0; }
-            .hp-student-row .hp-score { flex: 0 0 48px; }
-            .hp-student-row .hp-btn-secondary { flex: 1 1 auto; justify-content: center; padding: 12px 10px; white-space: normal; }
+            .hp-student-row .hp-score { flex: 0 0 auto; min-width: 40px; }
+            .hp-student-row .hp-btn-secondary { flex: 1 1 40%; justify-content: center; white-space: normal; min-width: 0; }
+            .hp-group-head { flex-wrap: wrap; }
             .hp-select-btn { padding: 12px; }
             .hp-btn, .hp-btn-secondary { padding: 12px 16px; }
             .modal-overlay { padding: 12px; }
             .modal-card { max-width: 100%; }
             .modal-header, .modal-body { padding: 20px; }
             .modal-input, .modal-textarea, .priority-select { font-size: 16px; }
-            .hp-input, .hp-select, .ai-input { font-size: 16px; }
             .ai-chat-window { width: calc(100% - 24px); right: 12px; bottom: calc(84px + env(safe-area-inset-bottom)); height: 62vh; }
             .ai-float-btn { bottom: calc(84px + env(safe-area-inset-bottom)); right: 16px; width: 56px; height: 56px; }
             .ai-float-btn i { width: 24px; height: 24px; }
