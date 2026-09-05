@@ -80,6 +80,7 @@ def with_db(f):
 
 
 def clean_val(val):
+    """Boş dəyərləri None etmək (ENUM xətalarının qarşısını almaq üçün)."""
     if val is None:
         return None
     val = str(val).strip()
@@ -112,7 +113,21 @@ def get_my_group_id(cur, user_id):
     return row.get('group_id') if row else None
 
 
+def get_live_group_seq(cur, target_gid):
+    """Canlı sıra: qruplar daxili ID artan sırada 1-dən nömrələnir."""
+    cur.execute("""
+        SELECT s.group_id FROM students s
+        WHERE s.group_id IS NOT NULL
+        GROUP BY s.group_id ORDER BY s.group_id ASC
+    """)
+    ordered = [r['group_id'] for r in cur.fetchall()]
+    if target_gid in ordered:
+        return ordered.index(target_gid) + 1
+    return target_gid
+
+
 def dissolve_group_if_empty(cur, group_id):
+    """Qrupda heç kim qalmadıqda qrupu silir."""
     if group_id is None:
         return
     cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
@@ -269,6 +284,12 @@ def logout():
 @login_required
 @with_db
 def get_home(cur):
+    """
+    Mənim evim:
+      - 'Rədd edilib'   → yalnız mesaj
+      - 'Ev seçilməyib' → ev seçmə planı datası
+      - 'Ev seçilib'    → otaq və otaq yoldaşları
+    """
     user_id = session['student_id']
 
     ev_status = get_ev_status(cur, user_id)
@@ -286,7 +307,8 @@ def get_home(cur):
                 "SELECT id, ad_soyad, ixtisas, kurs FROM students WHERE group_id = %s ORDER BY ad_soyad ASC",
                 (my_group_id,)
             )
-            my_group = {"id": my_group_id, "members": cur.fetchall()}
+            my_seq = get_live_group_seq(cur, my_group_id)
+            my_group = {"id": my_seq, "real_id": my_group_id, "members": cur.fetchall()}
 
         cur.execute(
             "SELECT DISTINCT ixtisas FROM students WHERE ixtisas IS NOT NULL AND ixtisas != '' ORDER BY ixtisas ASC"
@@ -512,7 +534,7 @@ def get_roommates(cur):
 @login_required
 @with_db
 def get_available_rooms(cur):
-    """Boş yeri olan evlər — yalnız eyni cinsə aid evlər + boş evlər."""
+    """Boş yeri olan evlər — yalnız istifadəçinin cinsinə aid bina."""
     # Self-heal: slot sətirləri yaradılmamış evlər üçün avtomatik yaradılır
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
@@ -585,40 +607,67 @@ def search_students(cur):
 @login_required
 @with_db
 def get_groups(cur):
-    """Qruplar — yalnız mənim cinsimdən üzvü olan qruplar."""
-    q = (request.args.get('q') or '').strip()
+    """Qruplar — görünən nömrə canlı sıradır (1, 2, 3...).
+    Boş qruplar avtomatik silinir, sıralar yenidən hesablanır.
+    Yalnız istifadəçinin cinsindən üzvü olan qruplar göstərilir."""
     my_cins = get_cins(cur, session['student_id'])
+    q = (request.args.get('q') or '').strip()
 
-    sql = """
-        SELECT g.id AS group_id, s.id AS student_id, s.ad_soyad, s.ixtisas, s.kurs
-        FROM student_groups g
-        JOIN students s ON s.group_id = g.id
-        WHERE EXISTS (SELECT 1 FROM students s2 WHERE s2.group_id = g.id AND s2.cins = %s)
-    """
-    params = [my_cins]
-    if q:
-        if q.isdigit():
-            sql += " AND (g.id = %s OR s.ad_soyad LIKE %s)"
-            params.extend([int(q), f"%{q}%"])
-        else:
-            sql += " AND s.ad_soyad LIKE %s"
-            params.append(f"%{q}%")
-    sql += " ORDER BY g.id ASC, s.ad_soyad ASC"
+    # 1) Boş qrupları avtomatik sil
+    cur.execute("""
+        DELETE FROM student_groups
+        WHERE id NOT IN (
+            SELECT gid FROM (SELECT DISTINCT s.group_id AS gid FROM students s WHERE s.group_id IS NOT NULL) x
+        )
+    """)
 
-    cur.execute(sql, tuple(params))
+    # 2) Bütün canlı qrupları daxili ID sırası ilə gətir
+    cur.execute("""
+        SELECT s.group_id, s.id AS student_id, s.ad_soyad, s.ixtisas, s.kurs, s.cins
+        FROM students s
+        WHERE s.group_id IS NOT NULL
+        ORDER BY s.group_id ASC, s.ad_soyad ASC
+    """)
     rows = cur.fetchall()
 
+    # 3) Qruplaşdır + cins uyğunluğunu yoxla
     groups = {}
+    group_cins = {}
     for row in rows:
         gid = row['group_id']
         if gid not in groups:
-            groups[gid] = {"id": gid, "members": []}
-        groups[gid]['members'].append({
+            groups[gid] = []
+            group_cins[gid] = row['cins']
+        groups[gid].append({
             "id": row['student_id'], "ad_soyad": row['ad_soyad'],
             "ixtisas": row['ixtisas'], "kurs": row['kurs']
         })
 
-    return ok(groups=list(groups.values()))
+    # 4) Yalnız mənim cinsimdən olan qruplar + axtarış filtri
+    visible = []
+    for gid in sorted(groups.keys()):
+        if group_cins[gid] != my_cins:
+            continue
+        if q:
+            match = any(q.lower() in m['ad_soyad'].lower() for m in groups[gid])
+            if not (q.isdigit() and False):
+                if not match:
+                    continue
+        visible.append(gid)
+
+    # Axtarış rəqəmdirsə — canlı sıra nömrəsinə görə filtrlə
+    if q and q.isdigit():
+        target_seq = int(q)
+        visible = [gid for idx, gid in enumerate(visible_all := visible, start=1) if idx == target_seq] if False else visible
+        # Sadə yanaşma: sıra nömrəsinə görə filtrlə
+        visible = [gid for idx, gid in enumerate(visible, start=1) if str(idx) == q]
+
+    # 5) Canlı sıralama: görünən qruplar 1-dən başlayaraq nömrələnir
+    result = []
+    for seq, gid in enumerate(visible, start=1):
+        result.append({"id": seq, "real_id": gid, "members": groups[gid]})
+
+    return ok(groups=result)
 
 
 @app.route('/get_requests', methods=['GET'])
@@ -653,7 +702,6 @@ def get_requests(cur):
     rows = cur.fetchall()
 
     result = []
-    pending = 0
     for row in rows:
         am_target = (row['target_id'] == user_id)
         can_vote = False
@@ -673,9 +721,6 @@ def get_requests(cur):
             voted = {v['voter_id'] for v in cur.fetchall()}
             waiting = [e['ad_soyad'] for e in eligible if e['id'] not in voted]
 
-        if (row['type'] == 'invite' and am_target) or can_vote:
-            pending += 1
-
         result.append({
             "id": row['id'], "type": row['type'], "room_id": row['room_id'],
             "target_id": row['target_id'],
@@ -684,7 +729,7 @@ def get_requests(cur):
             "waiting": waiting
         })
 
-    return ok(requests=result, pending_count=pending)
+    return ok(requests=result)
 
 
 # ---------------------------------------------------------------------------
@@ -815,7 +860,10 @@ def create_group(cur):
     cur.execute("INSERT INTO student_groups (created_at) VALUES (NOW())")
     group_id = cur.lastrowid
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
-    return ok(group_id=group_id, message=f"Qrup #{group_id} yaradıldı!")
+
+    # Yaradılan qrupun canlı sıra nömrəsini qaytar
+    seq = get_live_group_seq(cur, group_id)
+    return ok(group_id=seq, message=f"Qrup #{seq} yaradıldı!")
 
 
 @app.route('/join_group', methods=['POST'])
@@ -824,7 +872,7 @@ def create_group(cur):
 def join_group(cur):
     user_id = session['student_id']
     data = request.get_json() or {}
-    group_id = data.get('group_id', 0)
+    seq = data.get('group_id', 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Yalnız ev seçməmiş tələbələr qrupa qoşula bilər!")
@@ -832,14 +880,22 @@ def join_group(cur):
         return fail("Siz artıq bir qrupdasınız! Əvvəlcə qrupdan çıxın.")
 
     my_cins = get_cins(cur, user_id)
-    cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s AND cins != %s", (group_id, my_cins))
-    if cur.fetchone()['c'] > 0:
-        return fail("Bu qrupda qarşı cinsdən üzv var!")
+
+    # Görünən sıra nömrəsini daxili ID-yə çevir (yalnız mənim cinsimdən qruplar)
+    cur.execute("""
+        SELECT s.group_id, MIN(s.cins) AS cins
+        FROM students s WHERE s.group_id IS NOT NULL
+        GROUP BY s.group_id ORDER BY s.group_id ASC
+    """)
+    rows = cur.fetchall()
+    visible = [r['group_id'] for r in rows if r['cins'] == my_cins]
+
+    if not (isinstance(seq, int) and 1 <= seq <= len(visible)):
+        return fail("Belə bir qrup yoxdur!")
+    group_id = visible[seq - 1]
 
     cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
     count = cur.fetchone()['c']
-    if count == 0:
-        return fail("Belə bir qrup yoxdur və ya artıq boşdur!")
     if count >= 6:
         return fail("Qrup doludur (maksimum 6 üzv)!")
 
@@ -1006,17 +1062,13 @@ def invite_roommate(cur):
     target = cur.fetchone()
     if not target:
         return fail("Tələbə tapılmadı!")
+    if target_id == user_id:
+        return fail("Özünüzü dəvət edə bilməzsiniz!")
     if target['cins'] != my_cins:
         return fail("Yalnız eyni cinsdən tələbələri dəvət edə bilərsiniz!")
     if target['ev'] != 'Ev seçilməyib':
         return fail("Bu tələbənin artıq evi var!")
-    if target_id == user_id:
-        return fail("Özünüzü dəvət edə bilməzsiniz!")
 
-    cur.execute(
-        "SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL",
-        (room_id,)
-    )
     cur.execute("SELECT capacity FROM rooms WHERE id = %s", (room_id,))
     capacity = cur.fetchone()['capacity']
     cur.execute(
@@ -1139,7 +1191,6 @@ def request_kick(cur):
     )
     req_id = cur.lastrowid
 
-    # Requester-in səsi avtomatik Təsdiq
     cur.execute(
         "INSERT INTO home_request_votes (request_id, voter_id, vote) VALUES (%s, %s, 'Təsdiq')",
         (req_id, user_id)
