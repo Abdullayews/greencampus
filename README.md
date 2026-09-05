@@ -118,6 +118,3 @@ Bütün dəyərlər env variable-lardan oxunur:
 
 Admin tərəfi: **[greencampusadmin →](https://github.com/Abdullayews/greencampusadmin)**
 ```
-**Təklif olunan sıra:** 1 → 2 → 3 → 6 → 4 → 5 (kritik strukturlar əvvəl, yeni panellər sonra).
-
-Hazıram — **"başla"** deyin, və sıranın birincisindən (Otaqlar sistemi + birlikdə admin `app.py`-nin tam yenilənmiş versiyası) başlayıram. Hansı hissədən başlamağımı istəsəniz, birbaşa deyə bilərsiniz.
