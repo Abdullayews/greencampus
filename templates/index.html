@@ -16,7 +16,7 @@
             --shadow-md: 0 8px 20px rgba(0,0,0,.08); --shadow-lg: 0 12px 32px rgba(0,0,0,.10);
             --radius-btn: 8px; --radius-card: 12px; --radius-badge: 999px;
             --radius-modal: 16px; --radius-avatar: 50%;
-            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0, 0.2, 1);
             --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -28,32 +28,16 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.8; } }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes ripple { to { transform: scale(4); opacity: 0; } }
-        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes typing { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        .animate-fade-in-up { animation: fadeInUp 0.5s var(--transition-base) forwards; opacity: 0; }
-        .animate-fade-in { animation: fadeIn 0.4s var(--transition-base) forwards; opacity: 0; }
-        .animate-slide-in-left { animation: slideInLeft 0.4s var(--transition-base) forwards; opacity: 0; }
-        .animate-slide-in-right { animation: slideInRight 0.4s var(--transition-base) forwards; opacity: 0; }
-        .animate-bounce-in { animation: bounceIn 0.5s var(--transition-bounce) forwards; }
-        .delay-100 { animation-delay: 100ms; } .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; } .delay-400 { animation-delay: 400ms; }
-        .delay-500 { animation-delay: 500ms; }
-
         .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-btn); }
-        .skeleton-text { height: 16px; margin-bottom: 8px; }
-        .skeleton-title { height: 20px; width: 60%; margin-bottom: 12px; }
-        .skeleton-circle { width: 48px; height: 48px; border-radius: 50%; }
 
+        /* === LOGIN === */
         .login-overlay { position: fixed; inset: 0; background: linear-gradient(135deg, var(--ku-dark-green) 0%, #1a5248 50%, var(--ku-green) 100%); background-size: 200% 200%; animation: gradientShift 15s ease infinite; z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 24px; }
         .login-overlay::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); opacity: 0.6; }
         .login-card { width: 100%; max-width: 420px; background: var(--surface); border-radius: var(--radius-modal); padding: 40px; box-shadow: var(--shadow-lg); position: relative; z-index: 2; }
@@ -61,8 +45,8 @@
         .login-logo-icon { width: 64px; height: 64px; background: linear-gradient(135deg, var(--ku-soft-green), var(--ku-light-blue)); border-radius: var(--radius-avatar); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: var(--shadow-sm); animation: float 3s ease-in-out infinite; }
         .login-logo-icon i { width: 32px; height: 32px; color: var(--ku-dark-green); }
         .login-logo h2 { font-size: 28px; font-weight: 700; color: var(--ku-dark-green); margin-bottom: 4px; }
-        .login-logo p { font-size: 14px; color: var(--text-secondary); font-weight: 400; }
-        .input-group { margin-bottom: 20px; position: relative; }
+        .login-logo p { font-size: 14px; color: var(--text-secondary); }
+        .input-group { margin-bottom: 20px; }
         .input-group label { display: block; font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
         .input-group input { width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 16px; outline: none; background: var(--bg); transition: all var(--transition-fast); }
         .input-group input:focus { border-color: var(--ku-green); background: var(--surface); box-shadow: 0 0 0 4px rgba(68, 118, 108, 0.1); }
@@ -71,317 +55,157 @@
         .login-btn i { width: 20px; height: 20px; }
         .login-error { color: var(--danger); font-size: 14px; text-align: center; margin-top: 16px; display: none; padding: 8px; background: #fef2f2; border-radius: var(--radius-btn); border: 1px solid #fee2e2; animation: shake 0.4s ease; }
 
-        .sidebar { width: 280px; background: var(--surface); height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); overflow: visible; white-space: nowrap; box-shadow: var(--shadow-sm); }
+        /* === SIDEBAR === */
+        .sidebar { width: 280px; background: var(--surface); height: 100vh; position: fixed; left: 0; top: 0; border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transition: all 0.35s; overflow: visible; white-space: nowrap; box-shadow: var(--shadow-sm); }
         .sidebar.collapsed { width: 80px; }
-        .sidebar.collapsed .logo span, .sidebar.collapsed .nav-item span, .sidebar.collapsed .sidebar-footer-links h4, .sidebar.collapsed .sidebar-footer-links li a span { opacity: 0; width: 0; pointer-events: none; }
+        .sidebar.collapsed .logo span, .sidebar.collapsed .nav-item span { opacity: 0; width: 0; pointer-events: none; }
         .sidebar.collapsed .logo { padding: 0; justify-content: center; gap: 0; }
         .sidebar.collapsed .nav-item { justify-content: center; padding: 12px 16px; gap: 0; }
-        .sidebar.collapsed .sidebar-footer-links li a { justify-content: center; padding: 8px 16px; gap: 0; }
         .sidebar.collapsed .contact-dropdown { display: none; }
         .logo { height: 72px; padding: 0 24px; font-size: 22px; font-weight: 700; color: var(--ku-dark-green); display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); cursor: pointer; flex-shrink: 0; position: relative; overflow: hidden; }
-        .logo::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--ku-green); transform: scaleY(0); transition: transform 0.3s ease; }
-        .logo:hover::before { transform: scaleY(1); }
-        .logo:hover { background: var(--bg); }
         .logo i { width: 28px; height: 28px; color: var(--ku-green); flex-shrink: 0; }
-        .logo span { font-weight: 700; }
         .nav-menu { flex: 1; padding: 16px 12px; overflow-y: auto; overflow-x: hidden; }
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--text-primary); text-decoration: none; border-radius: var(--radius-btn); margin-bottom: 6px; font-size: 15px; font-weight: 500; transition: all var(--transition-fast); cursor: pointer; position: relative; overflow: hidden; }
-        .nav-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%) scaleY(0); width: 3px; height: 60%; background: var(--ku-green); border-radius: 0 4px 4px 0; transition: transform 0.25s ease; }
-        .nav-item:hover::before { transform: translateY(-50%) scaleY(1); }
         .nav-item i { width: 22px; height: 22px; color: var(--text-secondary); flex-shrink: 0; }
         .nav-item:hover { background: var(--bg); transform: translateX(4px); }
-        .nav-item:hover i { color: var(--ku-green); transform: scale(1.1); }
+        .nav-item:hover i { color: var(--ku-green); }
         .nav-item.active { background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); box-shadow: 0 4px 12px rgba(22, 66, 60, 0.25); }
         .nav-item.active i { color: var(--surface); }
-        .nav-item.active::before { display: none; }
         .sidebar-footer-links { padding: 16px; border-top: 1px solid var(--border); position: relative; }
         .sidebar-footer-links h4 { font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
         .sidebar-footer-links ul { list-style: none; }
         .sidebar-footer-links li { position: relative; margin-bottom: 4px; }
         .sidebar-footer-links li a { display: flex; align-items: center; gap: 12px; color: var(--text-primary); text-decoration: none; font-size: 14px; padding: 8px 16px; border-radius: var(--radius-btn); transition: all var(--transition-fast); cursor: pointer; }
-        .sidebar-footer-links li a:hover { background: var(--bg); color: var(--ku-green); transform: translateX(4px); }
+        .sidebar-footer-links li a:hover { background: var(--bg); color: var(--ku-green); }
         .sidebar-footer-links li a i { width: 18px; height: 18px; color: var(--text-secondary); }
-        .sidebar-footer-links li a:hover i { color: var(--ku-green); }
-        .contact-dropdown { position: absolute; left: 100%; bottom: 0; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: 16px; opacity: 0; visibility: hidden; transform: translateX(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; margin-left: 8px; }
-        .contact-dropdown.active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); }
+        .contact-dropdown { position: absolute; left: 100%; bottom: 0; width: 260px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-lg); padding: 16px; opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 95; margin-left: 8px; }
+        .contact-dropdown.active { opacity: 1; visibility: visible; }
         .contact-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--radius-btn); text-decoration: none; color: var(--text-primary); font-size: 14px; font-weight: 500; margin-bottom: 8px; }
-        .contact-item:hover { background: var(--bg); transform: translateX(4px); }
+        .contact-item:hover { background: var(--bg); }
         .contact-item i { width: 20px; height: 20px; color: var(--ku-green); }
 
-        .main-wrapper { margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; }
+        /* === MAIN === */
+        .main-wrapper { margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.35s; flex: 1; }
         .main-wrapper.expanded { margin-left: 80px; }
         .top-bar { height: 72px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 32px; position: sticky; top: 0; z-index: 90; }
         .top-bar h1 { font-size: 28px; font-weight: 700; opacity: 0; animation: fadeInUp 0.4s ease forwards; }
         .top-bar-actions { display: flex; align-items: center; gap: 16px; }
         .icon-btn { width: 44px; height: 44px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; position: relative; transition: all var(--transition-fast); }
-        .icon-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); transform: translateY(-2px); }
-        .notification-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; background: var(--danger); border-radius: var(--radius-badge); border: 2px solid var(--surface); animation: pulse 2s infinite; }
-        .notif-dropdown { position: absolute; top: 110%; right: 0; width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; max-height: 480px; overflow-y: auto; }
-        .notif-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-        .notif-item { display: flex; gap: 12px; padding: 14px; border-radius: var(--radius-btn); align-items: flex-start; cursor: pointer; transition: all var(--transition-fast); margin-bottom: 4px; }
+        .icon-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); }
+        .icon-btn i { width: 20px; height: 20px; }
+        /* #13 — bildiriş sayı badge */
+        .notif-count { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; background: var(--danger); border-radius: var(--radius-badge); border: 2px solid var(--surface); font-size: 10px; font-weight: 700; color: var(--surface); display: none; align-items: center; justify-content: center; padding: 0 4px; animation: pulse 2s infinite; }
+        .notif-count.visible { display: flex; }
+        .notif-dropdown { position: absolute; top: 110%; right: 0; width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 95; max-height: 480px; overflow-y: auto; }
+        .notif-dropdown.active { opacity: 1; visibility: visible; }
+        .notif-item { display: flex; gap: 12px; padding: 14px; border-radius: var(--radius-btn); cursor: pointer; transition: all var(--transition-fast); margin-bottom: 4px; }
         .notif-item:hover { background: var(--bg); transform: translateX(4px); }
-        .notif-icon { width: 36px; height: 36px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notif-item:last-child { margin-bottom: 0; }
         .notif-text h5 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
         .notif-text p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.4; }
         .profile-dropdown { position: relative; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px 14px; border-radius: var(--radius-btn); transition: all var(--transition-fast); border: 1px solid transparent; }
         .profile-dropdown:hover { background: var(--bg); border-color: var(--border); }
         .profile-dropdown .avatar { width: 36px; height: 36px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
         .profile-dropdown .name { font-size: 15px; font-weight: 500; }
-        .profile-dropdown > i { width: 18px; height: 18px; color: var(--text-secondary); transition: transform 0.3s; }
-        .profile-dropdown.active > i { transform: rotate(180deg); }
-        .dropdown-menu { position: absolute; top: 110%; right: 0; width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; }
-        .profile-dropdown.active .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .profile-dropdown > i { width: 18px; height: 18px; color: var(--text-secondary); }
+        .dropdown-menu { position: absolute; top: 110%; right: 0; width: 220px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transition: all 0.25s; z-index: 95; }
+        .profile-dropdown.active .dropdown-menu { opacity: 1; visibility: visible; }
         .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--radius-btn); color: var(--text-primary); font-size: 14px; font-weight: 500; cursor: pointer; transition: all var(--transition-fast); }
-        .dropdown-item:hover { background: var(--bg); color: var(--ku-green); transform: translateX(4px); }
+        .dropdown-item:hover { background: var(--bg); color: var(--ku-green); }
         .dropdown-item i { width: 18px; height: 18px; color: var(--text-secondary); }
         .dropdown-item.danger { color: var(--danger); }
+        .dropdown-item.danger i { color: var(--danger); }
         .dropdown-divider { height: 1px; background: var(--border); margin: 4px 0; }
-
         .content-layout { padding: 32px; flex: 1; }
-        .col-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-        .page-content { display: none; width: 100%; opacity: 0; transform: translateY(16px); transition: opacity 0.3s ease, transform 0.3s ease; }
-        .page-content.active-page { display: block; opacity: 1; transform: translateY(0); animation: fadeInUp 0.4s ease; }
+        .page-content { display: none; width: 100%; opacity: 0; transform: translateY(16px); transition: opacity 0.3s, transform 0.3s; }
+        .page-content.active-page { display: block; opacity: 1; transform: translateY(0); animation: fadeInUp 0.4s; }
         .home-layout { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
         .home-main { flex: 1; display: flex; flex-direction: column; gap: 24px; min-width: 300px; }
         .col-side { width: 380px; flex-shrink: 0; display: flex; flex-direction: column; gap: 24px; }
 
-        .welcome-banner { background: linear-gradient(135deg, var(--ku-green) 0%, var(--ku-dark-green) 100%); border-radius: var(--radius-card); padding: 40px; color: var(--surface); position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); animation: fadeInUp 0.5s ease; }
-        .welcome-banner::before { content: ''; position: absolute; top: -50%; right: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: float 6s ease-in-out infinite; }
+        .welcome-banner { background: linear-gradient(135deg, var(--ku-green) 0%, var(--ku-dark-green) 100%); border-radius: var(--radius-card); padding: 40px; color: var(--surface); position: relative; overflow: hidden; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); }
         .welcome-content { position: relative; z-index: 2; }
-        .welcome-content h2 { font-size: 32px; font-weight: 700; margin-bottom: 12px; animation: fadeInUp 0.5s ease 0.1s both; }
-        .welcome-content p { font-size: 16px; opacity: 0.9; max-width: 500px; margin-bottom: 28px; animation: fadeInUp 0.5s ease 0.2s both; }
-        .welcome-actions { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.5s ease 0.3s both; }
-        .btn-primary { background: var(--surface); color: var(--ku-dark-green); border: none; padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 600; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; transition: all var(--transition-base); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .btn-primary i { width: 20px; height: 20px; }
-        .btn-secondary { background: rgba(255,255,255,0.15); color: var(--surface); border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 500; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; transition: all var(--transition-base); backdrop-filter: blur(4px); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.25); transform: translateY(-3px); }
+        .welcome-content h2 { font-size: 32px; margin-bottom: 12px; }
+        .welcome-content p { font-size: 16px; opacity: 0.9; margin-bottom: 28px; }
+        .btn-primary { background: var(--surface); color: var(--ku-dark-green); border: none; padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 600; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; transition: all var(--transition-base); }
+        .btn-primary:hover { transform: translateY(-3px); }
+        .btn-secondary { background: rgba(255,255,255,0.15); color: var(--surface); border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; border-radius: var(--radius-btn); font-weight: 500; cursor: pointer; font-family: 'Poppins'; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.25); }
         .section-title { font-size: 24px; margin-bottom: 24px; font-weight: 700; position: relative; display: inline-block; }
         .section-title::after { content: ''; position: absolute; bottom: -6px; left: 0; width: 40px; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); border-radius: 2px; }
 
         .service-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-        .service-card { background: var(--surface); padding: 28px 24px; border-radius: var(--radius-card); border: 1px solid var(--border); box-shadow: var(--shadow-xs); transition: all var(--transition-base); cursor: pointer; flex: 1 1 200px; display: flex; flex-direction: column; align-items: flex-start; position: relative; overflow: hidden; }
-        .service-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); transform: scaleX(0); transition: transform 0.3s ease; }
-        .service-card:hover::before { transform: scaleX(1); }
-        .service-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--ku-green); }
+        .service-card { background: var(--surface); padding: 28px 24px; border-radius: var(--radius-card); border: 1px solid var(--border); cursor: pointer; flex: 1 1 200px; transition: all var(--transition-base); }
+        .service-card:hover { transform: translateY(-6px); border-color: var(--ku-green); }
         .service-icon { width: 52px; height: 52px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-        .service-icon i { width: 24px; height: 24px; }
-        .bg-green { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
-        .bg-blue { background: linear-gradient(135deg, var(--ku-light-blue), #e0f4f8); color: #0c4a6e; }
-        .bg-orange { background: linear-gradient(135deg, #fef3c7, #fde68a); color: var(--warning); }
-        .bg-purple { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7e22ce; }
-        .bg-red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
-        .service-card h3 { font-size: 18px; margin-bottom: 6px; font-weight: 600; }
-        .service-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+        .bg-green { background: var(--ku-soft-green); color: var(--ku-dark-green); }
+        .bg-blue { background: var(--ku-light-blue); color: #0c4a6e; }
+        .bg-orange { background: #fef3c7; color: var(--warning); }
+        .bg-purple { background: #f3e8ff; color: #7e22ce; }
+        .bg-red { background: #fee2e2; color: var(--danger); }
+        .service-card h3 { font-size: 18px; margin-bottom: 6px; }
+        .service-card p { font-size: 14px; color: var(--text-secondary); }
 
         .widgets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
         .widget-card { background: var(--surface); border-radius: var(--radius-card); border: 1px solid var(--border); padding: 28px; box-shadow: var(--shadow-xs); }
         .widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .widget-header h3 { font-size: 18px; font-weight: 600; }
         .view-all { font-size: 14px; color: var(--ku-green); font-weight: 600; cursor: pointer; background: none; border: none; font-family: 'Poppins'; }
-        .view-all:hover { color: var(--ku-dark-green); }
 
         .notification-item { display: flex; gap: 16px; padding: 18px; border-radius: var(--radius-btn); background: var(--bg); margin-bottom: 12px; border-left: 4px solid var(--ku-green); transition: all var(--transition-fast); cursor: pointer; }
-        .notification-item.danger { border-left-color: var(--danger); background: linear-gradient(90deg, #fff5f5, var(--bg)); }
-        .notification-item.warning { border-left-color: var(--warning); background: linear-gradient(90deg, #fffbeb, var(--bg)); }
-        .notification-item.info { border-left-color: var(--ku-light-blue); background: linear-gradient(90deg, #f0f9ff, var(--bg)); }
-        .notification-icon { width: 40px; height: 40px; border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; background: var(--surface); box-shadow: var(--shadow-xs); flex-shrink: 0; }
-        .notification-icon i { width: 20px; height: 20px; color: var(--ku-green); }
-        .notification-item.danger .notification-icon i { color: var(--danger); }
-        .notification-item.warning .notification-icon i { color: var(--warning); }
-        .notification-content h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-        .notification-content p { font-size: 14px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
-        .notification-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-        .badge { padding: 4px 12px; border-radius: var(--radius-badge); font-weight: 600; font-size: 12px; }
-        .badge-danger { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
-        .badge-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); color: var(--warning); }
-        .badge-info { background: linear-gradient(135deg, var(--ku-light-blue), #e0f4f8); color: #0c4a6e; }
-        .badge-success { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
+        .notification-item:hover { transform: translateX(6px); background: var(--surface); }
+        .notification-content h4 { font-size: 16px; margin-bottom: 6px; }
+        .notification-content p { font-size: 14px; color: var(--text-secondary); }
 
-        .match-card { background: var(--bg); border-radius: var(--radius-btn); padding: 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; margin-bottom: 12px; transition: all var(--transition-fast); cursor: pointer; }
-        .match-card:hover { border-color: var(--ku-green); transform: translateX(6px); box-shadow: var(--shadow-sm); }
+        .match-card { background: var(--bg); border-radius: var(--radius-btn); padding: 18px; border: 1px solid var(--border); display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
         .match-avatar { width: 48px; height: 48px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; flex-shrink: 0; }
         .btn-contact { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); border: none; padding: 10px 18px; border-radius: var(--radius-btn); font-weight: 600; cursor: pointer; font-family: 'Poppins'; font-size: 14px; }
-        .btn-contact:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
 
-        .profile-card-h { display: flex; align-items: center; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-        .profile-avatar { width: 64px; height: 64px; border-radius: var(--radius-avatar); background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--surface); font-weight: 700; flex-shrink: 0; }
-        .profile-info h3 { font-size: 20px; margin-bottom: 4px; font-weight: 600; }
-        .profile-info p { font-size: 14px; color: var(--text-secondary); }
         .detail-item { display: flex; justify-content: space-between; padding: 14px 0; font-size: 14px; border-bottom: 1px solid var(--border); }
-        .detail-item:last-child { border-bottom: none; }
-        .detail-label { color: var(--text-secondary); font-weight: 500; }
+        .detail-label { color: var(--text-secondary); }
         .detail-value { font-weight: 600; }
-        .text-green { color: var(--ku-green); font-weight: 700; }
 
-        .accordion { border: 1px solid var(--border); border-radius: var(--radius-btn); margin-bottom: 12px; overflow: hidden; background: var(--surface); }
+        .accordion { border: 1px solid var(--border); border-radius: var(--radius-btn); margin-bottom: 12px; background: var(--surface); }
         .accordion-header { padding: 16px; background: var(--bg); display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; font-size: 15px; }
-        .accordion-header span { display: flex; align-items: center; gap: 12px; }
-        .accordion-header i { width: 20px; height: 20px; }
-        .toggle-icon { transition: transform 0.3s; }
-        .accordion.active .toggle-icon { transform: rotate(180deg); }
-        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s, padding 0.4s ease; }
+        .accordion-body { max-height: 0; overflow: hidden; transition: max-height 0.4s, padding 0.4s; }
         .accordion.active .accordion-body { max-height: 500px; padding: 16px; }
-        .meal-list { list-style: none; }
-        .meal-list li { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px dashed var(--border); font-size: 14px; }
-        .meal-list li:last-child { border-bottom: none; }
-        .meal-day { font-weight: 600; color: var(--text-secondary); }
-        .meal-name { color: var(--text-primary); text-align: right; font-weight: 500; }
 
         .app-grid { display: flex; flex-wrap: wrap; gap: 24px; }
-        .add-card { width: 300px; min-height: 250px; border: 2px dashed var(--border); border-radius: var(--radius-card); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-base); background: var(--surface); position: relative; overflow: hidden; }
-        .add-card:hover { border-color: var(--ku-green); color: var(--ku-green); transform: translateY(-4px); box-shadow: var(--shadow-md); border-style: solid; }
-        .add-card i { width: 48px; height: 48px; margin-bottom: 16px; }
-        .add-card:hover i { transform: scale(1.2) rotate(90deg); }
-        .add-card span { font-size: 16px; font-weight: 600; position: relative; z-index: 1; }
-        .app-card { width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; box-shadow: var(--shadow-xs); position: relative; display: flex; flex-direction: column; transition: all var(--transition-base); }
-        .app-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--ku-green); }
-        .app-card-actions { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; opacity: 0; transform: translateY(-4px); transition: all 0.25s ease; }
-        .app-card:hover .app-card-actions { opacity: 1; transform: translateY(0); }
-        .card-action-btn { width: 32px; height: 32px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-fast); }
-        .card-action-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); transform: scale(1.1); }
-        .card-action-btn.delete:hover { background: #fee2e2; color: var(--danger); border-color: var(--danger); }
-        .card-action-btn i { width: 16px; height: 16px; }
-        .app-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-right: 80px; }
-        .app-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.5; }
-        .app-card-status { margin-top: auto; display: inline-block; padding: 6px 14px; background: var(--bg); border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; color: var(--text-secondary); width: fit-content; }
-        .app-card-status.approved { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
-        .app-card-status.pending { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
-        .app-card-note { margin-top: 10px; padding: 12px 14px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); border-left: 4px solid var(--ku-green); border-radius: var(--radius-btn); font-size: 13px; color: var(--ku-dark-green); font-weight: 500; line-height: 1.5; }
-        .app-card-note strong { font-weight: 700; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 24px; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-card { width: 100%; max-width: 500px; background: var(--surface); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); overflow: hidden; transform: scale(0.9) translateY(20px); transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
-        .modal-header { padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h3 { font-size: 20px; font-weight: 600; }
-        .modal-header i { width: 24px; height: 24px; cursor: pointer; transition: transform 0.2s; }
-        .modal-header i:hover { transform: rotate(90deg); }
-        .modal-body { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
-        .modal-input, .modal-textarea, .priority-select { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 15px; outline: none; background: var(--bg); color: var(--text-primary); transition: all var(--transition-fast); }
-        .modal-textarea { min-height: 120px; resize: vertical; }
-        .modal-input:focus, .modal-textarea:focus, .priority-select:focus { border-color: var(--ku-green); background: var(--surface); box-shadow: 0 0 0 4px rgba(68, 118, 108, 0.1); }
-        .priority-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 40px; }
-        .modal-footer { padding: 20px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; }
+        .add-card { width: 300px; min-height: 250px; border: 2px dashed var(--border); border-radius: var(--radius-card); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--transition-base); background: var(--surface); }
+        .add-card:hover { border-color: var(--ku-green); color: var(--ku-green); }
+        .app-card { width: 300px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 24px; }
+        .app-card h3 { font-size: 18px; margin-bottom: 16px; padding-right: 80px; }
+        .app-card p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+        .app-card-status { margin-top: auto; display: inline-block; padding: 6px 14px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; }
+        .app-card-status.approved { background: var(--ku-soft-green); color: var(--ku-dark-green); }
+        .app-card-status.pending { background: #fef3c7; color: #92400e; }
+        .app-card-note { margin-top: 10px; padding: 12px 14px; background: var(--ku-soft-green); border-left: 4px solid var(--ku-green); border-radius: var(--radius-btn); font-size: 13px; color: var(--ku-dark-green); font-weight: 500; }
 
         .apartment-plan { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; width: 100%; }
-        .room-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; position: relative; transition: all var(--transition-base); overflow: hidden; }
-        .room-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); transform: scaleX(0); transition: transform 0.3s ease; }
-        .room-card:hover::before { transform: scaleX(1); }
-        .room-card:hover { border-color: var(--ku-green); transform: translateY(-4px); box-shadow: var(--shadow-md); }
-        .bed-icon { width: 52px; height: 52px; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-        .bed-icon i { width: 24px; height: 24px; }
-        .room-owner { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
-        .item-list { display: flex; flex-direction: column; gap: 10px; }
-        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--bg); border-radius: var(--radius-btn); font-size: 14px; }
-        .item-name { font-weight: 600; }
+        .room-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; }
+        .bed-icon { width: 52px; height: 52px; background: var(--ku-soft-green); color: var(--ku-dark-green); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+        .item-row { display: flex; justify-content: space-between; padding: 14px; background: var(--bg); border-radius: var(--radius-btn); font-size: 14px; }
         .status-badge { padding: 5px 14px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; }
-        .status-good { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
-        .status-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
-        .status-bad { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+        .status-good { background: var(--ku-soft-green); color: var(--ku-dark-green); }
+        .status-warning { background: #fef3c7; color: #92400e; }
+        .status-bad { background: #fee2e2; color: var(--danger); }
 
-        .home-status-message { grid-column: 1 / -1; width: 100%; text-align: center; font-size: 18px; font-weight: 600; color: var(--text-secondary); padding: 80px 24px; animation: fadeIn 0.4s ease; }
+        .payment-card { max-width: 500px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--danger); border-radius: var(--radius-card); padding: 28px; }
+        .payment-card h3 { font-size: 20px; color: var(--danger); margin-bottom: 12px; }
 
-        .home-plan-layout { display: flex; gap: 24px; align-items: stretch; height: calc(100vh - 230px); min-height: 480px; animation: fadeInUp 0.4s ease; }
-        .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; min-height: 0; }
-        .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
-        .hp-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; min-height: 0; }
-        .hp-left .hp-box { flex: 1; }
-        .hp-right .hp-box { flex: 1 1 0; min-height: 0; }
-        .hp-box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .hp-box-title i { width: 20px; height: 20px; color: var(--ku-green); }
-        .hp-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
-        .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 16px; background: var(--bg); transition: all var(--transition-fast); }
-        .hp-room-card:hover { border-color: var(--ku-green); transform: translateX(4px); }
-        .hp-room-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .hp-room-name { font-size: 16px; font-weight: 700; }
-        .hp-free-badge { padding: 4px 12px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
-        .hp-room-occs { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
-        .hp-select-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; font-weight: 600; cursor: pointer; transition: all var(--transition-fast); }
-        .hp-select-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
-        .hp-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .hp-input { flex: 2 1 140px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; transition: all var(--transition-fast); }
-        .hp-select { flex: 1 1 110px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
-        .hp-input:focus, .hp-select:focus { border-color: var(--ku-green); background: var(--surface); }
-        .hp-btn { padding: 10px 16px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all var(--transition-fast); }
-        .hp-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-        .hp-btn i { width: 14px; height: 14px; }
-        .hp-btn-secondary { padding: 8px 14px; background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all var(--transition-fast); }
-        .hp-btn-secondary:hover { border-color: var(--ku-green); color: var(--ku-green); }
-        .hp-student-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg); border-radius: var(--radius-btn); border: 1px solid var(--border); transition: all var(--transition-fast); }
-        .hp-student-row:hover { border-color: var(--ku-green); }
-        .hp-student-info { flex: 1; min-width: 0; }
-        .hp-student-info h5 { font-size: 14px; font-weight: 600; }
-        .hp-student-info p { font-size: 12px; color: var(--text-secondary); }
-        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; }
-        .hp-group-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 14px; background: var(--bg); transition: all var(--transition-fast); }
-        .hp-group-card.mine { border-color: var(--ku-green); background: linear-gradient(90deg, #f0fdf4, var(--bg)); }
-        .hp-group-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
-        .hp-group-name { font-size: 14px; font-weight: 700; }
-        .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; margin: 0 6px 6px 0; }
-        .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
-        .hp-member-chip strong { color: var(--ku-green); }
-        .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
-        .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
-        @media (max-width: 1023px) {
-            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; }
-            .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
-            .hp-scroll { max-height: 420px; }
-        }
-
-        .survey-card { width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 28px; box-shadow: var(--shadow-xs); display: flex; flex-direction: column; gap: 16px; }
-        .survey-card h3 { font-size: 18px; font-weight: 600; }
-        .survey-card p { font-size: 14px; color: var(--text-secondary); flex: 1; line-height: 1.6; }
-
-        .payment-card { max-width: 500px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--danger); border-radius: var(--radius-card); padding: 28px; box-shadow: var(--shadow-xs); position: relative; transition: all var(--transition-base); }
-        .payment-card:hover { transform: translateX(8px); box-shadow: var(--shadow-md); }
-        .payment-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--danger); }
-
-        .simple-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 20px 32px; text-align: center; color: var(--text-secondary); font-size: 14px; }
-
-        .ai-chat-window { position: fixed; bottom: 96px; right: 32px; width: 380px; height: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); z-index: 200; display: none; flex-direction: column; overflow: hidden; transform: scale(0.9) translateY(20px); opacity: 0; transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .ai-chat-window.active { display: flex; transform: scale(1) translateY(0); opacity: 1; }
-        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); }
-        .ai-chat-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .ai-chat-header h3 i { width: 22px; height: 22px; }
-        .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: linear-gradient(180deg, var(--bg) 0%, #f1f5f9 100%); display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
-        .ai-msg { max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.6; animation: fadeInUp 0.3s ease; }
-        .ai-msg.user { background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .ai-msg.bot { background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .ai-msg.loading { color: var(--text-secondary); font-style: italic; background: var(--surface); border: 1px dashed var(--border); }
-        .ai-msg.loading::after { content: '...'; animation: typing 1.5s infinite; }
-        .ai-chat-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; background: var(--surface); }
-        .ai-input { flex: 1; padding: 12px 18px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; outline: none; background: var(--bg); transition: all var(--transition-fast); }
-        .ai-input:focus { border-color: var(--ku-green); background: var(--surface); }
-        .ai-send-btn { width: 44px; height: 44px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition-fast); }
-        .ai-send-btn:hover { transform: scale(1.1); }
-        .ai-send-btn i { width: 20px; height: 20px; }
-        .ai-float-btn { position: fixed; bottom: 32px; right: 32px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-avatar); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 20px rgba(68, 118, 108, 0.4); z-index: 200; transition: all var(--transition-base); animation: fadeInScale 0.5s ease 1s both; }
-        .ai-float-btn:hover { transform: scale(1.1) rotate(-5deg); }
+        /* === AI CHAT === */
+        .ai-chat-window { position: fixed; bottom: 96px; right: 32px; width: 380px; height: 520px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); z-index: 200; display: none; flex-direction: column; overflow: hidden; }
+        .ai-chat-window.active { display: flex; }
+        .ai-chat-header { padding: 18px 24px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); display: flex; justify-content: space-between; align-items: center; }
+        .ai-chat-body { flex: 1; padding: 20px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; gap: 14px; }
+        .ai-msg { max-width: 85%; padding: 14px 18px; border-radius: 18px; font-size: 14px; line-height: 1.6; }
+        .ai-msg.user { background: var(--ku-green); color: var(--surface); align-self: flex-end; }
+        .ai-msg.bot { background: var(--surface); border: 1px solid var(--border); align-self: flex-start; }
+        .ai-chat-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .ai-input { flex: 1; padding: 12px 18px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; outline: none; background: var(--bg); }
+        .ai-float-btn { position: fixed; bottom: 32px; right: 32px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-avatar); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 6px 20px rgba(68, 118, 108, 0.4); z-index: 200; }
         .ai-float-btn i { width: 26px; height: 26px; }
 
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        *:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; border-radius: 4px; }
-
-        @media (max-width: 1023px) { .col-side { width: 100%; } .home-layout { flex-direction: column; } }
-        @media (max-width: 767px) {
-            .top-bar h1 { font-size: 22px; } .sidebar { width: 80px; } .main-wrapper { margin-left: 80px; }
-            .sidebar .logo span, .sidebar .nav-item span, .sidebar .sidebar-footer-links h4, .sidebar .sidebar-footer-links li a span { opacity: 0; width: 0; pointer-events: none; }
-            .ai-chat-window { width: calc(100% - 32px); right: 16px; bottom: 96px; height: 60%; }
-            .contact-dropdown { display: none; }
-            .content-layout { padding: 20px; }
-            .app-grid { justify-content: center; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-        }
-
-        /* ═════════ XÜSUSİ DİALOQ SİSTEMİ ═════════ */
+        /* === XÜSUSİ DİALOQ === */
         .dlg-icon { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
         .dlg-icon i { width: 28px; height: 28px; }
         .dlg-icon.danger { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
@@ -393,12 +217,58 @@
         .dlg-icon.room { background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
         .dlg-icon.group { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7e22ce; }
         .dlg-icon.leave { background: linear-gradient(135deg, #fef3c7, #fde68a); color: var(--warning); }
-        .dlg-title { font-size: 19px; font-weight: 700; text-align: center; margin-bottom: 10px; }
         .dlg-text { font-size: 14px; color: var(--text-secondary); line-height: 1.65; text-align: center; }
         .dlg-text b, .dlg-text strong { color: var(--text-primary); }
         .dlg-highlight { display: block; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-weight: 600; color: var(--text-primary); text-align: center; }
         .dlg-actions { display: flex; gap: 12px; margin-top: 24px; }
         .dlg-actions .hp-btn, .dlg-actions .hp-btn-secondary { flex: 1; justify-content: center; padding: 12px 16px; font-size: 13px; }
+
+        /* === EV SEÇMƏ PLANI === */
+        .home-plan-layout { display: flex; gap: 24px; align-items: stretch; height: calc(100vh - 230px); min-height: 480px; }
+        .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; min-height: 0; }
+        .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+        .hp-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 20px; display: flex; flex-direction: column; min-height: 0; }
+        .hp-left .hp-box { flex: 1; }
+        .hp-right .hp-box { flex: 1 1 0; min-height: 0; }
+        .hp-box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .hp-box-title i { width: 20px; height: 20px; color: var(--ku-green); }
+        .hp-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
+        .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 16px; background: var(--bg); transition: all var(--transition-fast); }
+        .hp-room-card:hover { border-color: var(--ku-green); }
+        .hp-room-head { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .hp-room-name { font-size: 16px; font-weight: 700; }
+        .hp-free-badge { padding: 4px 12px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; background: var(--ku-soft-green); color: var(--ku-dark-green); }
+        .hp-room-occs { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+        .hp-select-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .hp-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .hp-input { flex: 2 1 140px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; }
+        .hp-select { flex: 1 1 110px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
+        .hp-btn { padding: 10px 16px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .hp-btn-secondary { padding: 8px 14px; background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .hp-student-row { display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--bg); border-radius: var(--radius-btn); border: 1px solid var(--border); }
+        .hp-student-row:hover { border-color: var(--ku-green); }
+        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; }
+        .hp-group-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 14px; background: var(--bg); }
+        .hp-group-card.mine { border-color: var(--ku-green); }
+        .hp-group-name { font-size: 14px; font-weight: 700; }
+        .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; margin: 0 6px 6px 0; }
+        .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
+        .hp-member-chip strong { color: var(--ku-green); }
+        .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
+        .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
+        .home-status-message { grid-column: 1 / -1; width: 100%; text-align: center; font-size: 18px; font-weight: 600; color: var(--text-secondary); padding: 80px 24px; }
+        @media (max-width: 1023px) {
+            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; }
+            .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
+            .hp-scroll { max-height: 420px; }
+        }
+        @media (max-width: 767px) {
+            .sidebar { width: 80px; } .main-wrapper { margin-left: 80px; }
+            .sidebar .logo span, .sidebar .nav-item span { opacity: 0; width: 0; pointer-events: none; }
+            .ai-chat-window { width: calc(100% - 32px); right: 16px; height: 60%; }
+            .contact-dropdown { display: none; }
+            .content-layout { padding: 20px; }
+        }
     </style>
 </head>
 <body>
@@ -434,13 +304,10 @@
         <div class="sidebar-footer-links">
             <h4>Faydalı keçidlər</h4>
             <ul>
-                <li><a href="https://qu.edu.az/en" target="_blank"><i data-lucide="globe"></i> <span>Universitet rəsmi saytı</span></a></li>
-                <li><a href="#"><i data-lucide="calendar"></i> <span>Akademik təqvim</span></a></li>
-                <li>
-                    <a id="contactToggle" onclick="toggleContactDropdown(event)"><i data-lucide="phone"></i> <span>İdarə ilə əlaqə</span></a>
+                <li><a href="https://qu.edu.az/en" target="_blank"><i data-lucide="globe"></i> <span>Universitet</span></a></li>
+                <li><a id="contactToggle" onclick="toggleContactDropdown(event)"><i data-lucide="phone"></i> <span>Əlaqə</span></a>
                     <div class="contact-dropdown" id="contactDropdown" onclick="event.stopPropagation()">
                         <a href="https://wa.me/994551234567" target="_blank" class="contact-item"><i data-lucide="message-circle"></i> WhatsApp</a>
-                        <a href="tel:+994121234567" class="contact-item"><i data-lucide="phone-call"></i> Qaynar Xətt</a>
                     </div>
                 </li>
             </ul>
@@ -453,7 +320,7 @@
             <h1 id="pageTitle">Ana Səhifə</h1>
             <div class="top-bar-actions">
                 <div style="position: relative;">
-                    <button class="icon-btn" onclick="toggleNotifDropdown(event)"><i data-lucide="bell"></i><span class="notification-dot" id="notificationDot"></span></button>
+                    <button class="icon-btn" onclick="toggleNotifDropdown(event)"><i data-lucide="bell"></i><span class="notif-count" id="notifCount"></span></button>
                     <div class="notif-dropdown" id="notifDropdown" onclick="event.stopPropagation()"><div id="notifDropdownContent">Yüklənir...</div></div>
                 </div>
                 <div class="profile-dropdown" id="profileDropdown" onclick="toggleProfileMenu(event)">
@@ -501,22 +368,21 @@
                         </div>
                         <div class="col-side">
                             <div class="widget-card">
-                                <div class="profile-card-h"><div class="profile-avatar">{{ user_initials }}</div><div class="profile-info"><h3>{{ user_name }}</h3><p>Qarabağ Universiteti</p></div></div>
-                                <div class="profile-details">
+                                <div class="profile-card-h" style="display: flex; align-items: center; gap: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px;"><div class="match-avatar" style="width: 64px; height: 64px; font-size: 22px;">{{ user_initials }}</div><div><h3>{{ user_name }}</h3><p style="font-size: 14px; color: var(--text-secondary);">Qarabağ Universiteti</p></div></div>
+                                <div>
                                     <div class="detail-item"><span class="detail-label">İxtisas</span><span class="detail-value">{{ user_ixtisas }}</span></div>
                                     <div class="detail-item"><span class="detail-label">Kurs</span><span class="detail-value">{{ user_kurs }}</span></div>
                                     <div class="detail-item"><span class="detail-label">Otaq</span><span class="detail-value">{{ user_otaq }}</span></div>
-                                    <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value text-green">Aktiv Tələbə</span></div>
                                 </div>
                             </div>
                             <div class="widget-card">
                                 <div class="widget-header"><h3>Yeməkxana</h3><span id="canteenDay" style="font-size: 14px; color: var(--text-secondary);">Yüklənir...</span></div>
-                                <div class="accordion active"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="hotel"></i> Yataqxana</span><i data-lucide="chevron-down" class="toggle-icon"></i></div><div class="accordion-body"><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenDormMeal">Yüklənir...</span></li></ul></div></div>
-                                <div class="accordion"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="graduation-cap"></i> Universitet</span><i data-lucide="chevron-down" class="toggle-icon"></i></div><div class="accordion-body"><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenUniMeal">Yüklənir...</span></li></ul></div></div>
+                                <div class="accordion active"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="hotel"></i> Yataqxana</span><i data-lucide="chevron-down"></i></div><div class="accordion-body"><ul style="list-style:none;"><li style="display:flex;justify-content:space-between;font-size:14px;"><span>Bugünün yeməyi</span> <span id="canteenDormMeal">Yüklənir...</span></li></ul></div></div>
+                                <div class="accordion"><div class="accordion-header" onclick="toggleAccordion(this)"><span><i data-lucide="graduation-cap"></i> Universitet</span><i data-lucide="chevron-down"></i></div><div class="accordion-body"><ul style="list-style:none;"><li style="display:flex;justify-content:space-between;font-size:14px;"><span>Bugünün yeməyi</span> <span id="canteenUniMeal">Yüklənir...</span></li></ul></div></div>
                             </div>
                             <div class="widget-card">
                                 <div class="widget-header"><h3>Camaşırxana</h3></div>
-                                <div id="laundryStatusHome"><div class="item-list" id="laundryListHome"></div></div>
+                                <div id="laundryStatusHome"><div id="laundryListHome"></div></div>
                             </div>
                         </div>
                     </div>
@@ -562,8 +428,8 @@
                 <section id="page-canteen" class="page-content">
                     <h2 class="section-title">Yeməkxana</h2>
                     <div class="widgets-grid">
-                        <div class="widget-card"><div class="widget-header"><h3>Yataqxana Yeməkxanası</h3><span id="canteenDayFull" style="font-size: 14px; color: var(--text-secondary);">Yüklənir...</span></div><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenDormMealFull">Yüklənir...</span></li></ul></div>
-                        <div class="widget-card"><div class="widget-header"><h3>Universitet Yeməkxanası</h3></div><ul class="meal-list"><li><span class="meal-day">Bugünün yeməyi</span> <span class="meal-name" id="canteenUniMealFull">Yüklənir...</span></li></ul></div>
+                        <div class="widget-card"><div class="widget-header"><h3>Yataqxana Yeməkxanası</h3><span id="canteenDayFull" style="font-size: 14px; color: var(--text-secondary);">Yüklənir...</span></div><ul style="list-style:none;"><li style="display:flex;justify-content:space-between;font-size:14px;"><span>Bugünün yeməyi</span> <span id="canteenDormMealFull">Yüklənir...</span></li></ul></div>
+                        <div class="widget-card"><div class="widget-header"><h3>Universitet Yeməkxanası</h3></div><ul style="list-style:none;"><li style="display:flex;justify-content:space-between;font-size:14px;"><span>Bugünün yeməyi</span> <span id="canteenUniMealFull">Yüklənir...</span></li></ul></div>
                     </div>
                 </section>
 
@@ -576,116 +442,87 @@
                 <section id="page-profile" class="page-content">
                     <h2 class="section-title">Mənim Profilim</h2>
                     <div class="widget-card" style="max-width: 600px; margin: 0 auto;">
-                        <div class="profile-card-h" style="justify-content: center; flex-direction: column; text-align: center;">
-                            <div class="profile-avatar" style="width: 96px; height: 96px; font-size: 32px;">{{ user_initials }}</div>
-                            <div class="profile-info" style="text-align: center;"><h3>{{ user_name }}</h3><p>Tələbə Profili</p></div>
+                        <div style="display: flex; justify-content: center; flex-direction: column; text-align: center; padding-bottom: 24px; border-bottom: 1px solid var(--border); margin-bottom: 24px;">
+                            <div class="match-avatar" style="width: 96px; height: 96px; font-size: 32px; margin: 0 auto 16px;">{{ user_initials }}</div>
+                            <h3>{{ user_name }}</h3><p style="color: var(--text-secondary);">Tələbə Profili</p>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Ad, Soyad</label><input type="text" class="modal-input" id="profileName" value="{{ user_name }}" disabled style="background: #f1f5f9; cursor: not-allowed;"></div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Email</label><input type="email" class="modal-input" id="profileEmail" placeholder="Email"></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Ad, Soyad</label><input type="text" class="hp-input" id="profileName" value="{{ user_name }}" disabled style="background: #f1f5f9; cursor: not-allowed;"></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Email</label><input type="email" class="hp-input" id="profileEmail" placeholder="Email"></div>
                             <div style="display: flex; gap: 16px;">
-                                <div style="flex: 1;"><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">İxtisas</label><input type="text" class="modal-input" id="profileIxtisas" placeholder="İxtisas"></div>
-                                <div style="width: 100px;"><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Kurs</label><input type="number" class="modal-input" id="profileKurs" placeholder="Kurs"></div>
+                                <div style="flex:1;"><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">İxtisas</label><input type="text" class="hp-input" id="profileIxtisas"></div>
+                                <div style="width: 100px;"><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Kurs</label><input type="number" class="hp-input" id="profileKurs"></div>
                             </div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Yuxu Rejimi (30%)</label><textarea class="modal-textarea" id="profileYuxu" rows="2" placeholder="Məs: Gecə quşu..."></textarea></div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Təmizlik (30%)</label><textarea class="modal-textarea" id="profileTemizlik" rows="2" placeholder="Məs: Həftədə 2 dəfə..."></textarea></div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Sosial (20%)</label><textarea class="modal-textarea" id="profileSosial" rows="2" placeholder="Məs: Sakit mühiti sevirəm..."></textarea></div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Həyat Tərzi (20%)</label><textarea class="modal-textarea" id="profileHayat" rows="2" placeholder="Məs: Kitab, proqramlaşdırma..."></textarea></div>
-                            <div><label class="detail-label" style="display: block; margin-bottom: 8px; font-size: 14px;">Gemini API Açarı</label><input type="text" class="modal-input" id="profileApiKey" placeholder="AIza..."></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Yuxu Rejimi (30%)</label><textarea class="hp-input" id="profileYuxu" rows="2" style="resize:vertical;"></textarea></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Təmizlik (30%)</label><textarea class="hp-input" id="profileTemizlik" rows="2" style="resize:vertical;"></textarea></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Sosial (20%)</label><textarea class="hp-input" id="profileSosial" rows="2" style="resize:vertical;"></textarea></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Həyat Tərzi (20%)</label><textarea class="hp-input" id="profileHayat" rows="2" style="resize:vertical;"></textarea></div>
+                            <div><label style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-secondary);">Gemini API Açarı</label><input type="text" class="hp-input" id="profileApiKey" placeholder="AIza..."></div>
                             <div style="display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 16px; background: var(--bg); border-radius: var(--radius-btn); border: 1px solid var(--border); cursor: pointer;">
                                 <i data-lucide="bird" style="width: 24px; height: 24px; color: var(--ku-green);"></i>
-                                <label for="evDeyisme" style="font-size: 14px; font-weight: 500; cursor: pointer; flex: 1;">Evi dəyişmək istəyirəm</label>
+                                <label for="evDeyisme" style="font-size: 14px; cursor: pointer; flex: 1;">Evi dəyişmək istəyirəm</label>
                                 <input type="checkbox" id="evDeyisme" style="width: 24px; height: 24px; cursor: pointer; accent-color: var(--ku-green);">
                             </div>
-                            <button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); justify-content: center; border: none;" onclick="saveProfile()"><i data-lucide="save"></i> Dəyişiklikləri Yadda Saxla</button>
+                            <button class="hp-btn" style="justify-content: center; padding: 14px;" onclick="saveProfile()"><i data-lucide="save"></i> Dəyişiklikləri Yadda Saxla</button>
                         </div>
                     </div>
                 </section>
             </div>
         </main>
-        <footer class="simple-footer">© {{ current_year }} Qarabağ Universiteti. Bütün hüquqlar qorunur.</footer>
+        <footer style="background: var(--surface); border-top: 1px solid var(--border); padding: 20px 32px; text-align: center; color: var(--text-secondary); font-size: 14px;">© {{ current_year }} Qarabağ Universiteti</footer>
     </div>
 
     <!-- Application Modal -->
-    <div class="modal-overlay" id="appModalOverlay">
-        <div class="modal-card">
-            <div class="modal-header"><h3 id="appModalTitle">Yeni Müraciət</h3><i data-lucide="x" onclick="closeModal('appModalOverlay')"></i></div>
-            <div class="modal-body">
+    <div class="modal-overlay" id="appModalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;display:none;justify-content:center;align-items:center;">
+        <div class="widget-card" style="max-width: 500px;">
+            <div style="padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); display: flex; justify-content: space-between; border-radius: 16px 16px 0 0;"><h3 id="appModalTitle">Yeni Müraciət</h3><i data-lucide="x" onclick="closeModal('appModalOverlay')" style="cursor:pointer;"></i></div>
+            <div style="padding: 28px; display: flex; flex-direction: column; gap: 18px;">
                 <input type="hidden" id="editAppId">
-                <input type="text" class="modal-input" id="appTitle" placeholder="Müraciət başlığı">
-                <textarea class="modal-textarea" id="appInput" placeholder="Müraciətinizi qısa şəkildə yazın..."></textarea>
-                <select class="priority-select" id="appPriority"><option value="Aşağı">Aşağı</option><option value="Orta" selected>Orta</option><option value="Yüksək">Yüksək</option></select>
+                <input type="text" class="hp-input" id="appTitle" placeholder="Müraciət başlığı" style="font-size:15px;padding:14px 18px;">
+                <textarea class="hp-input" id="appInput" placeholder="Müraciətinizi qısa şəkildə yazın..." style="min-height: 120px;"></textarea>
+                <select class="hp-select" id="appPriority"><option value="Aşağı">Aşağı</option><option value="Orta" selected>Orta</option><option value="Yüksək">Yüksək</option></select>
             </div>
-            <div class="modal-footer"><button class="btn-secondary" style="color: var(--text-primary);" onclick="closeModal('appModalOverlay')">Ləğv et</button><button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="saveAppData()"><i data-lucide="send"></i> Göndər</button></div>
+            <div style="padding: 20px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="hp-btn-secondary" onclick="closeModal('appModalOverlay')">Ləğv et</button>
+                <button class="hp-btn" onclick="saveAppData()"><i data-lucide="send"></i> Göndər</button>
+            </div>
         </div>
     </div>
 
     <!-- XÜSUSİ DİALOQ -->
     <div class="modal-overlay" id="dialogOverlay" style="z-index: 2000;">
-        <div class="modal-card" style="max-width: 430px;">
-            <div class="modal-header" id="dlgHeader"><h3 id="dlgTitleH">Təsdiq</h3></div>
-            <div class="modal-body" id="dlgBody" style="text-align: center; padding: 32px 24px;"></div>
+        <div class="widget-card" style="max-width: 430px;">
+            <div style="padding: 24px; background: linear-gradient(135deg, var(--ku-dark-green), var(--ku-green)); color: var(--surface); border-radius: 16px 16px 0 0;"><h3 id="dlgTitleH">Təsdiq</h3></div>
+            <div id="dlgBody" style="text-align: center; padding: 32px 24px;"></div>
         </div>
     </div>
 
     <!-- AI Chat -->
     <div class="ai-chat-window" id="aiChatWindow">
-        <div class="ai-chat-header"><h3><i data-lucide="bot"></i> Kampus AI</h3></div>
+        <div class="ai-chat-header"><h3 style="font-size: 16px; display: flex; align-items: center; gap: 8px;"><i data-lucide="bot"></i> Kampus AI</h3></div>
         <div class="ai-chat-body" id="aiChatBody"></div>
-        <div class="ai-chat-footer"><input type="text" class="ai-input" id="aiInput" placeholder="Sualınızı yazın..." onkeypress="handleAiKeyPress(event)"><button class="ai-send-btn" onclick="sendAiMessage()"><i data-lucide="send"></i></button></div>
+        <div class="ai-chat-footer"><input type="text" class="ai-input" id="aiInput" placeholder="Sualınızı yazın..." onkeypress="if(event.key==='Enter')sendAiMessage()"><button class="hp-btn" onclick="sendAiMessage()" style="width:44px;height:44px;justify-content:center;padding:0;"><i data-lucide="send"></i></button></div>
     </div>
     <button class="ai-float-btn" onclick="toggleAiChat()"><i data-lucide="bot"></i></button>
 
     <script>
         // ═════════ YARDIMÇILAR ═════════
-        function esc(str) {
-            if (!str) return '';
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-        function gv(id) {
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
-        function safeId(v) {
-            const n = parseInt(v, 10);
-            return Number.isInteger(n) ? n : 0;
-        }
-        function refreshIcons(container) {
-            if (container && container.querySelectorAll) {
-                lucide.createIcons({ nodes: [container] });
-            } else {
-                lucide.createIcons();
-            }
-        }
+        function esc(str) { if (!str) return ''; const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+        function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+        function safeId(v) { const n = parseInt(v, 10); return Number.isInteger(n) ? n : 0; }
+        function refreshIcons(c) { if (c && c.querySelectorAll) { lucide.createIcons({ nodes: [c] }); } else { lucide.createIcons(); } }
         const CURRENT_USER_NAME = {{ user_name | tojson }};
         lucide.createIcons();
 
         // ═════════ XÜSUSİ DİALOQ SİSTEMİ ═════════
         let dlgCallback = null;
+        const DLG_ICONS = { danger: 'trash-2', success: 'check-circle-2', warning: 'alert-triangle', info: 'info', kick: 'user-x', invite: 'mail-check', room: 'door-open', group: 'users-round', leave: 'log-out' };
 
-        const DLG_ICONS = {
-            danger:  { icon: 'trash-2' },
-            success: { icon: 'check-circle-2' },
-            warning: { icon: 'alert-triangle' },
-            info:    { icon: 'info' },
-            kick:    { icon: 'user-x' },
-            invite:  { icon: 'mail-check' },
-            room:    { icon: 'door-open' },
-            group:   { icon: 'users-round' },
-            leave:   { icon: 'log-out' }
-        };
-
-        function dialogBase(type, title, bodyHtml, isDanger) {
+        function dialogBase(type, title, bodyHtml, danger) {
             const meta = DLG_ICONS[type] || DLG_ICONS.info;
-            const header = document.getElementById('dlgHeader');
-            header.style.background = (isDanger || type === 'danger' || type === 'kick')
-                ? 'linear-gradient(135deg, var(--danger), #dc2626)'
-                : 'linear-gradient(135deg, var(--ku-dark-green), var(--ku-green))';
+            document.getElementById('dlgHeader').style.background = (danger || type === 'danger' || type === 'kick') ? 'linear-gradient(135deg, var(--danger), #dc2626)' : 'linear-gradient(135deg, var(--ku-dark-green), var(--ku-green))';
             document.getElementById('dlgTitleH').innerText = title;
-            document.getElementById('dlgBody').innerHTML =
-                `<div class="dlg-icon ${type}"><i data-lucide="${meta.icon}"></i></div>${bodyHtml}`;
+            document.getElementById('dlgBody').innerHTML = `<div class="dlg-icon ${type}"><i data-lucide="${meta}"></i></div>${bodyHtml}`;
             document.getElementById('dialogOverlay').classList.add('active');
             refreshIcons(document.getElementById('dlgBody'));
         }
@@ -697,26 +534,19 @@
         }
 
         function confirmDialog(title, bodyHtml, cb, opts = {}) {
-            const type = opts.type || 'warning';
-            const yesText = opts.yesText || 'Bəli';
-            const noText = opts.noText || 'Ləğv et';
-            const danger = !!opts.danger;
             dlgCallback = cb;
-            dialogBase(type, title,
+            dialogBase(opts.type || 'warning', title,
                 `<p class="dlg-text">${bodyHtml}</p>
                  <div class="dlg-actions">
-                     <button type="button" class="hp-btn-secondary" onclick="closeDialog(false)">${noText}</button>
-                     <button type="button" class="hp-btn" ${danger ? 'style="background:linear-gradient(135deg,var(--danger),#dc2626)"' : ''} onclick="closeDialog(true)">${yesText}</button>
-                 </div>`, danger);
+                     <button type="button" class="hp-btn-secondary" onclick="closeDialog(false)">${opts.noText || 'Ləğv et'}</button>
+                     <button type="button" class="hp-btn" ${opts.danger ? 'style="background:linear-gradient(135deg,var(--danger),#dc2626)"' : ''} onclick="closeDialog(true)">${opts.yesText || 'Bəli'}</button>
+                 </div>`, !!opts.danger);
         }
 
         function infoDialog(title, bodyHtml, type = 'info', okText = 'Bağla') {
             dlgCallback = null;
-            dialogBase(type, title,
-                `${bodyHtml}
-                 <div class="dlg-actions">
-                     <button type="button" class="hp-btn" style="background:linear-gradient(135deg,var(--ku-green),var(--ku-dark-green));color:var(--surface)" onclick="closeDialog(false)">${okText}</button>
-                 </div>`, false);
+            dialogBase(type, title, `${bodyHtml}
+                 <div class="dlg-actions"><button type="button" class="hp-btn" style="background:linear-gradient(135deg,var(--ku-green),var(--ku-dark-green));color:var(--surface)" onclick="closeDialog(false)">${okText}</button></div>`, false);
         }
 
         document.addEventListener('keydown', (e) => {
@@ -733,10 +563,8 @@
             const btn = e.target.querySelector('.login-btn');
             btn.innerHTML = '<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Yoxlanılır...';
             lucide.createIcons();
-            fetch('/login', {
-                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: gv('loginEmail'), sifre: gv('loginPassword') })
-            }).then(res => res.json()).then(data => {
+            fetch('/login', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: gv('loginEmail'), sifre: gv('loginPassword') }) })
+            .then(res => res.json()).then(data => {
                 if (data.success) window.location.reload();
                 else {
                     document.getElementById('loginError').style.display = 'block';
@@ -747,27 +575,16 @@
         }
 
         function logout() { window.location.href = '/logout'; }
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-            document.getElementById('mainWrapper').classList.toggle('expanded');
-        }
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); document.getElementById('mainWrapper').classList.toggle('expanded'); }
 
         function setActivePage(pageId, title) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             const targetItem = document.querySelector(`[data-menu="${pageId}"]`);
             if (targetItem) targetItem.classList.add('active');
             document.getElementById('pageTitle').innerText = title;
-            document.querySelectorAll('.page-content').forEach(page => {
-                page.classList.remove('active-page');
-                page.style.opacity = '0';
-                page.style.transform = 'translateY(16px)';
-            });
+            document.querySelectorAll('.page-content').forEach(page => { page.classList.remove('active-page'); page.style.opacity = '0'; });
             const targetPage = document.getElementById(`page-${pageId}`);
-            if (targetPage) {
-                targetPage.classList.add('active-page');
-                setTimeout(() => { targetPage.style.opacity = '1'; targetPage.style.transform = 'translateY(0)'; }, 10);
-            }
+            if (targetPage) { targetPage.classList.add('active-page'); setTimeout(() => { targetPage.style.opacity = '1'; }, 10); }
             if (pageId === 'home') loadHomeData();
             if (pageId === 'applications') loadApplications();
             if (pageId === 'roommate') loadRoommates();
@@ -778,7 +595,6 @@
             if (pageId === 'laundry') loadLaundry();
             if (pageId === 'profile') loadProfile();
             closeProfileMenu(); closeNotifDropdown(); closeContactDropdown();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function toggleProfileMenu(e) { e.stopPropagation(); document.getElementById('profileDropdown').classList.toggle('active'); }
@@ -787,19 +603,12 @@
         function closeNotifDropdown() { document.getElementById('notifDropdown').classList.remove('active'); }
         function toggleContactDropdown(e) { e.stopPropagation(); document.getElementById('contactDropdown').classList.toggle('active'); }
         function closeContactDropdown() { document.getElementById('contactDropdown').classList.remove('active'); }
-
         window.onclick = function(e) {
             if (!e.target.closest('#profileDropdown')) closeProfileMenu();
             if (!e.target.closest('#notifDropdown') && !e.target.closest('.icon-btn')) closeNotifDropdown();
-            if (!e.target.closest('#contactDropdown') && !e.target.closest('#contactToggle')) closeContactDropdown();
+            if (!e.target.closest('#contactDropdown')) closeContactDropdown();
         };
-
-        function toggleAccordion(el) {
-            const acc = el.parentElement;
-            const par = acc.parentElement;
-            par.querySelectorAll('.accordion').forEach(a => { if (a !== acc) a.classList.remove('active'); });
-            acc.classList.toggle('active');
-        }
+        function toggleAccordion(el) { const acc = el.parentElement; const par = acc.parentElement; par.querySelectorAll('.accordion').forEach(a => { if (a !== acc) a.classList.remove('active'); }); acc.classList.toggle('active'); }
         function openModal(id) { document.getElementById(id).classList.add('active'); setTimeout(() => lucide.createIcons(), 50); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
@@ -811,18 +620,17 @@
                 if (data.success && data.applications.length > 0) {
                     data.applications.forEach((app, index) => {
                         let statusClass = app.status === 'Təsdiqləndi' ? 'approved' : 'pending';
-                        const safeBasliq = app.basliq.replace(/'/g, "\\'");
-                        const safeMuraciet = app.muraciet.replace(/'/g, "\\'");
+                        const sb = String(app.basliq).replace(/'/g, "\\'");
+                        const sm = String(app.muraciet).replace(/'/g, "\\'");
                         grid.innerHTML += `
-                            <div class="app-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
-                                <div class="app-card-actions">
-                                    <div class="card-action-btn" onclick="event.stopPropagation(); editAppModal(${app.id}, '${safeBasliq}', '${safeMuraciet}', '${app.priority}')"><i data-lucide="edit-3"></i></div>
-                                    <div class="card-action-btn delete" onclick="event.stopPropagation(); deleteApp(${app.id})"><i data-lucide="trash-2"></i></div>
+                            <div class="app-card">
+                                <div style="position:absolute;top:16px;right:16px;display:flex;gap:8px;">
+                                    <div style="width:32px;height:32px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-btn);display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="event.stopPropagation(); editAppModal(${app.id}, '${sb}', '${sm}', '${app.priority}')"><i data-lucide="edit-3" style="width:16px;height:16px;"></i></div>
+                                    <div style="width:32px;height:32px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-btn);display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="event.stopPropagation(); deleteApp(${app.id})"><i data-lucide="trash-2" style="width:16px;height:16px;color:var(--danger);"></i></div>
                                 </div>
                                 <h3>${esc(app.basliq)}</h3>
                                 <p><strong>Öncəlik:</strong> ${esc(app.priority)}</p>
                                 <p><strong>Tarix:</strong> ${esc(app.tarix)}</p>
-                                <p><strong>Müraciət:</strong> ${esc(app.muraciet)}</p>
                                 <div class="app-card-status ${statusClass}">${esc(app.status)}</div>
                                 ${app.notlar ? `<div class="app-card-note"><strong>Qeyd:</strong> ${esc(app.notlar)}</div>` : ''}
                             </div>`;
@@ -854,49 +662,22 @@
             const editId = document.getElementById('editAppId').value;
             const title = document.getElementById('appTitle').value.trim();
             const text = document.getElementById('appInput').value.trim();
-            const priority = document.getElementById('appPriority').value;
-
-            if (text === '' || title === '') {
-                infoDialog('Boş Sahələr', `<p class="dlg-text">Zəhmət olmasa <b>başlıq</b> və <b>müraciət mətnini</b> doldurun.<span class="dlg-highlight">Hər iki sahə mütləqdir</span></p>`, 'warning');
-                return;
-            }
-
+            if (!text || !title) { infoDialog('Boş Sahələr', `<p class="dlg-text">Zəhmət olmasa <b>başlıq</b> və <b>müraciət mətnini</b> doldurun.</p>`, 'warning'); return; }
             const url = editId ? '/update_application' : '/submit_application';
-            const payload = editId
-                ? { id: editId, basliq: title, muraciet: text, priority: priority }
-                : { basliq: title, muraciet: text, priority: priority };
-
-            fetch(url, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    closeModal('appModalOverlay');
-                    loadApplications();
-                    infoDialog(editId ? 'Yeniləndi' : 'Göndərildi', `<p class="dlg-text">Müraciətiniz uğurla ${editId ? 'yeniləndi' : 'göndərildi'}!<span class="dlg-highlight">${esc(title)}</span>Cavabı eyni panelindən izləyə bilərsiniz.</p>`, 'success');
-                } else {
-                    infoDialog('Xəta', `<p class="dlg-text">Yadda saxlanılmadı:<span class="dlg-highlight">${esc(data.message || 'Naməlum səhv')}</span></p>`, 'danger');
-                }
+            const payload = editId ? { id: editId, basliq: title, muraciet: text, priority: document.getElementById('appPriority').value } : { basliq: title, muraciet: text, priority: document.getElementById('appPriority').value };
+            fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(res => res.json()).then(data => {
+                if (data.success) { closeModal('appModalOverlay'); loadApplications(); infoDialog(editId ? 'Yeniləndi' : 'Göndərildi', `<p class="dlg-text">Müraciətiniz uğurla ${editId ? 'yeniləndi' : 'göndərildi'}!</p>`, 'success'); }
+                else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message || 'Naməlum səhv')}</span></p>`, 'danger'); }
             });
         }
 
         function deleteApp(id) {
-            confirmDialog('Müraciəti Sil', `Bu müraciəti silmək istəyirsiniz?<span class="dlg-highlight">Müraciət #${id}</span>Bu əməliyyat <b>geri qaytarıla bilməz</b>!`, async () => {
-                try {
-                    const res = await fetch('/delete_application', {
-                        credentials: 'same-origin', method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: safeId(id) })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        loadApplications();
-                        infoDialog('Silindi', `<p class="dlg-text">Müraciət uğurla silindi.</p>`, 'success');
-                    } else {
-                        infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                    }
-                } catch (err) {
-                    infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                }
+            confirmDialog('Müraciəti Sil', `Bu müraciəti silmək istəyirsiniz?<span class="dlg-highlight">Müraciət #${id}</span>Bu əməliyyat geri qaytarıla bilməz!`, async () => {
+                const res = await fetch('/delete_application', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: safeId(id) }) });
+                const data = await res.json();
+                if (data.success) { loadApplications(); infoDialog('Silindi', '<p class="dlg-text">Müraciət uğurla silindi.</p>', 'success'); }
+                else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
             }, { type: 'danger', yesText: 'Bəli, sil', danger: true });
         }
 
@@ -906,11 +687,11 @@
         function loadCanteen() {
             fetch('/get_canteen').then(res => res.json()).then(data => {
                 if (data.success) {
-                    const dayText = "Bugün: " + data.day;
-                    document.getElementById('canteenDay').innerText = dayText;
+                    const dt = "Bugün: " + data.day;
+                    document.getElementById('canteenDay').innerText = dt;
                     document.getElementById('canteenDormMeal').innerText = data.dorm;
                     document.getElementById('canteenUniMeal').innerText = data.uni;
-                    document.getElementById('canteenDayFull').innerText = dayText;
+                    document.getElementById('canteenDayFull').innerText = dt;
                     document.getElementById('canteenDormMealFull').innerText = data.dorm;
                     document.getElementById('canteenUniMealFull').innerText = data.uni;
                 }
@@ -921,18 +702,13 @@
             fetch('/get_laundry').then(res => res.json()).then(data => {
                 if (data.success) {
                     const d = data.data;
-                    const statuses = { 'Yoxdur': 'status-bad', 'Gözlənilir': 'status-warning', 'Hazır': 'status-good' };
-                    const html = [1, 2, 3].map(n => `
-                        <div class="room-card" style="animation: fadeInUp 0.4s ease ${n * 0.1 - 0.1}s both;">
-                            <div class="bed-icon"><i data-lucide="washing-machine"></i></div>
-                            <div class="room-owner">Maşın ${n}</div>
-                            <div class="item-list"><div class="item-row"><span class="item-name">Status</span><span class="status-badge ${statuses[d['machine_' + n + '_status']]}">${d['machine_' + n + '_status']}</span></div></div>
-                        </div>`).join('');
-                    const listMain = document.getElementById('laundryList');
-                    if (listMain) listMain.innerHTML = html;
-                    const listHome = document.getElementById('laundryListHome');
-                    if (listHome) listHome.innerHTML = [1, 2, 3].map(n => `<div class="item-row"><span class="item-name">Maşın ${n}</span><span class="status-badge ${statuses[d['machine_' + n + '_status']]}">${d['machine_' + n + '_status']}</span></div>`).join('');
-                    refreshIcons(listMain || listHome);
+                    const st = { 'Yoxdur': 'status-bad', 'Gözlənilir': 'status-warning', 'Hazır': 'status-good' };
+                    const h = [1, 2, 3].map(n => `<div class="room-card"><div class="bed-icon"><i data-lucide="washing-machine"></i></div><div class="room-owner">Maşın ${n}</div><div class="item-list"><div class="item-row"><span class="item-name">Status</span><span class="status-badge ${st[d['machine_' + n + '_status']}">${d['machine_' + n + '_status']}</span></div></div></div>`).join('');
+                    const lm = document.getElementById('laundryList');
+                    if (lm) lm.innerHTML = h;
+                    const lh = document.getElementById('laundryListHome');
+                    if (lh) lh.innerHTML = [1, 2, 3].map(n => `<div class="item-row" style="margin-bottom:10px;"><span class="item-name">Maşın ${n}</span><span class="status-badge ${st[d['machine_' + n + '_status']}">${d['machine_' + n + '_status']}</span></div>`).join('');
+                    refreshIcons(lm || lh);
                 }
             });
         }
@@ -956,8 +732,7 @@
 
         function saveProfile() {
             fetch('/update_profile', {
-                credentials: 'same-origin', method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: gv('profileEmail'), ixtisas: gv('profileIxtisas'), kurs: gv('profileKurs'),
                     api_key: gv('profileApiKey'), ev_deyisme_isteyi: document.getElementById('evDeyisme').checked,
@@ -966,18 +741,8 @@
                 })
             }).then(res => res.json()).then(data => {
                 if (data.success) {
-                    const btn = document.querySelector('#page-profile .btn-primary');
-                    btn.innerHTML = '<i data-lucide="check"></i> Yadda saxlanıldı!';
-                    btn.style.background = 'linear-gradient(135deg, var(--success), #059669)';
-                    refreshIcons(btn);
-                    setTimeout(() => {
-                        btn.innerHTML = '<i data-lucide="save"></i> Dəyişiklikləri Yadda Saxla';
-                        btn.style.background = '';
-                        refreshIcons(btn);
-                    }, 2000);
-                } else {
-                    infoDialog('Profil Saxlanılmadı', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                }
+                    infoDialog('Yadda Saxlanıldı', '<p class="dlg-text">Profiliniz uğurla yeniləndi!</p>', 'success');
+                } else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
             });
         }
 
@@ -988,111 +753,59 @@
                 if (!list) return;
                 list.innerHTML = '';
                 if (data.success && data.roommates.length > 0) {
-                    data.roommates.slice(0, 3).forEach((r, index) => {
+                    data.roommates.slice(0, 3).forEach((r) => {
                         list.innerHTML += `
-                            <div class="match-card" style="margin-bottom: 12px; animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
+                            <div class="match-card">
                                 <div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div>
-                                <div style="flex: 1;">
-                                    <h4 style="font-size: 16px; font-weight: 600;">${esc(r.ad_soyad)}</h4>
-                                    <p style="font-size: 14px; color: var(--text-secondary);">${esc(r.ixtisas)}</p>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div id="home-score-${r.id}" style="font-size: 14px; font-weight: 700; color: var(--ku-green); margin-bottom: 4px;">-%</div>
-                                    <button class="btn-contact" onclick="checkHomeCompatibility(${r.id})">Yoxla</button>
-                                </div>
+                                <div style="flex: 1;"><h4 style="font-size: 16px;">${esc(r.ad_soyad)}</h4><p style="font-size: 14px; color: var(--text-secondary);">${esc(r.ixtisas)}</p></div>
+                                <div style="text-align: right;"><div id="home-score-${r.id}" style="font-size: 14px; font-weight: 700; color: var(--ku-green);">-%</div><button class="btn-contact" onclick="checkHomeCompatibility(${r.id})">Yoxla</button></div>
                             </div>`;
                     });
-                } else {
-                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary);">Hazırda otaq dəyişmək istəyən yoldaş yoxdur.</p>';
-                }
+                } else { list.innerHTML = '<p style="color: var(--text-secondary);">Hazırda otaq dəyişmək istəyən yoldaş yoxdur.</p>'; }
             });
         }
 
         async function checkHomeCompatibility(targetId) {
-            const scoreDiv = document.getElementById(`home-score-${targetId}`);
-            scoreDiv.innerText = "...";
+            const s = document.getElementById(`home-score-${targetId}`);
+            s.innerText = '...';
             try {
-                const res = await fetch('/ai_handler', {
-                    credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'match', target_id: safeId(targetId) })
-                });
+                const res = await fetch('/ai_handler', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: safeId(targetId) }) });
                 const data = await res.json();
-                if (data.success) {
-                    scoreDiv.innerText = data.score + "%";
-                } else {
-                    scoreDiv.innerText = "Xəta";
-                    infoDialog('AI Xətası', `<p class="dlg-text">Uyğunluq hesablana bilmədi:<span class="dlg-highlight">${esc(data.message)}</span>Profilinizdəki xarakteristikaları tam doldurduğunuzdan əmin olun.</p>`, 'warning');
-                }
-            } catch (err) {
-                scoreDiv.innerText = "Xəta";
-                infoDialog('Bağlantı Xətası', `<p class="dlg-text">Serverə qoşulmaq mümkün olmadı.</p>`, 'danger');
-            }
+                if (data.success) s.innerText = data.score + "%";
+                else { s.innerText = "Xəta"; infoDialog('AI Xətası', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'warning'); }
+            } catch (e) { s.innerText = "Xəta"; }
         }
 
         function renderRoommateList(data) {
             const list = document.getElementById('roommateList');
             list.innerHTML = '';
             if (data.success && data.roommates.length > 0) {
-                data.roommates.forEach((r, index) => {
-                    const actionHtml = (r.ev === 'Ev seçilməyib')
-                        ? `<button class="btn-primary" style="background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none;" onclick="inviteRoommate(${r.id})"><i data-lucide="user-plus"></i> Dəvət et</button>`
-                        : `<span class="badge badge-warning">Hal-hazırda evdədir</span>`;
-                    list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; animation: fadeInUp 0.4s ease ${index * 0.08}s both;">
-                        <div style="display: flex; align-items: center; gap: 16px;">
-                            <div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div>
-                            <div><h3 style="font-size: 18px; font-weight: 600;">${esc(r.ad_soyad)}</h3><p style="font-size: 14px; color: var(--text-secondary);">${esc(r.ixtisas)}</p></div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">${actionHtml}</div>
-                    </div>`;
+                data.roommates.forEach((r) => {
+                    const action = (r.ev === 'Ev seçilməyib')
+                        ? `<button class="hp-btn" style="background:linear-gradient(135deg,var(--ku-green),var(--ku-dark-green));color:var(--surface);" onclick="inviteRoommate(${r.id})"><i data-lucide="user-plus"></i> Dəvət et</button>`
+                        : `<span class="hp-free-badge">Evdədir</span>`;
+                    list.innerHTML += `<div class="widget-card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 16px;"><div class="match-avatar">${r.ad_soyad.split(' ').map(n => n[0]).join('')}</div><div><h3 style="font-size: 18px;">${esc(r.ad_soyad)}</h3><p style="color: var(--text-secondary);">${esc(r.ixtisas)}</p></div></div>
+                        <div style="display: flex; align-items: center; gap: 12px;">${action}</div></div>`;
                 });
                 refreshIcons(list);
-            } else {
-                list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary);">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>';
-            }
+            } else { list.innerHTML = '<p style="color: var(--text-secondary);">Hazırda ev dəyişmək istəyən başqa tələbə yoxdur.</p>'; }
         }
 
         function loadRoommates() {
-            const msgBox = document.getElementById('roommateStatusMsg');
-            if (msgBox) msgBox.innerHTML = '';
+            const m = document.getElementById('roommateStatusMsg');
+            if (m) m.innerHTML = '';
             fetch('/get_home').then(res => res.json()).then(home => {
                 if (home.success && home.ev_status === 'Rədd edilib') {
-                    if (msgBox) {
-                        msgBox.innerHTML = `<div class="notification-item danger"><div class="notification-icon"><i data-lucide="x-circle"></i></div><div class="notification-content"><h4>Siz yataqxanada yaşamırsınız</h4><p>Otaq yoldaşı axtarışı yalnız yataqxanada yaşayan tələbələr üçündür.</p></div></div>`;
-                        refreshIcons(msgBox);
-                    }
+                    if (m) { m.innerHTML = `<div class="notification-item" style="border-left-color: var(--danger);"><div class="notification-icon"><i data-lucide="x-circle"></i></div><div class="notification-content"><h4>Siz yataqxanada yaşamırsınız</h4></div></div>`; refreshIcons(m); }
                     return;
                 }
                 if (home.success && home.ev_status !== 'Ev seçilib') {
-                    if (msgBox) {
-                        msgBox.innerHTML = `<div class="notification-item warning"><div class="notification-icon"><i data-lucide="house"></i></div><div class="notification-content"><h4>Hələ ev seçməmisiniz</h4><p>Dəvət göndərmək üçün əvvəlcə ev seçin.</p><button class="btn-contact" style="margin-top: 10px;" onclick="setActivePage('myhome', 'Mənim evim')"><i data-lucide="door-open"></i> Ev seçməyə keç</button></div></div>`;
-                        refreshIcons(msgBox);
-                    }
+                    if (m) { m.innerHTML = `<div class="notification-item" style="border-left-color: var(--warning);"><div class="notification-icon"><i data-lucide="house"></i></div><div class="notification-content"><h4>Hələ ev seçməmisiniz</h4><p>Dəvət göndərmək üçün əvvəlcə ev seçin.</p></div></div>`; refreshIcons(m); }
                     return;
                 }
                 fetch('/get_roommates').then(res => res.json()).then(renderRoommateList);
-            }).catch(() => {
-                fetch('/get_roommates').then(res => res.json()).then(renderRoommateList);
             });
-        }
-
-        async function checkCompatibility(targetId) {
-            const scoreDiv = document.getElementById(`score-${targetId}`);
-            scoreDiv.innerText = "...";
-            try {
-                const res = await fetch('/ai_handler', {
-                    credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'match', target_id: safeId(targetId) })
-                });
-                const data = await res.json();
-                if (data.success) { scoreDiv.innerText = data.score + "%"; }
-                else {
-                    scoreDiv.innerText = "Xəta";
-                    infoDialog('AI Xətası', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'warning');
-                }
-            } catch (err) {
-                scoreDiv.innerText = "Xəta";
-                infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-            }
         }
 
         // ═════════ MƏNİM EVİM ═════════
@@ -1104,276 +817,159 @@
                 const list = document.getElementById('myHomeList');
                 const title = document.getElementById('myHomeTitle');
                 const desc = document.getElementById('myHomeDescription');
-                const leaveBtn = document.getElementById('leaveHomeBtn');
-                const reqBox = document.getElementById('myHomeRequests');
-
+                const lb = document.getElementById('leaveHomeBtn');
+                const rb = document.getElementById('myHomeRequests');
                 if (title) title.style.display = '';
                 if (desc) { desc.style.display = ''; desc.innerText = 'Sizin otağınızdakı tələbələr və əşyaların vəziyyəti:'; }
-                if (leaveBtn) leaveBtn.style.display = 'none';
+                if (lb) lb.style.display = 'none';
                 list.innerHTML = '';
-                if (reqBox) reqBox.innerHTML = '';
-
-                if (!data.success) {
-                    list.innerHTML = `<p class="home-status-message">${esc(data.message || 'Məlumat yüklənə bilmədi.')}</p>`;
-                    return;
-                }
-
+                if (rb) rb.innerHTML = '';
+                if (!data.success) { list.innerHTML = `<p class="home-status-message">${esc(data.message || 'Xəta.')}</p>`; return; }
                 if (data.ev_status === 'Rədd edilib') {
                     if (title) title.style.display = 'none';
                     if (desc) desc.style.display = 'none';
                     list.innerHTML = '<p class="home-status-message">Siz yataqxanada yaşamırsınız</p>';
                     return;
                 }
-
                 if (data.ev_status !== 'Ev seçilib') {
                     if (desc) desc.innerText = 'Ev seçmə planı — soldan ev seçin, sağda tələbə axtarın və ya qrup qurun:';
                     renderHomePlan(data);
                     loadMyHomeRequests();
                     return;
                 }
-
-                if (leaveBtn) leaveBtn.style.display = '';
-                const myId = data.my_id;
-
+                if (lb) lb.style.display = '';
+                MY_ID = data.my_id;
                 if (data.roommates && data.roommates.length > 0) {
-                    data.roommates.forEach((r, index) => {
-                        const safeName = String(r.ad_soyad).replace(/'/g, "\\'");
-                        let itemsHtml = '';
-                        if (r.items && r.items.length > 0) {
-                            r.items.forEach((item, i) => {
-                                let statusClass = 'status-good';
-                                if (item.status === 'Az zədəli') statusClass = 'status-warning';
-                                if (item.status === 'Zədəli') statusClass = 'status-bad';
-                                itemsHtml += `<div class="item-row" style="animation: fadeInUp 0.3s ease ${i * 0.05}s both;"><span class="item-name">${esc(item.item_name)}</span><span class="status-badge ${statusClass}">${esc(item.status)}</span></div>`;
-                            });
-                        } else { itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary);">İnventar yoxdur.</p>'; }
-                        const kickBtn = (r.id !== myId)
-                            ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;"><button class="hp-btn-secondary" style="color: var(--danger); border-color: #fecaca;" onclick="requestKickRoommate(${r.id}, '${safeName}')"><i data-lucide="user-x"></i> Qov</button></div>`
-                            : '';
-                        list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
-                            <div class="bed-icon"><i data-lucide="bed-double"></i></div>
-                            <div class="room-owner">Yataq: ${esc(r.ad_soyad)}${r.id === myId ? ' (siz)' : ''}</div>
-                            <div class="item-list">${itemsHtml}</div>${kickBtn}</div>`;
+                    data.roommates.forEach((r) => {
+                        const sn = String(r.ad_soyad).replace(/'/g, "\\'");
+                        let ih = '';
+                        r.items.forEach((item) => {
+                            let sc = 'status-good'; if (item.status === 'Az zədəli') sc = 'status-warning'; if (item.status === 'Zədəli') sc = 'status-bad';
+                            ih += `<div class="item-row"><span class="item-name">${esc(item.item_name)}</span><span class="status-badge ${sc}">${esc(item.status)}</span></div>`;
+                        });
+                        const kb = (r.id !== MY_ID) ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;"><button class="hp-btn-secondary" style="color: var(--danger); border-color: #fecaca;" onclick="requestKickRoommate(${r.id}, '${sn}')"><i data-lucide="user-x"></i> Qov</button></div>` : '';
+                        list.innerHTML += `<div class="room-card"><div class="bed-icon"><i data-lucide="bed-double"></i></div><div class="room-owner">Yataq: ${esc(r.ad_soyad)}${r.id === MY_ID ? ' (siz)' : ''}</div><div class="item-list">${ih}</div>${kb}</div>`;
                     });
                     refreshIcons(list);
-                } else {
-                    list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary);">Otaq yoldaşları tapılmadı.</p>';
                 }
                 loadMyHomeRequests();
             });
         }
 
-        // ═════════ TƏLBƏLƏR ═════════
         function loadMyHomeRequests() {
             fetch('/get_requests').then(res => res.json()).then(data => {
                 const box = document.getElementById('myHomeRequests');
                 if (!box) return;
-                if (!data.success || !data.requests || data.requests.length === 0) {
-                    box.innerHTML = '';
-                    return;
-                }
-                const items = data.requests.map((req, i) => renderRequestItem(req, i)).join('');
-                box.innerHTML = `<h2 class="section-title" style="font-size: 20px;">Tələblər</h2><div>${items}</div>`;
+                if (!data.success || !data.requests || data.requests.length === 0) { box.innerHTML = ''; return; }
+                box.innerHTML = `<h2 class="section-title" style="font-size: 20px;">Tələblər</h2><div>${data.requests.map((req, i) => renderRequestItem(req, i)).join('')}</div>`;
                 refreshIcons(box);
             });
         }
 
         function renderRequestItem(req, i) {
-            const anim = `animation: fadeInUp 0.4s ease ${i * 0.08}s both;`;
             if (req.type === 'invite') {
                 if (req.am_target) {
-                    return `<div class="notification-item info" style="${anim}">
-                        <div class="notification-icon"><i data-lucide="mail-check"></i></div>
-                        <div class="notification-content">
-                            <h4>${esc(req.requester_name)} səni Ev ${req.room_id}-ə dəvət edir</h4>
-                            <p>Dəvəti qəbul etsəniz həmin evdə yerləşdiriləcəksiniz.</p>
-                            <div class="notification-meta">
-                                <button class="btn-contact" onclick="respondInvite(${req.id}, true)"><i data-lucide="check"></i> Qəbul et</button>
-                                <button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="respondInvite(${req.id}, false)"><i data-lucide="x"></i> Rədd et</button>
-                            </div>
-                        </div>
-                    </div>`;
+                    return `<div class="notification-item" style="border-left-color: var(--ku-light-blue);"><div class="notification-icon"><i data-lucide="mail-check"></i></div><div class="notification-content"><h4>${esc(req.requester_name)} səni Ev ${req.room_id}-ə dəvət edir</h4><div style="display:flex;gap:8px;margin-top:12px;"><button class="btn-contact" onclick="respondInvite(${req.id}, true)">Qəbul et</button><button class="btn-contact" style="background:#fee2e2;color:var(--danger);" onclick="respondInvite(${req.id}, false)">Rədd et</button></div></div></div>`;
                 }
-                return `<div class="notification-item" style="${anim}"><div class="notification-icon"><i data-lucide="mail"></i></div><div class="notification-content"><h4>Yeni dəvət göndərilib</h4><p>${esc(req.requester_name)}, ${esc(req.target_name)} adlı tələbəni evə dəvət edib — cavab gözlənilir.</p></div></div>`;
+                return `<div class="notification-item"><div class="notification-icon"><i data-lucide="mail"></i></div><div class="notification-content"><h4>Yeni dəvət göndərilib</h4><p>${esc(req.requester_name)} → ${esc(req.target_name)}</p></div></div>`;
             }
             if (req.type === 'kick') {
                 if (req.am_target) {
-                    return `<div class="notification-item danger" style="${anim}">
-                        <div class="notification-icon"><i data-lucide="user-x"></i></div>
-                        <div class="notification-content"><h4>${esc(req.requester_name)} səni evdən qovmaq tələbi verib</h4>
-                        <p>Evdəki digər sakinlərin hamısı təsdiq etsə, evdən çıxarılacaqsınız.</p></div>
-                    </div>`;
+                    return `<div class="notification-item" style="border-left-color: var(--danger);"><div class="notification-icon"><i data-lucide="user-x"></i></div><div class="notification-content"><h4>${esc(req.requester_name)} səni evdən qovmaq tələbi verib</h4></div></div>`;
                 }
-                const voteHtml = req.can_vote
-                    ? `<button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')"><i data-lucide="check"></i> Təsdiq</button><button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')"><i data-lucide="x"></i> Rədd</button>`
-                    : (req.my_vote ? `<span class="badge badge-info">Səsiniz: ${esc(req.my_vote)}</span>` : '');
-                const waiting = req.waiting && req.waiting.length ? `<p style="font-size: 12px; color: var(--text-secondary);">Gözlənilir: ${esc(req.waiting.join(', '))}</p>` : '';
-                return `<div class="notification-item warning" style="${anim}">
-                    <div class="notification-icon"><i data-lucide="user-x"></i></div>
-                    <div class="notification-content"><h4>${esc(req.requester_name)}, ${esc(req.target_name)}ni evdən qovmaq istəyir</h4>${waiting}
-                    <div class="notification-meta">${voteHtml}</div></div>
-                </div>`;
+                const vh = req.can_vote ? `<div style="display:flex;gap:8px;"><button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')">Təsdiq</button><button class="btn-contact" style="background:#fee2e2;color:var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')">Rədd</button></div>` : (req.my_vote ? `<span class="hp-free-badge">Səs: ${esc(req.my_vote)}</span>` : '');
+                return `<div class="notification-item" style="border-left-color: var(--warning);"><div class="notification-icon"><i data-lucide="user-x"></i></div><div class="notification-content"><h4>${esc(req.requester_name)} → ${esc(req.target_name)} (qovma)</h4>${req.waiting ? `<p style="font-size:12px;">Gözlənir: ${esc(req.waiting.join(', '))}</p>` : ''}${vh}</div></div>`;
             }
             if (req.type === 'leave') {
                 if (req.am_target) {
-                    return `<div class="notification-item" style="${anim}"><div class="notification-icon"><i data-lucide="log-out"></i></div><div class="notification-content"><h4>Evdən çıxma tələbiniz gözləmədədir</h4><p>Evdəki sakinlərin hamısı təsdiq etsə, evdən çıxacaqsınız.</p></div></div>`;
+                    return `<div class="notification-item"><div class="notification-icon"><i data-lucide="log-out"></i></div><div class="notification-content"><h4>Çıxma tələbiniz gözləmədədir</h4></div></div>`;
                 }
-                const voteHtml = req.can_vote
-                    ? `<button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')"><i data-lucide="check"></i> Təsdiq</button><button class="btn-contact" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')"><i data-lucide="x"></i> Rədd</button>`
-                    : (req.my_vote ? `<span class="badge badge-info">Səsiniz: ${esc(req.my_vote)}</span>` : '');
-                const waiting = req.waiting && req.waiting.length ? `<p style="font-size: 12px; color: var(--text-secondary);">Gözlənilir: ${esc(req.waiting.join(', '))}</p>` : '';
-                return `<div class="notification-item" style="${anim}"><div class="notification-icon"><i data-lucide="log-out"></i></div><div class="notification-content"><h4>${esc(req.target_name)} evdən çıxmaq istəyir</h4>${waiting}<div class="notification-meta">${voteHtml}</div></div></div>`;
+                const vh = req.can_vote ? `<div style="display:flex;gap:8px;"><button class="btn-contact" onclick="voteRequest(${req.id}, 'Təsdiq')">Təsdiq</button><button class="btn-contact" style="background:#fee2e2;color:var(--danger);" onclick="voteRequest(${req.id}, 'Rədd')">Rədd</button></div>` : (req.my_vote ? `<span class="hp-free-badge">Səs: ${esc(req.my_vote)}</span>` : '');
+                return `<div class="notification-item"><div class="notification-icon"><i data-lucide="log-out"></i></div><div class="notification-content"><h4>${esc(req.target_name)} evdən çıxmaq istəyir</h4>${vh}</div></div>`;
             }
             return '';
         }
 
-        // ═════════ TƏLB ƏMƏLİYYATLARI — XÜSUSİ DİALOQLAR ═════════
         async function inviteRoommate(studentId) {
             try {
-                const res = await fetch('/invite_roommate', {
-                    credentials: 'same-origin', method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ student_id: safeId(studentId) })
-                });
+                const res = await fetch('/invite_roommate', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: safeId(studentId) }) });
                 const data = await res.json();
-                if (data.success) {
-                    infoDialog('Dəvət Göndərildi', `<p class="dlg-text">Dəvətiniz uğurla göndərildi!<span class="dlg-highlight">Cavab "Mənim evim → Tələblər"</span>Tələbə qəbul etsə, dərhal evinizə köçəcək.</p>`, 'invite');
-                } else {
-                    infoDialog('Dəvət Göndərilmədi', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                }
-            } catch (err) {
-                infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-            }
+                if (data.success) { infoDialog('Dəvət Göndərildi', `<p class="dlg-text">Dəvətiniz göndərildi!<span class="dlg-highlight">Cavab "Tələblər" bölməsində</span></p>`, 'invite'); }
+                else { infoDialog('Dəvət Göndərilmədi', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+            } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
         }
 
         async function respondInvite(reqId, accept) {
-            confirmDialog(accept ? 'Dəvəti Qəbul Et' : 'Dəvəti Rədd Et',
-                accept
-                    ? `Bu evə köçmək istəyirsiniz?<span class="dlg-highlight">Dəvət #${reqId}</span>Qəbul etsəniz <b>dərhal evə yerləşdiriləcəksiniz</b> və digər bütün dəvətlər ləğv olunacaq.`
-                    : `Bu dəvəti rədd etmək istəyirsiniz?<span class="dlg-highlight">Dəvət #${reqId}</span>Bu ev sizi gələcəkdə yenidən dəvət edə bilər.`,
-                async () => {
-                    try {
-                        const res = await fetch('/respond_invite', {
-                            credentials: 'same-origin', method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ request_id: safeId(reqId), accept })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            infoDialog(accept ? 'Xoş gəlmisiniz!' : 'Dəvət Rədd Edildi', `<p class="dlg-text">${esc(data.message)}</p>`, accept ? 'success' : 'info');
-                            loadMyHome();
-                        } else {
-                            infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                        }
-                    } catch (err) {
-                        infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                    }
-                }, { type: accept ? 'invite' : 'warning', yesText: accept ? 'Bəli, qəbul edirəm' : 'Bəli, rədd edirəm' });
+            confirmDialog(accept ? 'Dəvəti Qəbul Et' : 'Dəvəti Rədd Et', accept ? `Bu evə köçmək istəyirsiniz?<span class="dlg-highlight">Dəvət #${reqId}</span>` : `Bu dəvəti rədd etmək istəyirsiniz?`, async () => {
+                try {
+                    const res = await fetch('/respond_invite', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: safeId(reqId), accept }) });
+                    const data = await res.json();
+                    if (data.success) { infoDialog(accept ? 'Xoş gəlmisiniz!' : 'Rədd Edildi', `<p class="dlg-text">${esc(data.message)}</p>`, accept ? 'success' : 'info'); loadMyHome(); }
+                    else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+                } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
+            }, { type: accept ? 'invite' : 'warning', yesText: accept ? 'Qəbul' : 'Rədd' });
         }
 
         function requestKickRoommate(studentId, name) {
-            confirmDialog('Qovma Tələbi', `Bu tələbəni evdən qovmaq üçün tələb göndərmək istəyirsiniz?<span class="dlg-highlight">${esc(name)}</span>Evdəki <b>bütün</b> digər sakinlər təsdiq etməlidir. Bir nəfər rədd etsə, tələb ləğv olunur.`, async () => {
+            confirmDialog('Qovma Tələbi', `Bu tələbəni evdən qovmaq istəyirsiniz?<span class="dlg-highlight">${esc(name)}</span>Bütün ev sakinləri təsdiq etməlidir.`, async () => {
                 try {
-                    const res = await fetch('/request_kick', {
-                        credentials: 'same-origin', method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ student_id: safeId(studentId) })
-                    });
+                    const res = await fetch('/request_kick', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: safeId(studentId) }) });
                     const data = await res.json();
-                    if (data.success) {
-                        infoDialog('Tələb Göndərildi', `<p class="dlg-text">Qovma tələbi göndərildi.<span class="dlg-highlight">${esc(name)}</span>Evdəkilər "Tələblər" bölməsində cavab verəcək.</p>`, 'kick');
-                        loadMyHome();
-                    } else {
-                        infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                    }
-                } catch (err) {
-                    infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                }
-            }, { type: 'kick', yesText: 'Bəli, qovmaq istəyirəm', danger: true });
+                    if (data.success) { infoDialog('Tələb Göndərildi', `<p class="dlg-text">${esc(data.message)}</p>`, 'kick'); loadMyHome(); }
+                    else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+                } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
+            }, { type: 'kick', yesText: 'Bəli, qov', danger: true });
         }
 
         function requestLeaveHome() {
-            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Evdə tək olsanız — dərhal çıxacaqsınız</span>Yoxsa ev yoldaşlarınızın <b>hamısının təsdiqi</b> gözləniləcək.`, async () => {
+            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Təkdirsə — dərhal</span>Yoxsa ev yoldaşlarınız təsdiq etməlidir.`, async () => {
                 try {
-                    const res = await fetch('/request_leave', {
-                        credentials: 'same-origin', method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({})
-                    });
+                    const res = await fetch('/request_leave', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
                     const data = await res.json();
-                    if (data.success) {
-                        infoDialog('Tamamlandı', `<p class="dlg-text">${esc(data.message)}</p>`, 'leave');
-                        loadMyHome();
-                    } else {
-                        infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                    }
-                } catch (err) {
-                    infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                }
-            }, { type: 'leave', yesText: 'Bəli, evdən çıxıram' });
+                    if (data.success) { infoDialog('Tamamlandı', `<p class="dlg-text">${esc(data.message)}</p>`, 'leave'); loadMyHome(); }
+                    else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+                } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
+            }, { type: 'leave', yesText: 'Bəli, çıx' });
         }
 
-        function voteRequest(reqId, vote) {
-            const isYes = vote === 'Təsdiq';
-            confirmDialog(isYes ? 'Səs Ver: Təsdiq' : 'Səs Ver: Rədd',
-                isYes
-                    ? `Bu tələbə <b>təsdiq</b> səsi vermək istəyirsiniz?<span class="dlg-highlight">Tələb #${reqId}</span>Hamı təsdiq verərsə, tələb icra olunacaq.`
-                    : `Bu tələbi <b>rədd</b> etmək istəyirsiniz?<span class="dlg-highlight">Tələb #${reqId}</span>Sizin bir səsiniz kifayətdir — tələb dərhal bağlanacaq.`,
-                async () => {
-                    try {
-                        const res = await fetch('/vote_request', {
-                            credentials: 'same-origin', method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ request_id: safeId(reqId), vote })
-                        });
-                        const data = await res.json();
-                        if (data.success) {
-                            infoDialog('Səs Qeydə Alındı', `<p class="dlg-text">${esc(data.message)}</p>`, 'success');
-                            loadMyHome();
-                        } else {
-                            infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                        }
-                    } catch (err) {
-                        infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                    }
-                }, { type: isYes ? 'success' : 'warning', yesText: isYes ? 'Bəli, təsdiq verirəm' : 'Bəli, rədd edirəm' });
+        async function voteRequest(reqId, vote) {
+            confirmDialog(vote === 'Təsdiq' ? 'Təsdiq' : 'Rədd', `Bu tələbə <b>${vote}</b> səsi verirsiniz?`, async () => {
+                try {
+                    const res = await fetch('/vote_request', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ request_id: safeId(reqId), vote }) });
+                    const data = await res.json();
+                    if (data.success) { infoDialog('Səs Qeydə Alındı', `<p class="dlg-text">${esc(data.message)}</p>`, 'success'); loadMyHome(); }
+                    else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+                } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
+            }, { type: vote === 'Təsdiq' ? 'success' : 'warning' });
         }
 
         // ═════════ EV SEÇMƏ PLANI ═════════
         function renderHomePlan(data) {
             MY_ID = data.my_id || null;
             hpState.myGroupId = data.my_group ? (data.my_group.real_id || data.my_group.id) : null;
-
             document.getElementById('myHomeList').innerHTML = `
                 <div class="home-plan-layout">
-                    <div class="hp-left">
-                        <div class="hp-box">
-                            <div class="hp-box-title"><i data-lucide="house"></i> Seçilə biləcək evlər</div>
-                            <div class="hp-scroll" id="hpRooms"><div class="hp-empty">Yüklənir...</div></div>
-                        </div>
-                    </div>
+                    <div class="hp-left"><div class="hp-box">
+                        <div class="hp-box-title"><i data-lucide="house"></i> Seçilə biləcək evlər</div>
+                        <div class="hp-scroll" id="hpRooms"><div class="hp-empty">Yüklənir...</div></div>
+                    </div></div>
                     <div class="hp-right">
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="user-search"></i> Tələbə axtarışı</div>
                             <div class="hp-search-row">
                                 <input type="text" class="hp-input" id="hpStudentQ" placeholder="Ad Soyad..." onkeypress="if(event.key==='Enter')searchPlanStudents()">
                                 <select class="hp-select" id="hpFilterIxtisas"><option value="">Bütün ixtisaslar</option></select>
-                                <select class="hp-select" id="hpFilterKurs">
-                                    <option value="">Bütün kurslar</option>
-                                    <option value="1">1 kurs</option><option value="2">2 kurs</option>
-                                    <option value="3">3 kurs</option><option value="4">4 kurs</option>
-                                    <option value="5">5 kurs</option><option value="6">6 kurs</option>
-                                </select>
-                                <button class="hp-btn" onclick="searchPlanStudents()"><i data-lucide="search"></i> Axtar</button>
+                                <select class="hp-select" id="hpFilterKurs"><option value="">Kurslar</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
+                                <button class="hp-btn" onclick="searchPlanStudents()"><i data-lucide="search"></i></button>
                             </div>
                             <div class="hp-scroll" id="hpStudents"><div class="hp-empty">Axtarın...</div></div>
                         </div>
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="users"></i> Qruplar</div>
                             <div class="hp-search-row">
-                                <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup sırası və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
-                                <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
-                                <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
+                                <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
+                                <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i></button>
+                                <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup</button>
                             </div>
                             <div id="hpMyGroup"></div>
                             <div class="hp-scroll" id="hpGroups"><div class="hp-empty">Yüklənir...</div></div>
@@ -1381,38 +977,23 @@
                     </div>
                 </div>`;
             refreshIcons(document.getElementById('myHomeList'));
-
-            const ixtSel = document.getElementById('hpFilterIxtisas');
-            (data.ixtisaslar || []).forEach(ix => {
-                const opt = document.createElement('option');
-                opt.value = ix; opt.innerText = ix;
-                ixtSel.appendChild(opt);
-            });
-
+            const ix = document.getElementById('hpFilterIxtisas');
+            (data.ixtisaslar || []).forEach(v => { const o = document.createElement('option'); o.value = v; o.text = v; ix.appendChild(o); });
             renderMyGroup(data.my_group);
             loadPlanRooms();
             searchPlanStudents();
             searchPlanGroups();
         }
 
-        function renderMyGroup(myGroup) {
+        function renderMyGroup(g) {
             const box = document.getElementById('hpMyGroup');
             if (!box) return;
-            if (myGroup) {
-                hpState.myGroupId = myGroup.real_id || myGroup.id;
-                const chips = myGroup.members.map(m =>
-                    `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`).join('');
-                box.innerHTML = `
-                    <div class="hp-my-group">
-                        <div class="hp-group-head">
-                            <span class="hp-group-name">Qrup #${myGroup.id} (${myGroup.members.length} üzv)</span>
-                            <button class="hp-btn-secondary" onclick="leavePlanGroup()">Qrupdan çıx</button>
-                        </div>
-                        <div>${chips}</div>
-                    </div>`;
+            if (g) {
+                hpState.myGroupId = g.real_id || g.id;
+                box.innerHTML = `<div class="hp-my-group"><div class="hp-group-head"><span class="hp-group-name">Qrup #${g.id} (${g.members.length} üzv)</span><button class="hp-btn-secondary" onclick="leavePlanGroup()">Çıx</button></div><div>${g.members.map(m => `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`).join('')}</div></div>`;
             } else {
                 hpState.myGroupId = null;
-                box.innerHTML = '<div class="hp-empty" style="padding: 6px 0 10px;">Sizin qrupunuz yoxdur — "+ Qrup yarat" düyməsini basın.</div>';
+                box.innerHTML = '<div class="hp-empty">Qrupunuz yoxdur</div>';
             }
             refreshIcons(box);
         }
@@ -1423,213 +1004,137 @@
                 if (!box) return;
                 if (data.success && data.rooms.length > 0) {
                     box.innerHTML = data.rooms.map(r => `
-                        <div class="hp-room-card" title="${r.occupants.length ? 'Yaşayanlar: ' + esc(r.occupants.join(', ')) : 'Boş ev'}">
-                            <div class="hp-room-head">
-                                <span class="hp-room-name">Ev ${r.id}</span>
-                                <span class="hp-free-badge">${r.free_count} boş</span>
-                            </div>
+                        <div class="hp-room-card" title="${r.occupants.length ? r.occupants.join(', ') : 'Boş'}">
+                            <div class="hp-room-head"><span class="hp-room-name">Ev ${r.id}</span><span class="hp-free-badge">${r.free_count} boş</span></div>
                             <div class="hp-room-occs">${r.occupants.length ? esc(r.occupants.join(', ')) : 'Boş ev'}</div>
                             <button class="hp-select-btn" onclick="selectPlanHome(${r.id}, ${r.free_count})">Seç</button>
                         </div>`).join('');
-                } else {
-                    box.innerHTML = '<div class="hp-empty">Boş yeri olan ev yoxdur.</div>';
-                }
+                } else { box.innerHTML = '<div class="hp-empty">Boş yeri olan ev yoxdur.</div>'; }
             });
         }
 
-        function selectPlanHome(roomId, freeCount) {
-            const withGroup = hpState.myGroupId ? ' və <b>qrupunuzla birlikdə</b>' : '';
-            confirmDialog('Ev Seçimi', `Bu evi özünüzə seçmək istəyirsiniz?${withGroup}<span class="dlg-highlight">Ev ${roomId} • ${freeCount} boş yer</span>Seçdikdən sonra dəyişmək üçün ev yoldaşlarınızın təsdiqi lazım olacaq.`, async () => {
+        function selectPlanHome(roomId, free) {
+            const w = hpState.myGroupId ? ' və <b>qrupunuzla</b>' : '';
+            confirmDialog('Ev Seçimi', `Bu evi özünüzə seçirsiniz?${w}<span class="dlg-highlight">Ev ${roomId} • ${free} boş yer</span>`, async () => {
                 try {
-                    const res = await fetch('/select_home', {
-                        credentials: 'same-origin', method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ room_id: safeId(roomId) })
-                    });
+                    const res = await fetch('/select_home', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: safeId(roomId) }) });
                     const data = await res.json();
-                    if (data.success) {
-                        infoDialog('Uğurlu!', `<p class="dlg-text">Ev seçimi tamamlandı!<span class="dlg-highlight">Ev ${roomId}</span>Artıq "Mənim evim" panelində otaq yoldaşlarınızı görə bilərsiniz.</p>`, 'success');
-                        loadMyHome();
-                    } else {
-                        infoDialog('Ev Seçilmədi', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                    }
-                } catch (err) {
-                    infoDialog('Bağlantı Xətası', `<p class="dlg-text">Serverə qoşulmaq mümkün olmadı. İnternetinizi yoxlayıb təkrar cəhd edin.</p>`, 'danger');
-                }
-            }, { type: 'room', yesText: 'Bəli, bu evi seçirəm' });
+                    if (data.success) { infoDialog('Uğurlu!', `<p class="dlg-text">Ev seçimi tamamlandı!<span class="dlg-highlight">Ev ${roomId}</span></p>`, 'success'); loadMyHome(); }
+                    else { infoDialog('Ev Seçilmədi', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+                } catch (e) { infoDialog('Xəta', '<p class="dlg-text">Server xətası.</p>', 'danger'); }
+            }, { type: 'room', yesText: 'Bəli, seçirəm' });
         }
 
         function searchPlanStudents() {
-            const q = gv('hpStudentQ').trim();
-            const ix = gv('hpFilterIxtisas');
-            const kurs = gv('hpFilterKurs');
+            const p = new URLSearchParams();
+            p.set('q', gv('hpStudentQ'));
+            p.set('ixtisas', gv('hpFilterIxtisas'));
+            p.set('kurs', gv('hpFilterKurs'));
             const box = document.getElementById('hpStudents');
             box.innerHTML = '<div class="hp-empty">Axtarılır...</div>';
-            const params = new URLSearchParams();
-            params.set('q', q); params.set('ixtisas', ix); params.set('kurs', kurs);
-            fetch('/search_students?' + params.toString()).then(res => res.json()).then(data => {
+            fetch('/search_students?' + p.toString()).then(res => res.json()).then(data => {
                 if (data.success && data.students.length > 0) {
                     box.innerHTML = data.students.map(s => `
                         <div class="hp-student-row">
-                            <div class="hp-student-info">
-                                <h5>${esc(s.ad_soyad)}</h5>
-                                <p>${esc(s.ixtisas || '')} • ${esc(s.kurs || '-')} kurs</p>
-                            </div>
+                            <div style="flex:1;min-width:0;"><h5 style="font-size:14px;">${esc(s.ad_soyad)}</h5><p style="font-size:12px;color:var(--text-secondary);">${esc(s.ixtisas||'')} • ${esc(s.kurs||'-')} kurs</p></div>
                             <div class="hp-score" id="hp-score-${s.id}">-%</div>
                             <button class="hp-btn-secondary" onclick="checkPlanCompat(${s.id})">Yoxla</button>
-                            ${hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="addPlanMember(${s.id})">Əlavə et</button>` : ''}
+                            ${hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="addPlanMember(${s.id})">Əlavə</button>` : ''}
                         </div>`).join('');
-                } else {
-                    box.innerHTML = '<div class="hp-empty">Nəticə tapılmadı.</div>';
-                }
+                } else { box.innerHTML = '<div class="hp-empty">Nəticə yox.</div>'; }
             });
         }
 
-        async function checkPlanCompat(targetId) {
-            const scoreDiv = document.getElementById(`hp-score-${targetId}`);
-            if (!scoreDiv) return;
-            scoreDiv.innerText = '...';
+        async function checkPlanCompat(tid) {
+            const s = document.getElementById(`hp-score-${tid}`);
+            if (!s) return;
+            s.innerText = '...';
             try {
-                const res = await fetch('/ai_handler', {
-                    credentials: 'same-origin', method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'match', target_id: safeId(targetId) })
-                });
+                const res = await fetch('/ai_handler', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'match', target_id: safeId(tid) }) });
                 const data = await res.json();
-                if (data.success) { scoreDiv.innerText = data.score + '%'; }
-                else {
-                    scoreDiv.innerText = 'Xəta';
-                    infoDialog('AI Xətası', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'warning');
-                }
-            } catch (err) { scoreDiv.innerText = 'Xəta'; }
+                if (data.success) s.innerText = data.score + '%';
+                else { s.innerText = 'Xəta'; infoDialog('AI Xətası', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'warning'); }
+            } catch (e) { s.innerText = 'Xəta'; }
         }
 
-        function addPlanMember(studentId) {
-            fetch('/add_group_member', {
-                credentials: 'same-origin', method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ student_id: safeId(studentId) })
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    infoDialog('Üzv Əlavə Edildi', `<p class="dlg-text">Tələbə qrupunuza uğurla əlavə olundu.<span class="dlg-highlight">Qrupunuz gücləndi!</span>Qrupla birlikdə ev seçə bilərsiniz.</p>`, 'group');
-                    refreshPlanState(); searchPlanStudents();
-                } else {
-                    infoDialog('Əlavə Edilmədi', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                }
+        function addPlanMember(sid) {
+            fetch('/add_group_member', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: safeId(sid) }) })
+            .then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); infoDialog('Əlavə Edildi', '<p class="dlg-text">Üzv qrupa əlavə olundu.</p>', 'group'); }
+                else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
             });
         }
 
         function refreshPlanState() {
             fetch('/get_home').then(res => res.json()).then(data => {
-                if (data.success && data.ev_status === 'Ev seçilməyib') {
-                    renderMyGroup(data.my_group);
-                } else { loadMyHome(); }
+                if (data.success && data.ev_status === 'Ev seçilməyib') { renderMyGroup(data.my_group); } else { loadMyHome(); }
             });
         }
 
         function createPlanGroup() {
-            fetch('/create_group', {
-                credentials: 'same-origin', method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({})
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    infoDialog('Qrup Yaradıldı!', `<p class="dlg-text">Təbriklər!<span class="dlg-highlight">${esc(data.message)}</span>İndi tələbə axtarışı ilə üzv əlavə edib birlikdə ev seçə bilərsiniz.</p>`, 'group');
-                    refreshPlanState(); searchPlanStudents(); searchPlanGroups();
-                } else {
-                    infoDialog('Qrup Yaradılmadı', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                }
-            });
-        }
-
-        function joinPlanGroup(seq) {
-            fetch('/join_group', {
-                credentials: 'same-origin', method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ group_id: safeId(seq) })
-            }).then(res => res.json()).then(data => {
-                if (data.success) {
-                    infoDialog('Qrupa Qoşuldunuz!', `<p class="dlg-text">Artıq bu qrupun üzvüsünüz.<span class="dlg-highlight">Qrupla birlikdə ev seçə bilərsiniz</span>İstədiyiniz an "Qrupdan çıx" ilə ayrıla bilərsiniz.</p>`, 'group');
-                    refreshPlanState(); searchPlanStudents(); searchPlanGroups();
-                } else {
-                    infoDialog('Qoşulma Alınmadı', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                }
+            fetch('/create_group', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+            .then(res => res.json()).then(data => {
+                if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); infoDialog('Qrup Yaradıldı!', `<p class="dlg-text">${esc(data.message)}</p>`, 'group'); }
+                else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
             });
         }
 
         function leavePlanGroup() {
-            confirmDialog('Qrupdan Çıx', `Qrupdan çıxmaq istəyirsiniz?<span class="dlg-highlight">Qrup üzvlərinizlə birgə ev seçə bilməyəcəksiniz</span>Son üzv sizsinizsə, qrup tamamilə silinəcək.`, async () => {
-                try {
-                    const res = await fetch('/leave_group', {
-                        credentials: 'same-origin', method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({})
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        infoDialog('Qrupdan Çıxdınız', `<p class="dlg-text">${esc(data.message)}</p>`, 'group');
-                        refreshPlanState(); searchPlanStudents(); searchPlanGroups();
-                    } else {
-                        infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger');
-                    }
-                } catch (err) {
-                    infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-                }
-            }, { type: 'group', yesText: 'Bəli, çıxıram' });
+            confirmDialog('Qrupdan Çıx', 'Qrupdan çıxmaq istəyirsiniz?', async () => {
+                const res = await fetch('/leave_group', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                const data = await res.json();
+                if (data.success) { refreshPlanState(); searchPlanStudents(); searchPlanGroups(); infoDialog('Çıxdınız', `<p class="dlg-text">${esc(data.message)}</p>`, 'group'); }
+                else { infoDialog('Xəta', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'danger'); }
+            }, { type: 'group' });
         }
 
         function searchPlanGroups() {
-            const q = gv('hpGroupQ').trim();
             const box = document.getElementById('hpGroups');
             box.innerHTML = '<div class="hp-empty">Axtarılır...</div>';
-            fetch('/get_groups?q=' + encodeURIComponent(q)).then(res => res.json()).then(data => {
+            fetch('/get_groups?q=' + encodeURIComponent(gv('hpGroupQ'))).then(res => res.json()).then(data => {
                 if (data.success && data.groups.length > 0) {
                     box.innerHTML = data.groups.map(g => {
                         const mine = (g.real_id || g.id) === hpState.myGroupId;
-                        const chips = g.members.map(m =>
-                            `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`).join('');
                         return `<div class="hp-group-card ${mine ? 'mine' : ''}">
-                            <div class="hp-group-head">
-                                <span class="hp-group-name">Qrup #${g.id} (${g.members.length} üzv)${mine ? ' — sizin' : ''}</span>
-                                ${!mine && !hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="joinPlanGroup(${g.id})">Qoşul</button>` : ''}
-                            </div>
-                            <div>${chips}</div>
-                        </div>`;
+                            <div class="hp-group-head"><span class="hp-group-name">Qrup #${g.id} (${g.members.length})${mine ? ' — sizin' : ''}</span>
+                            ${!mine && !hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="joinPlanGroup(${g.id})">Qoşul</button>` : ''}</div>
+                            <div>${g.members.map(m => `<span class="hp-member-chip"><i data-lucide="user"></i> ${esc(m.ad_soyad)}${m.id === MY_ID ? ' <strong>(siz)</strong>' : ''}</span>`).join('')}</div></div>`;
                     }).join('');
                     refreshIcons(box);
-                } else {
-                    box.innerHTML = '<div class="hp-empty">Qrup tapılmadı.</div>';
+                } else { box.innerHTML = '<div class="hp-empty">Qrup yoxdur.</div>'; }
+            });
+        }
+
+        // ═════════ NOTIFICATIONS — #13 badge + #10 polling ═════════
+        function loadNotifDropdown() {
+            fetch('/get_notifications').then(res => res.json()).then(data => {
+                const content = document.getElementById('notifDropdownContent');
+                const badge = document.getElementById('notifCount');
+                const count = (data.success && data.total_count) ? data.total_count : 0;
+                if (badge) {
+                    if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.classList.add('visible'); }
+                    else { badge.classList.remove('visible'); }
                 }
+                content.innerHTML = '';
+                if (data.success && data.notifications.length > 0) {
+                    data.notifications.forEach((n) => {
+                        content.innerHTML += `<div class="notif-item" onclick="setActivePage('${n.redirect}', '${n.redirect_text}')"><div class="notif-text"><h5>${esc(n.title)}</h5><p>${esc(n.description)}</p></div></div>`;
+                    });
+                } else { content.innerHTML = '<p style="padding:16px;text-align:center;color:var(--text-secondary);">Bildiriş yoxdur.</p>'; }
             });
         }
 
         // ═════════ NOTIFICATIONS / CONTENTS / PAYMENTS ═════════
-        function loadNotifDropdown() {
-            fetch('/get_notifications').then(res => res.json()).then(data => {
-                const content = document.getElementById('notifDropdownContent');
-                const dot = document.getElementById('notificationDot');
-                if (dot) dot.style.display = (data.success && data.notifications && data.notifications.length > 0) ? '' : 'none';
-                content.innerHTML = '';
-                if (data.success && data.notifications.length > 0) {
-                    data.notifications.forEach((n, index) => {
-                        content.innerHTML += `<div class="notif-item" onclick="setActivePage('${n.redirect}', '${n.redirect_text}')"><div class="notif-icon"><i data-lucide="${n.icon}"></i></div><div class="notif-text"><h5>${esc(n.title)}</h5><p>${esc(n.description)}</p></div></div>`;
-                    });
-                    refreshIcons(content);
-                } else { content.innerHTML = '<p style="padding: 16px; text-align: center; color: var(--text-secondary); font-size: 14px;">Heç bir bildiriş yoxdur.</p>'; }
-            });
-        }
-
         function loadHomeAnnouncements() {
             fetch('/get_contents').then(res => res.json()).then(data => {
-                const homeAnn = document.getElementById('homeAnnouncements'); if (!homeAnn) return; homeAnn.innerHTML = '';
-                if (data.success && data.contents.length > 0) {
-                    data.contents.slice(0, 2).forEach((c, index) => {
+                const h = document.getElementById('homeAnnouncements'); if (!h) return; h.innerHTML = '';
+                if (data.success) {
+                    data.contents.slice(0, 2).forEach((c) => {
                         if (c.type === 'announcement') {
-                            let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
-                            homeAnn.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
+                            h.innerHTML += `<div class="notification-item"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p></div></div>`;
                         }
                     });
-                    refreshIcons(homeAnn);
+                    refreshIcons(h);
                 }
             });
         }
@@ -1637,95 +1142,59 @@
         function loadContents() {
             fetch('/get_contents').then(res => res.json()).then(data => {
                 if (data.success) {
-                    const annList = document.getElementById('announcementsList'); const surList = document.getElementById('surveysList');
-                    annList.innerHTML = ''; surList.innerHTML = '';
+                    const a = document.getElementById('announcementsList'), s = document.getElementById('surveysList');
+                    a.innerHTML = ''; s.innerHTML = '';
                     data.contents.forEach(c => {
-                        let badgeClass = 'badge-info'; if (c.priority === 'Yüksək') badgeClass = 'badge-danger';
                         if (c.type === 'announcement') {
-                            annList.innerHTML += `<div class="notification-item ${c.priority === 'Yüksək' ? 'danger' : ''}"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span></div></div></div>`;
+                            a.innerHTML += `<div class="notification-item"><div class="notification-icon"><i data-lucide="megaphone"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p></div></div>`;
                         } else {
-                            surList.innerHTML += `<div class="notification-item"><div class="notification-icon"><i data-lucide="clipboard-check"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p><div class="notification-meta"><span class="badge ${badgeClass}">${esc(c.priority)}</span><button class="btn-contact" style="padding: 6px 14px; font-size: 12px;">İştirak et</button></div></div></div>`;
+                            s.innerHTML += `<div class="notification-item"><div class="notification-icon"><i data-lucide="clipboard-check"></i></div><div class="notification-content"><h4>${esc(c.title)}</h4><p>${esc(c.description)}</p></div></div>`;
                         }
                     });
-                    refreshIcons(annList);
+                    refreshIcons(a); refreshIcons(s);
                 }
             });
         }
 
         function loadPayments() {
             fetch('/get_penalties').then(res => res.json()).then(data => {
-                const list = document.getElementById('paymentsList'); list.innerHTML = '';
+                const l = document.getElementById('paymentsList'); l.innerHTML = '';
                 if (data.success && data.penalties.length > 0) {
-                    data.penalties.forEach((p, index) => {
-                        list.innerHTML += `<div class="payment-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;"><div class="service-icon bg-red" style="margin-bottom: 16px; width: 52px; height: 52px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"><i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i></div><h3>${esc(p.reason)}</h3><p><strong>Məbləğ:</strong> ${esc(p.amount)} AZN</p><p><strong>Status:</strong> <span style="color: var(--danger); font-weight: 600;">${esc(p.status)}</span></p></div>`;
+                    data.penalties.forEach((p) => {
+                        l.innerHTML += `<div class="payment-card"><div class="bed-icon" style="background:#fee2e2;color:var(--danger);"><i data-lucide="alert-triangle"></i></div><h3>${esc(p.reason)}</h3><p><strong>Məbləğ:</strong> ${esc(p.amount)} AZN</p><p><strong>Status:</strong> <span style="color:var(--danger);font-weight:600;">${esc(p.status)}</span></p></div>`;
                     });
-                    refreshIcons(list);
-                } else { list.innerHTML = '<p style="font-size: 14px; color: var(--text-secondary);">Heç bir cərimə qeydə alınmayıb.</p>'; }
+                    refreshIcons(l);
+                } else { l.innerHTML = '<p style="color: var(--text-secondary);">Cərimə yoxdur.</p>'; }
             });
         }
 
         // ═════════ AI CHAT ═════════
-        function toggleAiChat() {
-            const win = document.getElementById('aiChatWindow');
-            win.classList.toggle('active');
-            if (win.classList.contains('active') && document.getElementById('aiChatBody').innerHTML === '') {
-                resetAiChat();
-            }
-        }
-        function resetAiChat() {
-            document.getElementById('aiChatBody').innerHTML = `<div class="ai-msg bot">Salam, <strong>${CURRENT_USER_NAME}</strong>! Mən Kampus AI köməkçisiyəm. Sualınız nədir?</div>`;
-            aiChatHistory = [{ role: 'model', text: `Salam, ${CURRENT_USER_NAME}!` }];
-        }
+        function toggleAiChat() { const w = document.getElementById('aiChatWindow'); w.classList.toggle('active'); if (w.classList.contains('active') && document.getElementById('aiChatBody').innerHTML === '') resetAiChat(); }
+        function resetAiChat() { document.getElementById('aiChatBody').innerHTML = `<div class="ai-msg bot">Salam, <strong>${CURRENT_USER_NAME}</strong>! Sualınız nədir?</div>`; aiChatHistory = [{ role: 'model', text: 'Salam!' }]; }
         let aiChatHistory = [];
         async function sendAiMessage() {
-            const input = document.getElementById('aiInput');
-            const body = document.getElementById('aiChatBody');
-            const text = input.value;
-            if (text.trim() === '') return;
-            const userMsg = document.createElement('div');
-            userMsg.className = 'ai-msg user';
-            userMsg.innerText = text;
-            body.appendChild(userMsg);
+            const input = document.getElementById('aiInput'), body = document.getElementById('aiChatBody');
+            const text = input.value; if (!text.trim()) return;
+            const um = document.createElement('div'); um.className = 'ai-msg user'; um.innerText = text; body.appendChild(um);
             aiChatHistory.push({ role: 'user', text: text });
-            input.value = '';
-            body.scrollTop = body.scrollHeight;
-            const loadingMsg = document.createElement('div');
-            loadingMsg.className = 'ai-msg bot loading';
-            loadingMsg.innerText = "Gözləyin";
-            body.appendChild(loadingMsg);
-            body.scrollTop = body.scrollHeight;
+            input.value = ''; body.scrollTop = body.scrollHeight;
+            const lm = document.createElement('div'); lm.className = 'ai-msg bot'; lm.innerText = "Gözləyin"; body.appendChild(lm); body.scrollTop = body.scrollHeight;
             try {
-                const res = await fetch('/ai_handler', {
-                    credentials: 'same-origin', method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'chat', message: text, history: aiChatHistory.slice(-10) })
-                });
-                const responseText = await res.text();
-                try {
-                    const data = JSON.parse(responseText);
-                    loadingMsg.classList.remove('loading');
-                    if (data.success) {
-                        loadingMsg.innerText = data.reply;
-                        aiChatHistory.push({ role: 'model', text: data.reply });
-                    } else {
-                        loadingMsg.innerText = "Xəta: " + (data.message || "Cavab alına bilmədi.");
-                        loadingMsg.style.color = "var(--danger)";
-                    }
-                } catch (parseError) {
-                    loadingMsg.classList.remove('loading');
-                    loadingMsg.innerText = "Server xətası baş verdi.";
-                    loadingMsg.style.color = "var(--danger)";
-                }
-            } catch (error) {
-                loadingMsg.classList.remove('loading');
-                loadingMsg.innerText = "Serverə qoşulmaq mümkün olmadı.";
-                loadingMsg.style.color = "var(--danger)";
-            }
+                const res = await fetch('/ai_handler', { credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'chat', message: text, history: aiChatHistory.slice(-10) }) });
+                const data = await res.json();
+                lm.className = 'ai-msg bot';
+                if (data.success) { lm.innerText = data.reply; aiChatHistory.push({ role: 'model', text: data.reply }); }
+                else { lm.innerText = "Xəta: " + (data.message || "Cavab alınmadı."); lm.style.color = "var(--danger)"; }
+            } catch (e) { lm.className = 'ai-msg bot'; lm.innerText = "Server xətası."; lm.style.color = "var(--danger)"; }
             body.scrollTop = body.scrollHeight;
         }
-        function handleAiKeyPress(e) { if (e.key === 'Enter') sendAiMessage(); }
 
-        {% if is_logged_in %} loadHomeData(); {% endif %}
+        // ═════════ INIT + #10 POLLING (30 san) ═════════
+        {% if is_logged_in %}
+        loadHomeData();
+        // #10 Real-time yenilənmə: hər 30 saniyədə bildirişlər
+        setInterval(() => { loadNotifDropdown(); }, 30000);
+        {% endif %}
     </script>
 </body>
 </html>
