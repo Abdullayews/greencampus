@@ -80,7 +80,6 @@ def with_db(f):
 
 
 def clean_val(val):
-    """Boş dəyərləri None etmək (ENUM xətalarının qarşısını almaq üçün)."""
     if val is None:
         return None
     val = str(val).strip()
@@ -101,6 +100,12 @@ def get_ev_status(cur, user_id):
     return row.get('ev') or 'Ev seçilməyib'
 
 
+def get_cins(cur, user_id):
+    cur.execute("SELECT cins FROM students WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    return row.get('cins') if row else None
+
+
 def get_my_group_id(cur, user_id):
     cur.execute("SELECT group_id FROM students WHERE id = %s", (user_id,))
     row = cur.fetchone()
@@ -108,12 +113,66 @@ def get_my_group_id(cur, user_id):
 
 
 def dissolve_group_if_empty(cur, group_id):
-    """Qrupda heç kim qalmadıqda qrupu silir."""
     if group_id is None:
         return
     cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
     if cur.fetchone()['c'] == 0:
         cur.execute("DELETE FROM student_groups WHERE id = %s", (group_id,))
+
+
+def remove_from_room(cur, student_id):
+    """Tələbəni evdən çıxarır; ev boşalırsa evin cinsini sıfırlayır."""
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
+    row = cur.fetchone()
+    if not row:
+        return
+    room_id = row['room_id']
+
+    gid = get_my_group_id(cur, student_id)
+    cur.execute("UPDATE room_slots SET student_id = NULL WHERE student_id = %s", (student_id,))
+    cur.execute("UPDATE students SET ev = 'Ev seçilməyib', group_id = NULL WHERE id = %s", (student_id,))
+    if gid:
+        dissolve_group_if_empty(cur, gid)
+
+    cur.execute("SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL", (room_id,))
+    if cur.fetchone()['c'] == 0:
+        cur.execute("UPDATE rooms SET cins = NULL WHERE id = %s", (room_id,))
+
+
+def _apply_request(cur, req):
+    """Təsdiqlənmiş tələbi icra edir."""
+    if req['type'] in ('kick', 'leave'):
+        remove_from_room(cur, req['target_id'])
+
+
+def _check_request_resolution(cur, request_id):
+    """Bütün ev sakinləri təsdiq veribsə tələbi icra edir, rədd varsa bağlayır."""
+    cur.execute("SELECT * FROM home_requests WHERE id = %s", (request_id,))
+    req = cur.fetchone()
+    if not req or req['status'] != 'Gözləmədə':
+        return
+
+    cur.execute("""
+        SELECT rs.student_id FROM room_slots rs
+        WHERE rs.room_id = %s AND rs.student_id IS NOT NULL AND rs.student_id != %s
+    """, (req['room_id'], req['target_id']))
+    eligible = [r['student_id'] for r in cur.fetchall()]
+
+    if not eligible:
+        cur.execute("UPDATE home_requests SET status = 'Təsdiqləndi' WHERE id = %s", (request_id,))
+        _apply_request(cur, req)
+        return
+
+    cur.execute("SELECT voter_id, vote FROM home_request_votes WHERE request_id = %s", (request_id,))
+    votes = {v['voter_id']: v['vote'] for v in cur.fetchall()}
+
+    if any(votes.get(eid) == 'Rədd' for eid in eligible):
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (request_id,))
+        return
+
+    if all(eid in votes for eid in eligible):
+        cur.execute("UPDATE home_requests SET status = 'Təsdiqləndi' WHERE id = %s", (request_id,))
+        _apply_request(cur, req)
 
 
 # ---------------------------------------------------------------------------
@@ -181,7 +240,7 @@ def login():
             if user['sifre'] != sifre:
                 return fail("Şifrə yanlışdır!")
 
-            session.permanent = True  # sessiya avtomatik bitmir
+            session.permanent = True
             session['student_id'] = user['id']
             session['user_name'] = user['ad_soyad']
             session['ixtisas'] = user['ixtisas']
@@ -210,12 +269,6 @@ def logout():
 @login_required
 @with_db
 def get_home(cur):
-    """
-    Mənim evim:
-      - 'Rədd edilib'   → yalnız mesaj
-      - 'Ev seçilməyib' → ev seçmə planı datası
-      - 'Ev seçilib'    → otaq və otaq yoldaşları
-    """
     user_id = session['student_id']
 
     ev_status = get_ev_status(cur, user_id)
@@ -240,7 +293,7 @@ def get_home(cur):
         )
         ixtisaslar = [r['ixtisas'] for r in cur.fetchall()]
 
-        return ok(ev_status=ev_status, my_group=my_group, ixtisaslar=ixtisaslar)
+        return ok(ev_status=ev_status, my_id=user_id, my_group=my_group, ixtisaslar=ixtisaslar)
 
     # ---- EV SEÇİLİB ----
     gid = get_my_group_id(cur, user_id)
@@ -281,7 +334,7 @@ def get_home(cur):
             "items": items
         })
 
-    return ok(ev_status=ev_status, room_number=room_number, roommates=roommates)
+    return ok(ev_status=ev_status, my_id=user_id, room_number=room_number, roommates=roommates)
 
 
 @app.route('/get_applications', methods=['GET'])
@@ -290,7 +343,6 @@ def get_home(cur):
 def get_applications(cur):
     user_id = session['student_id']
 
-    # Təsdiqlənmiş, notu olmayan müraciətlər üçün default qeyd yaradılır
     cur.execute(
         "UPDATE applications SET notlar = 'Müraciətiniz təsdiqləndi.' "
         "WHERE student_id = %s AND status = 'Təsdiqləndi' AND notlar IS NULL",
@@ -371,18 +423,42 @@ def get_notifications(cur):
 
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'announcement'")
     ann_count = cur.fetchone()['count']
-
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'survey'")
     surv_count = cur.fetchone()['count']
-
     cur.execute("SELECT COUNT(*) as count FROM penalties WHERE student_id = %s AND status = 'Ödənilməmiş'", (user_id,))
     pen_count = cur.fetchone()['count']
 
-    return ok(notifications=[
-        {"title": "Aktiv Elanlar", "description": f"{ann_count} ədəd aktiv elanınız var.", "icon": "megaphone", "color": "info", "redirect": "announcements", "redirect_text": "Elanlar"},
-        {"title": "Aktiv Anketlər", "description": f"{surv_count} ədəd ankent iştirakınızı gözləyir.", "icon": "clipboard-check", "color": "warning", "redirect": "announcements", "redirect_text": "Elanlar"},
-        {"title": "Ödənişli Cərimələr", "description": f"{pen_count} ədəd ödənilməmiş cəriməniz var.", "icon": "alert-triangle", "color": "danger", "redirect": "payments", "redirect_text": "Ödənişlər"}
-    ])
+    # Tələb sayı — mənim hərəkətimi gözləyən tələblər
+    req_count = 0
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
+    rrow = cur.fetchone()
+    my_room = rrow['room_id'] if rrow else None
+    if my_room:
+        cur.execute("""
+            SELECT COUNT(*) AS c FROM home_requests hr
+            WHERE hr.room_id = %s AND hr.status = 'Gözləmədə'
+              AND hr.type IN ('kick', 'leave') AND hr.target_id != %s
+              AND NOT EXISTS (SELECT 1 FROM home_request_votes v WHERE v.request_id = hr.id AND v.voter_id = %s)
+        """, (my_room, user_id, user_id))
+        req_count += cur.fetchone()['c']
+    cur.execute("""
+        SELECT COUNT(*) AS c FROM home_requests
+        WHERE target_id = %s AND type = 'invite' AND status = 'Gözləmədə'
+    """, (user_id,))
+    req_count += cur.fetchone()['c']
+
+    # Sayı 0 olan bildirişlər göndərilmir (avtomatik gizli)
+    notifications = []
+    if ann_count > 0:
+        notifications.append({"title": "Aktiv Elanlar", "description": f"{ann_count} ədəd aktiv elanınız var.", "icon": "megaphone", "color": "info", "redirect": "announcements", "redirect_text": "Elanlar"})
+    if surv_count > 0:
+        notifications.append({"title": "Aktiv Anketlər", "description": f"{surv_count} ədəd ankent iştirakınızı gözləyir.", "icon": "clipboard-check", "color": "warning", "redirect": "announcements", "redirect_text": "Elanlar"})
+    if pen_count > 0:
+        notifications.append({"title": "Ödənişli Cərimələr", "description": f"{pen_count} ədəd ödənilməmiş cəriməniz var.", "icon": "alert-triangle", "color": "danger", "redirect": "payments", "redirect_text": "Ödənişlər"})
+    if req_count > 0:
+        notifications.append({"title": "Tələblər", "description": f"{req_count} sayda tələb var.", "icon": "inbox", "color": "info", "redirect": "myhome", "redirect_text": "Mənim evim"})
+
+    return ok(notifications=notifications)
 
 
 @app.route('/get_penalties', methods=['GET'])
@@ -417,13 +493,14 @@ def get_profile(cur):
 @login_required
 @with_db
 def get_roommates(cur):
+    """Otaq yoldaşı axtarışı — yalnız eyni cinsdən tələbələr."""
     cur.execute("""
-        SELECT s.id, s.ad_soyad, s.ixtisas,
+        SELECT s.id, s.ad_soyad, s.ixtisas, s.ev,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
         FROM students s
         LEFT JOIN students_profiles p ON s.id = p.student_id
-        WHERE s.ev_deyisme_isteyi = 1 AND s.id != %s
-    """, (session['student_id'],))
+        WHERE s.ev_deyisme_isteyi = 1 AND s.id != %s AND s.cins = %s
+    """, (session['student_id'], get_cins(cur, session['student_id'])))
     return ok(roommates=cur.fetchall())
 
 
@@ -435,7 +512,7 @@ def get_roommates(cur):
 @login_required
 @with_db
 def get_available_rooms(cur):
-    """Boş yeri olan evlər — ev seçmə planının sol paneli."""
+    """Boş yeri olan evlər — yalnız eyni cinsə aid evlər + boş evlər."""
     # Self-heal: slot sətirləri yaradılmamış evlər üçün avtomatik yaradılır
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
@@ -447,7 +524,8 @@ def get_available_rooms(cur):
         WHERE rs.room_id IS NULL
     """)
 
-    # Boş yerlər REAL boş slotlara görə hesablanır (select_home ilə eyni məntiq)
+    my_cins = get_cins(cur, session['student_id'])
+
     cur.execute("""
         SELECT r.id AS room_id,
                COALESCE(SUM(rs.student_id IS NULL), 0) AS free_count,
@@ -456,10 +534,11 @@ def get_available_rooms(cur):
         FROM rooms r
         LEFT JOIN room_slots rs ON rs.room_id = r.id
         LEFT JOIN students s ON s.id = rs.student_id
+        WHERE (r.cins IS NULL OR r.cins = %s)
         GROUP BY r.id
         HAVING COALESCE(SUM(rs.student_id IS NULL), 0) > 0
         ORDER BY r.id ASC
-    """)
+    """, (my_cins,))
     rooms = cur.fetchall()
 
     result = [{
@@ -483,9 +562,9 @@ def search_students(cur):
     sql = """
         SELECT s.id, s.ad_soyad, s.ixtisas, s.kurs
         FROM students s
-        WHERE s.id != %s AND s.ev = 'Ev seçilməyib' AND s.group_id IS NULL
+        WHERE s.id != %s AND s.ev = 'Ev seçilməyib' AND s.group_id IS NULL AND s.cins = %s
     """
-    params = [user_id]
+    params = [user_id, get_cins(cur, user_id)]
 
     if q:
         sql += " AND s.ad_soyad LIKE %s"
@@ -506,20 +585,23 @@ def search_students(cur):
 @login_required
 @with_db
 def get_groups(cur):
+    """Qruplar — yalnız mənim cinsimdən üzvü olan qruplar."""
     q = (request.args.get('q') or '').strip()
+    my_cins = get_cins(cur, session['student_id'])
 
     sql = """
         SELECT g.id AS group_id, s.id AS student_id, s.ad_soyad, s.ixtisas, s.kurs
         FROM student_groups g
         JOIN students s ON s.group_id = g.id
+        WHERE EXISTS (SELECT 1 FROM students s2 WHERE s2.group_id = g.id AND s2.cins = %s)
     """
-    params = []
+    params = [my_cins]
     if q:
         if q.isdigit():
-            sql += " WHERE g.id = %s OR s.ad_soyad LIKE %s"
+            sql += " AND (g.id = %s OR s.ad_soyad LIKE %s)"
             params.extend([int(q), f"%{q}%"])
         else:
-            sql += " WHERE s.ad_soyad LIKE %s"
+            sql += " AND s.ad_soyad LIKE %s"
             params.append(f"%{q}%")
     sql += " ORDER BY g.id ASC, s.ad_soyad ASC"
 
@@ -539,8 +621,74 @@ def get_groups(cur):
     return ok(groups=list(groups.values()))
 
 
+@app.route('/get_requests', methods=['GET'])
+@login_required
+@with_db
+def get_requests(cur):
+    """Mənim gördüyüm tələblər (dəvət / qovma / çıxma)."""
+    user_id = session['student_id']
+
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
+    row = cur.fetchone()
+    my_room = row['room_id'] if row else None
+
+    sql = """
+        SELECT hr.id, hr.type, hr.room_id, hr.target_id, hr.requester_id,
+               t.ad_soyad AS target_name, r.ad_soyad AS requester_name,
+               (SELECT v.vote FROM home_request_votes v WHERE v.request_id = hr.id AND v.voter_id = %s) AS my_vote
+        FROM home_requests hr
+        JOIN students t ON t.id = hr.target_id
+        JOIN students r ON r.id = hr.requester_id
+        WHERE hr.status = 'Gözləmədə'
+    """
+    params = [user_id]
+    if my_room:
+        sql += " AND (hr.room_id = %s OR hr.target_id = %s)"
+        params.extend([my_room, user_id])
+    else:
+        sql += " AND hr.target_id = %s"
+        params.append(user_id)
+    sql += " ORDER BY hr.created_at ASC"
+    cur.execute(sql, tuple(params))
+    rows = cur.fetchall()
+
+    result = []
+    pending = 0
+    for row in rows:
+        am_target = (row['target_id'] == user_id)
+        can_vote = False
+        waiting = []
+
+        if row['type'] in ('kick', 'leave') and my_room == row['room_id'] and not am_target and not row['my_vote']:
+            can_vote = True
+
+        if row['type'] in ('kick', 'leave'):
+            cur.execute("""
+                SELECT s.id, s.ad_soyad FROM room_slots rs
+                JOIN students s ON s.id = rs.student_id
+                WHERE rs.room_id = %s AND rs.student_id IS NOT NULL AND rs.student_id != %s
+            """, (row['room_id'], row['target_id']))
+            eligible = cur.fetchall()
+            cur.execute("SELECT voter_id FROM home_request_votes WHERE request_id = %s", (row['id'],))
+            voted = {v['voter_id'] for v in cur.fetchall()}
+            waiting = [e['ad_soyad'] for e in eligible if e['id'] not in voted]
+
+        if (row['type'] == 'invite' and am_target) or can_vote:
+            pending += 1
+
+        result.append({
+            "id": row['id'], "type": row['type'], "room_id": row['room_id'],
+            "target_id": row['target_id'],
+            "requester_name": row['requester_name'], "target_name": row['target_name'],
+            "am_target": am_target, "my_vote": row['my_vote'], "can_vote": can_vote,
+            "waiting": waiting
+        })
+
+    return ok(requests=result, pending_count=pending)
+
+
 # ---------------------------------------------------------------------------
-# Mutations (POST)
+# Mutations (POST) — ərizələr, profil
 # ---------------------------------------------------------------------------
 
 @app.route('/submit_application', methods=['POST'])
@@ -683,6 +831,11 @@ def join_group(cur):
     if get_my_group_id(cur, user_id) is not None:
         return fail("Siz artıq bir qrupdasınız! Əvvəlcə qrupdan çıxın.")
 
+    my_cins = get_cins(cur, user_id)
+    cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s AND cins != %s", (group_id, my_cins))
+    if cur.fetchone()['c'] > 0:
+        return fail("Bu qrupda qarşı cinsdən üzv var!")
+
     cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
     count = cur.fetchone()['c']
     if count == 0:
@@ -724,10 +877,13 @@ def add_group_member(cur):
     if cur.fetchone()['c'] >= 6:
         return fail("Qrup doludur (maksimum 6 üzv)!")
 
-    cur.execute("SELECT ev, group_id FROM students WHERE id = %s", (student_id,))
+    my_cins = get_cins(cur, user_id)
+    cur.execute("SELECT ev, group_id, cins FROM students WHERE id = %s", (student_id,))
     target = cur.fetchone()
     if not target:
         return fail("Tələbə tapılmadı!")
+    if target['cins'] != my_cins:
+        return fail("Yalnız eyni cinsdən tələbələr əlavə oluna bilər!")
     if target['ev'] != 'Ev seçilməyib':
         return fail("Bu tələbənin artıq evi var!")
     if target['group_id'] is not None:
@@ -736,6 +892,10 @@ def add_group_member(cur):
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (gid, student_id))
     return ok(message="Üzv qrupa əlavə olundu!")
 
+
+# ---------------------------------------------------------------------------
+# Ev seçmə (POST)
+# ---------------------------------------------------------------------------
 
 @app.route('/select_home', methods=['POST'])
 @login_required
@@ -748,10 +908,14 @@ def select_home(cur):
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Sizin artıq eviniz seçilib!")
 
-    gid = get_my_group_id(cur, user_id)
+    my_cins = get_cins(cur, user_id)
 
+    gid = get_my_group_id(cur, user_id)
     member_ids = [user_id]
     if gid is not None:
+        cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s AND cins != %s", (gid, my_cins))
+        if cur.fetchone()['c'] > 0:
+            return fail("Qrupunuzda qarşı cinsdən üzv var!")
         cur.execute(
             "SELECT id FROM students WHERE group_id = %s AND ev = 'Ev seçilməyib' ORDER BY id ASC",
             (gid,)
@@ -760,16 +924,18 @@ def select_home(cur):
         if user_id not in member_ids:
             member_ids.append(user_id)
 
-    cur.execute("SELECT id FROM rooms WHERE id = %s", (room_id,))
-    if not cur.fetchone():
+    cur.execute("SELECT id, cins FROM rooms WHERE id = %s", (room_id,))
+    room = cur.fetchone()
+    if not room:
         return fail("Ev tapılmadı!")
+    if room['cins'] is not None and room['cins'] != my_cins:
+        return fail("Bu ev qarşı cinsə aiddir!")
 
-    # Əmin ol: bu evin slot sətirləri mövcuddur (daimi qoruma)
+    # Self-heal: slot sətirləri
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
-        SELECT %s, s.slot
-        FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
-              UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) s
+        SELECT %s, s.slot FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
+                                UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) s
     """, (room_id,))
 
     cur.execute(
@@ -796,10 +962,278 @@ def select_home(cur):
         tuple(member_ids)
     )
 
+    # Ev boş idisə, seçən tərəfin cinsini təyin et
+    if room['cins'] is None:
+        cur.execute("UPDATE rooms SET cins = %s WHERE id = %s", (my_cins, room_id))
+
+    # Artıq mənasız olan pending dəvətləri bağla
+    cur.execute(
+        f"UPDATE home_requests SET status = 'Rədd edildi' WHERE target_id IN ({placeholders}) "
+        "AND type = 'invite' AND status = 'Gözləmədə'",
+        tuple(member_ids)
+    )
+
     if gid is not None:
         cur.execute("DELETE FROM student_groups WHERE id = %s", (gid,))
 
     return ok(message=f"Ev {room_id} seçildi! Qrupunuzla birlikdə yerləşdirildiniz.")
+
+
+# ---------------------------------------------------------------------------
+# Tələblər (POST) — dəvət / qovma / çıxma / səsvermə
+# ---------------------------------------------------------------------------
+
+@app.route('/invite_roommate', methods=['POST'])
+@login_required
+@with_db
+def invite_roommate(cur):
+    """Evdə yaşayan sakin, eyni cinsdən ev seçməmiş tələbəni evinə dəvət edir."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    target_id = data.get('student_id', 0)
+
+    if get_ev_status(cur, user_id) != 'Ev seçilib':
+        return fail("Dəvət etmək üçün əvvəlcə evdə yaşamalısınız!")
+
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row:
+        return fail("Sizin eviniz tapılmadı!")
+    room_id = row['room_id']
+
+    my_cins = get_cins(cur, user_id)
+    cur.execute("SELECT ev, cins FROM students WHERE id = %s", (target_id,))
+    target = cur.fetchone()
+    if not target:
+        return fail("Tələbə tapılmadı!")
+    if target['cins'] != my_cins:
+        return fail("Yalnız eyni cinsdən tələbələri dəvət edə bilərsiniz!")
+    if target['ev'] != 'Ev seçilməyib':
+        return fail("Bu tələbənin artıq evi var!")
+    if target_id == user_id:
+        return fail("Özünüzü dəvət edə bilməzsiniz!")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL",
+        (room_id,)
+    )
+    cur.execute("SELECT capacity FROM rooms WHERE id = %s", (room_id,))
+    capacity = cur.fetchone()['capacity']
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL",
+        (room_id,)
+    )
+    if cur.fetchone()['c'] >= capacity:
+        return fail("Evdə boş yer yoxdur!")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM home_requests WHERE target_id = %s AND type = 'invite' AND status = 'Gözləmədə'",
+        (target_id,)
+    )
+    if cur.fetchone()['c'] > 0:
+        return fail("Bu tələbəyə artıq aktiv dəvət var!")
+
+    cur.execute(
+        "INSERT INTO home_requests (type, room_id, target_id, requester_id) VALUES ('invite', %s, %s, %s)",
+        (room_id, target_id, user_id)
+    )
+    return ok(message="Dəvət göndərildi — cavabı 'Tələblər' bölməsində görünəcək.")
+
+
+@app.route('/respond_invite', methods=['POST'])
+@login_required
+@with_db
+def respond_invite(cur):
+    """Dəvət edilən şəxs dəvəti qəbul/rədd edir."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    req_id = data.get('request_id', 0)
+    accept = bool(data.get('accept', False))
+
+    cur.execute(
+        "SELECT * FROM home_requests WHERE id = %s AND target_id = %s AND type = 'invite' AND status = 'Gözləmədə'",
+        (req_id, user_id)
+    )
+    req = cur.fetchone()
+    if not req:
+        return fail("Dəvət tapılmadı!")
+
+    if not accept:
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
+        return ok(message="Dəvət rədd edildi.")
+
+    my_cins = get_cins(cur, user_id)
+    cur.execute("SELECT cins FROM rooms WHERE id = %s", (req['room_id'],))
+    room = cur.fetchone()
+    if room['cins'] is not None and room['cins'] != my_cins:
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
+        return fail("Bu ev artıq qarşı cinsə aiddir!")
+
+    if get_ev_status(cur, user_id) != 'Ev seçilməyib':
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
+        return fail("Sizin artıq eviniz var!")
+
+    # Self-heal
+    cur.execute("""
+        INSERT IGNORE INTO room_slots (room_id, slot)
+        SELECT %s, s.slot FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
+                                UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) s
+    """, (req['room_id'],))
+
+    cur.execute(
+        "SELECT slot FROM room_slots WHERE room_id = %s AND student_id IS NULL ORDER BY slot ASC LIMIT 1",
+        (req['room_id'],)
+    )
+    slot_row = cur.fetchone()
+    if not slot_row:
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
+        return fail("Evdə boş yer yoxdur!")
+
+    cur.execute(
+        "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s",
+        (user_id, req['room_id'], slot_row['slot'])
+    )
+    if room['cins'] is None:
+        cur.execute("UPDATE rooms SET cins = %s WHERE id = %s", (my_cins, req['room_id']))
+
+    gid = get_my_group_id(cur, user_id)
+    cur.execute("UPDATE students SET ev = 'Ev seçilib', group_id = NULL WHERE id = %s", (user_id,))
+    if gid:
+        dissolve_group_if_empty(cur, gid)
+
+    cur.execute("UPDATE home_requests SET status = 'Təsdiqləndi' WHERE id = %s", (req_id,))
+    cur.execute(
+        "UPDATE home_requests SET status = 'Rədd edildi' WHERE target_id = %s AND type = 'invite' AND status = 'Gözləmədə' AND id != %s",
+        (user_id, req_id)
+    )
+    return ok(message=f"Ev {req['room_id']} dəvəti qəbul edildi!")
+
+
+@app.route('/request_kick', methods=['POST'])
+@login_required
+@with_db
+def request_kick(cur):
+    """Ev sakini başqa sakini qovma tələbi verir — evdəkilərin hamısı təsdiq etməlidir."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    target_id = data.get('student_id', 0)
+
+    if target_id == user_id:
+        return fail("Özünüzü qova bilməzsiniz — 'Evdən çıx' düyməsini istifadə edin.")
+
+    my_room = get_room_number_for_student(cur, user_id)
+    target_room = get_room_number_for_student(cur, target_id)
+    if my_room == 'Bilinmir' or my_room != target_room:
+        return fail("Bu tələbə sizin evinizdə yaşamır!")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM home_requests WHERE room_id = %s AND target_id = %s AND type IN ('kick', 'leave') AND status = 'Gözləmədə'",
+        (my_room, target_id)
+    )
+    if cur.fetchone()['c'] > 0:
+        return fail("Bu tələbə üçün aktiv tələb artıq var!")
+
+    cur.execute(
+        "INSERT INTO home_requests (type, room_id, target_id, requester_id) VALUES ('kick', %s, %s, %s)",
+        (my_room, target_id, user_id)
+    )
+    req_id = cur.lastrowid
+
+    # Requester-in səsi avtomatik Təsdiq
+    cur.execute(
+        "INSERT INTO home_request_votes (request_id, voter_id, vote) VALUES (%s, %s, 'Təsdiq')",
+        (req_id, user_id)
+    )
+    _check_request_resolution(cur, req_id)
+    return ok(message="Qovma tələbi göndərildi — ev yoldaşlarının təsdiqi gözlənilir.")
+
+
+@app.route('/request_leave', methods=['POST'])
+@login_required
+@with_db
+def request_leave(cur):
+    """Evdən çıxma tələbi. Evdə təkdirsə avtomatik çıxır."""
+    user_id = session['student_id']
+
+    cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
+    row = cur.fetchone()
+    if not row:
+        return fail("Siz evdə yaşamırsınız!")
+    room_id = row['room_id']
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL",
+        (room_id,)
+    )
+    if cur.fetchone()['c'] == 1:
+        remove_from_room(cur, user_id)
+        return ok(message="Evdən çıxdınız.")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM home_requests WHERE room_id = %s AND target_id = %s AND type = 'leave' AND status = 'Gözləmədə'",
+        (room_id, user_id)
+    )
+    if cur.fetchone()['c'] > 0:
+        return fail("Çıxma tələbiniz onsuzda gözləmədədir!")
+
+    cur.execute(
+        "INSERT INTO home_requests (type, room_id, target_id, requester_id) VALUES ('leave', %s, %s, %s)",
+        (room_id, user_id, user_id)
+    )
+    req_id = cur.lastrowid
+
+    cur.execute(
+        "INSERT INTO home_request_votes (request_id, voter_id, vote) VALUES (%s, %s, 'Təsdiq')",
+        (req_id, user_id)
+    )
+    _check_request_resolution(cur, req_id)
+    return ok(message="Çıxma tələbi göndərildi — ev yoldaşlarının təsdiqi gözlənilir.")
+
+
+@app.route('/vote_request', methods=['POST'])
+@login_required
+@with_db
+def vote_request(cur):
+    """Ev sakini qovma/çıxma tələbinə səs verir."""
+    user_id = session['student_id']
+    data = request.get_json() or {}
+    req_id = data.get('request_id', 0)
+    vote = 'Təsdiq' if data.get('vote') == 'Təsdiq' else 'Rədd'
+
+    cur.execute("SELECT * FROM home_requests WHERE id = %s AND status = 'Gözləmədə'", (req_id,))
+    req = cur.fetchone()
+    if not req:
+        return fail("Tələb tapılmadı!")
+    if req['type'] == 'invite':
+        return fail("Dəvət üçün səsvermə yoxdur!")
+    if req['target_id'] == user_id:
+        return fail("Bu tələb sizin haqqınızdadır!")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id = %s",
+        (req['room_id'], user_id)
+    )
+    if cur.fetchone()['c'] == 0:
+        return fail("Siz bu evdə yaşamırsınız!")
+
+    cur.execute(
+        "SELECT COUNT(*) AS c FROM home_request_votes WHERE request_id = %s AND voter_id = %s",
+        (req_id, user_id)
+    )
+    if cur.fetchone()['c'] > 0:
+        return fail("Siz artıq səs vermisiniz!")
+
+    cur.execute(
+        "INSERT INTO home_request_votes (request_id, voter_id, vote) VALUES (%s, %s, %s)",
+        (req_id, user_id, vote)
+    )
+
+    if vote == 'Rədd':
+        cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
+        return ok(message="Tələb rədd edildi.")
+
+    _check_request_resolution(cur, req_id)
+    return ok(message="Səsiniz qeydə alındı.")
 
 
 # ---------------------------------------------------------------------------
