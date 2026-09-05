@@ -139,8 +139,7 @@ def dissolve_group_if_empty(cur, group_id):
 
 
 def remove_from_room(cur, student_id):
-    """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)
-    və ev boşalanda dəyişmir."""
+    """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
     row = cur.fetchone()
     if not row:
