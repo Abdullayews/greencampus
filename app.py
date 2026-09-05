@@ -1,13 +1,16 @@
 import os
 import re
+import time
 import secrets
 import logging
+from collections import defaultdict
 from datetime import datetime, timedelta
 from functools import wraps
 
 import requests
 from flask import Flask, session, request, jsonify, redirect, render_template
 from pymysql.err import IntegrityError
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from config import get_db_connection
 
@@ -32,8 +35,17 @@ app.permanent_session_lifetime = timedelta(days=3650)
 # --- Cookie konfiqurasiyası + logging ---
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_SECURE'] = True
 log = logging.getLogger('student')
 logging.basicConfig(level=logging.INFO)
+
+
+@app.after_request
+def _security_headers(resp):
+    resp.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    resp.headers.setdefault('X-Frame-Options', 'DENY')
+    resp.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    return resp
 
 
 # ---------------------------------------------------------------------------
@@ -63,11 +75,15 @@ def login_required(f):
     return decorated
 
 
+class BizError(Exception):
+    """İş məntiqi xətası — rollback edilir və istifadəçiyə mesajla qaytarılır."""
+
+
 def with_db(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         try:
-            conn = get_db_connection()   # pool-dan — close() pool-a qaytarır
+            conn = get_db_connection()
         except Exception as e:
             return fail(f"DB Bağlantı xətası: {e}", 500)
         try:
@@ -75,15 +91,20 @@ def with_db(f):
                 result = f(cur, *args, **kwargs)
             conn.commit()
             return result
+        except BizError as e:
+            conn.rollback()
+            return fail(str(e), 400)
         except IntegrityError as e:
             conn.rollback()
+            if 'Duplicate entry' in str(e) and 'email' in str(e):
+                return fail("Bu email artıq istifadə olunur!", 400)
             return fail(f"Məlumat uyğunsuzluğu: {e}", 400)
         except Exception as e:
             conn.rollback()
             log.exception("Əməliyyat xətası")
             return fail(f"Əməliyyat xətası: {e}", 500)
         finally:
-            conn.close()   # pool-a qaytarır
+            conn.close()
     return decorated
 
 
@@ -227,11 +248,40 @@ def _check_request_resolution(cur, request_id):
 
 @app.route('/', methods=['GET'])
 def index():
+    is_logged_in = 'student_id' in session
     user_name = session.get('user_name', '')
     user_ixtisas = session.get('ixtisas', '')
     user_kurs = session.get('kurs', '')
     user_otaq = session.get('otaq_nomresi', '')
-    is_logged_in = 'student_id' in session
+
+    if is_logged_in:
+        try:
+            conn = get_db_connection()
+            try:
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT ad_soyad, ixtisas, kurs FROM students WHERE id = %s",
+                        (session['student_id'],)
+                    )
+                    row = cur.fetchone()
+                    if row:
+                        user_name = row['ad_soyad'] or ''
+                        user_ixtisas = row['ixtisas'] or ''
+                        user_kurs = str(row['kurs'] or '')
+                        session['user_name'] = user_name
+                        session['ixtisas'] = user_ixtisas
+                        session['kurs'] = user_kurs
+                    cur.execute(
+                        "SELECT room_id FROM room_slots WHERE student_id = %s",
+                        (session['student_id'],)
+                    )
+                    slot = cur.fetchone()
+                    user_otaq = str(slot['room_id']) if slot else 'Yoxdur'
+                    session['otaq_nomresi'] = user_otaq
+            finally:
+                conn.close()
+        except Exception:
+            log.exception("Index sessiya yeniləmə xətası")
 
     name_first = ''
     user_initials = 'T'
@@ -263,11 +313,35 @@ def index():
 # Auth
 # ---------------------------------------------------------------------------
 
+_LOGIN_ATTEMPTS = defaultdict(list)
+_LOGIN_WINDOW = 300
+_LOGIN_MAX = 10
+
+
+def _client_ip():
+    xff = request.headers.get('X-Forwarded-For', '')
+    if xff:
+        return xff.split(',')[0].strip()
+    return request.remote_addr or 'unknown'
+
+
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json() or {}
-    email = data.get('email', '')
-    sifre = data.get('sifre', '')
+    data = request.get_json(silent=True) or {}
+    email = (data.get('email') or '').strip()
+    sifre = data.get('sifre') or ''
+
+    ip = _client_ip()
+    now = time.time()
+    if len(_LOGIN_ATTEMPTS) > 10000:
+        _LOGIN_ATTEMPTS.clear()
+    attempts = [t for t in _LOGIN_ATTEMPTS[ip] if now - t < _LOGIN_WINDOW]
+    _LOGIN_ATTEMPTS[ip] = attempts
+    if len(attempts) >= _LOGIN_MAX:
+        return fail("Çoxlu uğursuz cəhd! 5 dəqiqə sonra yenidən cəhd edin.", 429)
+
+    if not email or not sifre:
+        return fail("Email və ya şifrə yanlışdır!")
 
     conn = get_db_connection()
     try:
@@ -280,11 +354,33 @@ def login():
             """
             cursor.execute(sql, (email,))
             user = cursor.fetchone()
-
             if not user:
-                return fail(f"Bu email databasedə yoxdur: {email}")
-            if user['sifre'] != sifre:
-                return fail("Şifrə yanlışdır!")
+                cursor.execute("""
+                    SELECT s.id, s.ad_soyad, s.sifre, s.ixtisas, s.kurs, rs.room_id as otaq_nomresi
+                    FROM students s
+                    LEFT JOIN room_slots rs ON rs.student_id = s.id
+                    WHERE LOWER(s.email) = %s
+                """, (email.lower(),))
+                user = cursor.fetchone()
+
+            valid = False
+            if user:
+                stored = user['sifre'] or ''
+                if stored.startswith(('pbkdf2:', 'scrypt:')):
+                    valid = check_password_hash(stored, sifre)
+                elif stored == sifre:
+                    valid = True
+                    cursor.execute(
+                        "UPDATE students SET sifre = %s WHERE id = %s",
+                        (generate_password_hash(sifre), user['id'])
+                    )
+                    conn.commit()
+
+            if not valid:
+                _LOGIN_ATTEMPTS[ip].append(time.time())
+                return fail("Email və ya şifrə yanlışdır!")
+
+            _LOGIN_ATTEMPTS.pop(ip, None)
 
             session.permanent = True
             session['student_id'] = user['id']
@@ -343,7 +439,6 @@ def get_home(cur):
 
         return ok(ev_status=ev_status, my_id=user_id, my_group=my_group, ixtisaslar=ixtisaslar)
 
-    # ---- EV SEÇİLİB ----
     gid = get_my_group_id(cur, user_id)
     if gid:
         cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
@@ -463,13 +558,21 @@ def get_laundry(cur):
     return ok(data=data)
 
 
+_NOTIF_CACHE = {}
+_NOTIF_TTL = 20
+
+
 @app.route('/get_notifications', methods=['GET'])
 @login_required
 @with_db
 def get_notifications(cur):
-    """Bildirişlər + BILDIRIŞ BADGE SAYI (real-time polling üçün yüngül cavab).
-    30 saniyəlik polling ilə çağırılır — badge rəqəmi `total` sahəsindən oxunur."""
+    """Bildirişlər + badge sayı — 30 saniyəlik polling üçün yüngül cavab."""
     user_id = session['student_id']
+
+    now = time.time()
+    hit = _NOTIF_CACHE.get(user_id)
+    if hit and now - hit[0] < _NOTIF_TTL:
+        return jsonify(hit[1])
 
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'announcement'")
     ann_count = cur.fetchone()['count']
@@ -496,19 +599,26 @@ def get_notifications(cur):
     """, (user_id,))
     req_count += cur.fetchone()['c']
 
-    # Sayı 0 olan bildirişlər göndərilmir (avtomatik gizli)
     notifications = []
     if ann_count > 0:
         notifications.append({"title": "Aktiv Elanlar", "description": f"{ann_count} ədəd aktiv elanınız var.", "icon": "megaphone", "color": "info", "redirect": "announcements", "redirect_text": "Elanlar"})
     if surv_count > 0:
-        notifications.append({"title": "Aktiv Anketlər", "description": f"{surv_count} ədəd ankent iştirakınızı gözləyir.", "icon": "clipboard-check", "color": "warning", "redirect": "announcements", "redirect_text": "Elanlar"})
+        notifications.append({"title": "Aktiv Anketlər", "description": f"{surv_count} ədəd anket iştirakınızı gözləyir.", "icon": "clipboard-check", "color": "warning", "redirect": "announcements", "redirect_text": "Elanlar"})
     if pen_count > 0:
         notifications.append({"title": "Ödənişli Cərimələr", "description": f"{pen_count} ədəd ödənilməmiş cəriməniz var.", "icon": "alert-triangle", "color": "danger", "redirect": "payments", "redirect_text": "Ödənişlər"})
     if req_count > 0:
         notifications.append({"title": "Tələblər", "description": f"{req_count} sayda tələb var.", "icon": "inbox", "color": "info", "redirect": "myhome", "redirect_text": "Mənim evim"})
 
-    # BILDIRIŞ BADGE SAYI — frontend-də nöqtənin yanında rəqəm kimi göstərilir
-    return ok(notifications=notifications, total=len(notifications), req_count=req_count)
+    payload = {
+        "success": True,
+        "notifications": notifications,
+        "total": len(notifications),
+        "req_count": req_count
+    }
+    if len(_NOTIF_CACHE) > 5000:
+        _NOTIF_CACHE.clear()
+    _NOTIF_CACHE[user_id] = (now, payload)
+    return jsonify(payload)
 
 
 @app.route('/get_penalties', methods=['GET'])
@@ -682,12 +792,9 @@ def get_groups(cur):
 @login_required
 @with_db
 def get_requests(cur):
-    """Mənim gördüyüm tələblər.
-    Əvvəlcə ÖLÜ TƏLƏB TƏMİZLƏYİCİ işə düşür — sonra real siyahı gəlir.
-    (Real-time polling: 30 san-interval ilə çağırıla bilər.)"""
+    """Mənim gördüyüm tələblər. Əvvəlcə ölü tələb təmizləyicisi işə düşür."""
     user_id = session['student_id']
 
-    # Ölü tələbləri bağla (əbədi gözləmədə qalanlar)
     _cleanup_dead_requests(cur)
 
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
@@ -754,7 +861,7 @@ def get_requests(cur):
 @with_db
 def submit_application(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     basliq = (data.get('basliq') or '').strip()
     muraciet = (data.get('muraciet') or '').strip()
@@ -778,7 +885,7 @@ def submit_application(cur):
 @with_db
 def update_application(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
 
     app_id = as_int(data.get('id'), 0)
     basliq = (data.get('basliq') or '').strip()
@@ -803,7 +910,7 @@ def update_application(cur):
 @with_db
 def delete_application(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     app_id = as_int(data.get('id'), 0)
 
     cur.execute("DELETE FROM applications WHERE id = %s AND student_id = %s", (app_id, user_id))
@@ -814,7 +921,7 @@ def delete_application(cur):
 @login_required
 @with_db
 def update_profile(cur):
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     user_id = session['student_id']
 
     email = clean_val(data.get('email'))
@@ -827,6 +934,14 @@ def update_profile(cur):
     temizlik = clean_val(data.get('temizlik'))
     sosial = clean_val(data.get('sosial_munasibet'))
     hayat = clean_val(data.get('hayat_terzi'))
+
+    if email:
+        cur.execute(
+            "SELECT id FROM students WHERE email = %s AND id != %s",
+            (email, user_id)
+        )
+        if cur.fetchone():
+            return fail("Bu email başqa tələbə tərəfindən istifadə olunur!")
 
     cur.execute(
         "UPDATE students SET email = %s, ixtisas = %s, kurs = %s, api_key = %s, ev_deyisme_isteyi = %s WHERE id = %s",
@@ -843,16 +958,10 @@ def update_profile(cur):
         hayat_terzi = VALUES(hayat_terzi)
     """, (user_id, yuxu, temizlik, sosial, hayat))
 
+    session['ixtisas'] = ixtisas or ''
+    session['kurs'] = kurs or ''
+
     return ok(message="Profil yeniləndi!")
-
-
-@app.route('/update_api_key', methods=['POST'])
-@login_required
-@with_db
-def update_api_key(cur):
-    new_key = secrets.token_hex(16)
-    cur.execute("UPDATE students SET api_key = %s WHERE id = %s", (new_key, session['student_id']))
-    return ok(api_key=new_key, message="API açarı yeniləndi!")
 
 
 # ---------------------------------------------------------------------------
@@ -883,7 +992,7 @@ def create_group(cur):
 @with_db
 def join_group(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     seq = as_int(data.get('group_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
@@ -933,7 +1042,7 @@ def leave_group(cur):
 @with_db
 def add_group_member(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     student_id = as_int(data.get('student_id'), 0)
 
     gid = get_my_group_id(cur, user_id)
@@ -969,7 +1078,7 @@ def add_group_member(cur):
 @with_db
 def select_home(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     room_id = as_int(data.get('room_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
@@ -1016,11 +1125,15 @@ def select_home(cur):
             f"yerləşəcək şəxs sayı isə {len(member_ids)}-dir!"
         )
 
+    assigned = 0
     for student_id, slot in zip(member_ids, free_slots):
         cur.execute(
-            "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s",
+            "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s AND student_id IS NULL",
             (student_id, room_id, slot)
         )
+        assigned += cur.rowcount
+    if assigned != len(member_ids):
+        raise BizError("Bu əsnədə ev doldu — siyahını yeniləyib təkrar seçin!")
 
     placeholders = ','.join(['%s'] * len(member_ids))
     cur.execute(
@@ -1038,6 +1151,7 @@ def select_home(cur):
     )
 
     if gid is not None:
+        cur.execute("UPDATE students SET group_id = NULL WHERE group_id = %s", (gid,))
         cur.execute("DELETE FROM student_groups WHERE id = %s", (gid,))
 
     return ok(message=f"Ev {room_id} seçildi! Qrupunuzla birlikdə yerləşdirildiniz.")
@@ -1052,7 +1166,7 @@ def select_home(cur):
 @with_db
 def invite_roommate(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     target_id = as_int(data.get('student_id'), 0)
 
     if get_ev_status(cur, user_id) != 'Ev seçilib':
@@ -1104,7 +1218,7 @@ def invite_roommate(cur):
 @with_db
 def respond_invite(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     req_id = as_int(data.get('request_id'), 0)
     accept = bool(data.get('accept', False))
 
@@ -1147,9 +1261,11 @@ def respond_invite(cur):
         return fail("Evdə boş yer yoxdur!")
 
     cur.execute(
-        "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s",
+        "UPDATE room_slots SET student_id = %s WHERE room_id = %s AND slot = %s AND student_id IS NULL",
         (user_id, req['room_id'], slot_row['slot'])
     )
+    if cur.rowcount == 0:
+        raise BizError("Bu əsnədə ev doldu — dəvət ləğv olundu, yenidən ev seçin!")
     if room['cins'] is None:
         cur.execute("UPDATE rooms SET cins = %s WHERE id = %s", (my_cins, req['room_id']))
 
@@ -1171,7 +1287,7 @@ def respond_invite(cur):
 @with_db
 def request_kick(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     target_id = as_int(data.get('student_id'), 0)
 
     if target_id == user_id:
@@ -1241,7 +1357,7 @@ def request_leave(cur):
         (req_id, user_id)
     )
     _check_request_resolution(cur, req_id)
-    return ok(message="Çıxma tələbi göndərildi — ev yoldaşlarının təsdiqi gözlənilir.")
+    return ok(message="Çıxma tələbi göndərildi — ev yoldaşlarının təsdiyi gözlənilir.")
 
 
 @app.route('/vote_request', methods=['POST'])
@@ -1249,7 +1365,7 @@ def request_leave(cur):
 @with_db
 def vote_request(cur):
     user_id = session['student_id']
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     req_id = as_int(data.get('request_id'), 0)
     vote = 'Təsdiq' if data.get('vote') == 'Təsdiq' else 'Rədd'
 
@@ -1310,7 +1426,7 @@ def ai_handler():
     if not api_key:
         return fail("API açarı tapılmadı! Zəhmət olmasa Profil bölməsindən şəxsi Gemini API açarınızı daxil edin.")
 
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     if not data or 'type' not in data:
         return fail("Yanlış sorğu formatı.")
 
