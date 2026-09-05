@@ -170,6 +170,20 @@ def dissolve_group_if_empty(cur, group_id):
         cur.execute("DELETE FROM student_groups WHERE id = %s", (group_id,))
 
 
+def _next_group_id(cur):
+    """Yeni qrup ID-si = mövcud ən böyük ID + 1. Eyni anda yaradılan
+    iki qrup eyni ID tutarsa duplicate-key düşür — 3 dəfə təkrar cəhd edilir."""
+    for _ in range(3):
+        cur.execute("SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM student_groups")
+        next_id = cur.fetchone()['next_id']
+        try:
+            cur.execute("INSERT INTO student_groups (id, created_at) VALUES (%s, NOW())", (next_id,))
+            return next_id
+        except IntegrityError:
+            continue
+    raise BizError("Qrup yaradıla bilmədi — bir azdan təkrar cəhd edin!")
+
+
 def remove_from_room(cur, student_id):
     """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
@@ -189,7 +203,6 @@ def _cleanup_dead_requests(cur):
     tələbləri avtomatik bağlayır:
       - invite: hədəfin artıq evi varsa (başqa yerdə yerləşibsə)
       - kick/leave: hədəf artıq həmin evdə yaşamırsa (köçübsə/silinibsə)
-    Beləliklə, "əbədi gözləmədə" qalan xətalı tələblər yox olur.
     """
     try:
         cur.execute("""
@@ -979,8 +992,7 @@ def create_group(cur):
     if get_my_group_id(cur, user_id) is not None:
         return fail("Siz artıq bir qrupdasınız!")
 
-    cur.execute("INSERT INTO student_groups (created_at) VALUES (NOW())")
-    group_id = cur.lastrowid
+    group_id = _next_group_id(cur)
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
 
     seq = get_live_group_seq(cur, group_id, get_cins(cur, user_id))
@@ -1357,7 +1369,7 @@ def request_leave(cur):
         (req_id, user_id)
     )
     _check_request_resolution(cur, req_id)
-    return ok(message="Çıxma tələbi göndərildi — ev yoldaşlarının təsdiyi gözlənilir.")
+    return ok(message="Çıxma tələbi göndərildi — ev yoldaşlarının təsdiqi gözlənilir.")
 
 
 @app.route('/vote_request', methods=['POST'])
