@@ -115,6 +115,16 @@
         .contact-item:hover { background: var(--bg); transform: translateX(4px); }
         .contact-item i { width: 20px; height: 20px; color: var(--ku-green); }
 
+        /* === BOTTOM NAV (mobil) === */
+        .bottom-nav { display: none; position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); box-shadow: 0 -4px 16px rgba(0,0,0,.06); z-index: 240; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+        .bn-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; flex: 1 1 0; padding: 8px 2px; background: none; border: none; font-family: 'Poppins'; font-size: 10px; font-weight: 600; color: var(--text-secondary); cursor: pointer; position: relative; min-width: 0; border-radius: var(--radius-btn); -webkit-tap-highlight-color: transparent; }
+        .bn-item i { width: 22px; height: 22px; }
+        .bn-item span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .bn-item:active { background: var(--bg); }
+        .bn-item.active { color: var(--ku-dark-green); }
+        .bn-item.active i { color: var(--ku-green); }
+        .bn-item.active::before { content: ''; position: absolute; top: -6px; left: 22%; right: 22%; height: 3px; border-radius: 0 0 4px 4px; background: linear-gradient(90deg, var(--ku-green), var(--ku-soft-green)); }
+
         /* === MAIN LAYOUT === */
         .main-wrapper { margin-left: 280px; min-height: 100vh; display: flex; flex-direction: column; transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1); flex: 1; }
         .main-wrapper.expanded { margin-left: 80px; }
@@ -404,13 +414,49 @@
         /* === RESPONSIVE === */
         @media (max-width: 1023px) { .col-side { width: 100%; } .home-layout { flex-direction: column; } }
         @media (max-width: 767px) {
-            .top-bar h1 { font-size: 22px; } .sidebar { width: 80px; } .main-wrapper { margin-left: 80px; }
-            .sidebar .logo span, .sidebar .nav-item span, .sidebar .sidebar-footer-links h4, .sidebar .sidebar-footer-links li a span { opacity: 0; width: 0; pointer-events: none; }
-            .ai-chat-window { width: calc(100% - 32px); right: 16px; bottom: 96px; height: 60%; }
-            .contact-dropdown { display: none; }
-            .content-layout { padding: 20px; }
+            body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+            .bottom-nav { display: flex; }
+            .sidebar { display: none; }
+            .main-wrapper { margin-left: 0; }
+            .top-bar { height: 64px; padding: 0 16px; }
+            .top-bar h1 { font-size: 18px; }
+            .profile-dropdown { padding: 8px; }
+            .profile-dropdown .name { display: none; }
+            .notif-dropdown { position: fixed; top: 70px; left: 12px; right: 12px; width: auto; }
+            .content-layout { padding: 16px; }
+            .welcome-banner { padding: 24px; }
+            .welcome-content h2 { font-size: 24px; }
+            .welcome-content p { font-size: 14px; margin-bottom: 20px; }
+            .welcome-actions .btn-primary, .welcome-actions .btn-secondary { flex: 1 1 100%; justify-content: center; }
+            .section-title { font-size: 20px; }
+            .widgets-grid { grid-template-columns: 1fr; }
+            .service-grid .service-card { flex: 1 1 45%; padding: 20px; }
             .app-grid { justify-content: center; }
-            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); }
+            .app-card, .add-card { width: 100%; min-height: 200px; }
+            .apartment-plan { grid-template-columns: 1fr; }
+            .room-card { padding: 20px; }
+            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); max-height: 420px; }
+            .hp-room-card { padding: 10px; }
+            .hp-room-name { font-size: 14px; }
+            .hp-search-row .hp-input, .hp-search-row .hp-select { flex: 1 1 100%; font-size: 16px; }
+            .hp-search-row .hp-btn { flex: 1 1 100%; justify-content: center; }
+            .hp-select-btn { padding: 12px; }
+            .hp-btn, .hp-btn-secondary { padding: 12px 16px; }
+            .modal-overlay { padding: 12px; }
+            .modal-card { max-width: 100%; }
+            .modal-header, .modal-body { padding: 20px; }
+            .modal-input, .modal-textarea, .priority-select { font-size: 16px; }
+            .hp-input, .hp-select, .ai-input { font-size: 16px; }
+            .ai-chat-window { width: calc(100% - 24px); right: 12px; bottom: calc(84px + env(safe-area-inset-bottom)); height: 62vh; }
+            .ai-float-btn { bottom: calc(84px + env(safe-area-inset-bottom)); right: 16px; width: 56px; height: 56px; }
+            .ai-float-btn i { width: 24px; height: 24px; }
+            .contact-dropdown { display: none; }
+            .login-overlay { padding: 16px; }
+            .login-card { padding: 28px; }
+            .login-logo h2 { font-size: 24px; }
+            .payment-card { max-width: 100%; }
+            .dlg-actions { flex-direction: column; }
+            .dlg-actions .hp-btn, .dlg-actions .hp-btn-secondary { width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -637,6 +683,16 @@
         <footer class="simple-footer">© {{ current_year }} Qarabağ Universiteti. Bütün hüquqlar qorunur.</footer>
     </div>
 
+    <!-- BOTTOM NAV (mobil) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button type="button" class="bn-item active" data-menu="home" onclick="setActivePage('home', 'Ana Səhifə')"><i data-lucide="home"></i><span>Ana</span></button>
+        <button type="button" class="bn-item" data-menu="myhome" onclick="setActivePage('myhome', 'Mənim evim')"><i data-lucide="door-open"></i><span>Evim</span></button>
+        <button type="button" class="bn-item" data-menu="roommate" onclick="setActivePage('roommate', 'Otaq Yoldaşı Axtar')"><i data-lucide="search"></i><span>Axtar</span></button>
+        <button type="button" class="bn-item" data-menu="applications" onclick="setActivePage('applications', 'Müraciətlər')"><i data-lucide="clipboard-list"></i><span>Müraciət</span></button>
+        <button type="button" class="bn-item" data-menu="announcements" onclick="setActivePage('announcements', 'Elanlar')"><i data-lucide="megaphone"></i><span>Elanlar</span></button>
+        <button type="button" class="bn-item" data-menu="payments" onclick="setActivePage('payments', 'Ödənişlər')"><i data-lucide="wallet"></i><span>Ödəniş</span></button>
+    </nav>
+
     <!-- Application Modal -->
     <div class="modal-overlay" id="appModalOverlay">
         <div class="modal-card">
@@ -836,14 +892,14 @@
         function logout() { window.location.href = '/logout'; }
 
         function toggleSidebar() {
+            if (window.innerWidth < 768) return;
             document.getElementById('sidebar').classList.toggle('collapsed');
             document.getElementById('mainWrapper').classList.toggle('expanded');
         }
 
         function setActivePage(pageId, title) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            const targetItem = document.querySelector(`[data-menu="${pageId}"]`);
-            if(targetItem) targetItem.classList.add('active');
+            document.querySelectorAll('[data-menu]').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll(`[data-menu="${pageId}"]`).forEach(item => item.classList.add('active'));
             document.getElementById('pageTitle').innerText = title;
             document.querySelectorAll('.page-content').forEach(page => {
                 page.classList.remove('active-page');
@@ -1367,7 +1423,7 @@
         }
 
         function requestLeaveHome() {
-            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Evdə tək olsanız — dərhal çıxacaqsınız</span>Yoxsa ev yoldaşlarınızın <b>hamısının təsdiyi</b> gözləniləcək.`, async () => {
+            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Evdə tək olsanız — dərhal çıxacaqsınız</span>Yoxsa ev yoldaşlarınızın <b>hamısının təsdiqi</b> gözləniləcək.`, async () => {
                 try {
                     const res = await fetch('/request_leave', {
                         credentials: 'same-origin', method: 'POST',
@@ -1799,4 +1855,4 @@
         {% endif %}
     </script>
 </body>
-</html>
+                        </html>
