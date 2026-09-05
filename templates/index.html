@@ -318,13 +318,15 @@
         .hp-box-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .hp-box-title i { width: 20px; height: 20px; color: var(--ku-green); }
         .hp-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; }
-        .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 16px; background: var(--bg); transition: all var(--transition-fast); }
-        .hp-room-card:hover { border-color: var(--ku-green); transform: translateX(4px); }
-        .hp-room-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .hp-room-name { font-size: 16px; font-weight: 700; }
-        .hp-free-badge { padding: 4px 12px; border-radius: var(--radius-badge); font-size: 12px; font-weight: 700; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); }
-        .hp-room-occs { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
-        .hp-select-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .hp-rooms-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-right: 4px; align-content: start; }
+        .hp-rooms-grid .hp-empty { grid-column: 1 / -1; }
+        .hp-room-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 12px; background: var(--bg); transition: all var(--transition-fast); display: flex; flex-direction: column; min-width: 0; }
+        .hp-room-card:hover { border-color: var(--ku-green); transform: translateY(-3px); box-shadow: var(--shadow-xs); }
+        .hp-room-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 6px; }
+        .hp-room-name { font-size: 15px; font-weight: 700; white-space: nowrap; }
+        .hp-free-badge { padding: 3px 10px; border-radius: var(--radius-badge); font-size: 11px; font-weight: 700; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); white-space: nowrap; }
+        .hp-room-occs { font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.45; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .hp-select-btn { width: 100%; padding: 9px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; }
         .hp-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .hp-input { flex: 2 1 140px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; transition: all var(--transition-fast); }
         .hp-select { flex: 1 1 110px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
@@ -348,10 +350,12 @@
         .hp-member-chip strong { color: var(--ku-green); }
         .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
+        @media (max-width: 1399px) { .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 1023px) {
             .home-plan-layout { flex-direction: column; height: auto; min-height: 0; }
             .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
             .hp-scroll { max-height: 420px; }
+            .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); max-height: 420px; }
         }
 
         /* === SURVEY === */
@@ -406,6 +410,7 @@
             .contact-dropdown { display: none; }
             .content-layout { padding: 20px; }
             .app-grid { justify-content: center; }
+            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -803,7 +808,7 @@
             });
         }
 
-        // ═════════ AUTH / NAVİQASİYA ═════════
+        // ═════════ AUTH / NAVİGASİYA ═════════
         function handleLogin(e) {
             e.preventDefault();
             const btn = e.target.querySelector('.login-btn');
@@ -1362,7 +1367,7 @@
         }
 
         function requestLeaveHome() {
-            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Evdə tək olsanız — dərhal çıxacaqsınız</span>Yoxsa ev yoldaşlarınızın <b>hamısının təsdiqi</b> gözləniləcək.`, async () => {
+            confirmDialog('Evdən Çıx', `Evdən çıxmaq istəyirsiniz?<span class="dlg-highlight">Evdə tək olsanız — dərhal çıxacaqsınız</span>Yoxsa ev yoldaşlarınızın <b>hamısının təsdiyi</b> gözləniləcək.`, async () => {
                 try {
                     const res = await fetch('/request_leave', {
                         credentials: 'same-origin', method: 'POST',
@@ -1418,7 +1423,7 @@
                     <div class="hp-left">
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="house"></i> Seçilə biləcək evlər</div>
-                            <div class="hp-scroll" id="hpRooms"><div class="hp-empty">Yüklənir...</div></div>
+                            <div class="hp-rooms-grid" id="hpRooms"><div class="hp-empty">Yüklənir...</div></div>
                         </div>
                     </div>
                     <div class="hp-right">
