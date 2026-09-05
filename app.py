@@ -13,7 +13,6 @@ from config import get_db_connection
 
 app = Flask(__name__)
 
-# --- Secret key — dəyişməz olmalıdır, yoxsa bütün sessiyalar ölür ---
 _secret_key = os.environ.get('SECRET_KEY')
 if not _secret_key:
     _key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret_key.txt')
@@ -26,12 +25,11 @@ if not _secret_key:
             f.write(_secret_key)
 app.secret_key = _secret_key
 
-# --- Sessiya avtomatik bitmir (daimi sessiya, ~10 il) ---
 app.permanent_session_lifetime = timedelta(days=3650)
 
-# --- Gəlişdirmə: cookie konfiqurasiyası + logging ---
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 log = logging.getLogger('student')
 logging.basicConfig(level=logging.INFO)
 
@@ -80,7 +78,7 @@ def with_db(f):
             return fail(f"Məlumat uyğunsuzluğu: {e}", 400)
         except Exception as e:
             conn.rollback()
-            log.exception("Əməliyyat xətası")  # Gəlişdirmə: 500-lər Render logs-da görünür
+            log.exception("Əməliyyat xətası")
             return fail(f"Əməliyyat xətası: {e}", 500)
         finally:
             conn.close()
@@ -88,7 +86,6 @@ def with_db(f):
 
 
 def clean_val(val):
-    """Boş dəyərləri None etmək (ENUM xətalarının qarşısını almaq üçün)."""
     if val is None:
         return None
     val = str(val).strip()
@@ -96,7 +93,6 @@ def clean_val(val):
 
 
 def as_int(val, default=None):
-    """Gəlişdirmə: ID məcburi int-yə çevrilir, alınmazsa default."""
     try:
         return int(val)
     except (TypeError, ValueError):
@@ -130,8 +126,6 @@ def get_my_group_id(cur, user_id):
 
 
 def get_live_group_seq(cur, target_gid, my_cins=None):
-    """Canlı sıra: qruplar daxili ID artan sırada 1-dən nömrələnir.
-    my_cins verilibsə, yalnız həmin cinsdən qruplar nömrələnir."""
     cur.execute("""
         SELECT s.group_id, MIN(s.cins) AS cins
         FROM students s
@@ -146,7 +140,6 @@ def get_live_group_seq(cur, target_gid, my_cins=None):
 
 
 def dissolve_group_if_empty(cur, group_id):
-    """Qrupda heç kim qalmadıqda qrupu silir."""
     if group_id is None:
         return
     cur.execute("SELECT COUNT(*) AS c FROM students WHERE group_id = %s", (group_id,))
@@ -154,8 +147,30 @@ def dissolve_group_if_empty(cur, group_id):
         cur.execute("DELETE FROM student_groups WHERE id = %s", (group_id,))
 
 
+def resolve_stale_requests(cur):
+    """Ölü tələbləri avtomatik bağlayır:
+    - Qovma/çıxma: hədəf artıq həmin otaqda yaşamırsa → bağlanır
+    - Dəvət: hədəf artıq ev seçibsə → bağlanır
+    """
+    cur.execute("""
+        UPDATE home_requests hr
+        LEFT JOIN room_slots rs ON rs.student_id = hr.target_id
+        SET hr.status = 'Rədd edildi'
+        WHERE hr.status = 'Gözləmədə'
+          AND hr.type IN ('kick', 'leave')
+          AND (rs.room_id IS NULL OR rs.room_id != hr.room_id)
+    """)
+    cur.execute("""
+        UPDATE home_requests hr
+        JOIN students s ON s.id = hr.target_id
+        SET hr.status = 'Rədd edildi'
+        WHERE hr.status = 'Gözləmədə'
+          AND hr.type = 'invite'
+          AND s.ev != 'Ev seçilməyib'
+    """)
+
+
 def remove_from_room(cur, student_id):
-    """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
     row = cur.fetchone()
     if not row:
@@ -169,13 +184,11 @@ def remove_from_room(cur, student_id):
 
 
 def _apply_request(cur, req):
-    """Təsdiqlənmiş tələbi icra edir."""
     if req['type'] in ('kick', 'leave'):
         remove_from_room(cur, req['target_id'])
 
 
 def _check_request_resolution(cur, request_id):
-    """Bütün ev sakinləri təsdiq veribsə tələbi icra edir, rədd varsa bağlayır."""
     cur.execute("SELECT * FROM home_requests WHERE id = %s", (request_id,))
     req = cur.fetchone()
     if not req or req['status'] != 'Gözləmədə':
@@ -242,10 +255,6 @@ def index():
     )
 
 
-# ---------------------------------------------------------------------------
-# Auth
-# ---------------------------------------------------------------------------
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -265,9 +274,9 @@ def login():
             user = cursor.fetchone()
 
             if not user:
-                return fail(f"Bu email databasedə yoxdur: {email}")
+                return fail("Email və ya şifrə yanlışdır!")
             if user['sifre'] != sifre:
-                return fail("Şifrə yanlışdır!")
+                return fail("Email və ya şifrə yanlışdır!")
 
             session.permanent = True
             session['student_id'] = user['id']
@@ -299,12 +308,6 @@ def logout():
 @login_required
 @with_db
 def get_home(cur):
-    """
-    Mənim evim:
-      - 'Rədd edilib'   → yalnız mesaj
-      - 'Ev seçilməyib' → ev seçmə planı datası
-      - 'Ev seçilib'    → otaq və otaq yoldaşları
-    """
     user_id = session['student_id']
 
     ev_status = get_ev_status(cur, user_id)
@@ -332,7 +335,6 @@ def get_home(cur):
 
         return ok(ev_status=ev_status, my_id=user_id, my_group=my_group, ixtisaslar=ixtisaslar)
 
-    # ---- EV SEÇİLİB ----
     gid = get_my_group_id(cur, user_id)
     if gid:
         cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
@@ -380,7 +382,6 @@ def get_home(cur):
 def get_applications(cur):
     user_id = session['student_id']
 
-    # Təsdiqlənmiş, notu olmayan müraciətlər üçün SQL-də notlar hissəsi yaradılır
     cur.execute(
         "UPDATE applications SET notlar = 'Müraciətiniz təsdiqləndi.' "
         "WHERE student_id = %s AND status = 'Təsdiqləndi' AND notlar IS NULL",
@@ -466,7 +467,6 @@ def get_notifications(cur):
     cur.execute("SELECT COUNT(*) as count FROM penalties WHERE student_id = %s AND status = 'Ödənilməmiş'", (user_id,))
     pen_count = cur.fetchone()['count']
 
-    # Tələb sayı — mənim hərəkətimi gözləyən tələblər
     req_count = 0
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
     rrow = cur.fetchone()
@@ -485,7 +485,6 @@ def get_notifications(cur):
     """, (user_id,))
     req_count += cur.fetchone()['c']
 
-    # Sayı 0 olan bildirişlər göndərilmir (avtomatik gizli)
     notifications = []
     if ann_count > 0:
         notifications.append({"title": "Aktiv Elanlar", "description": f"{ann_count} ədəd aktiv elanınız var.", "icon": "megaphone", "color": "info", "redirect": "announcements", "redirect_text": "Elanlar"})
@@ -496,7 +495,7 @@ def get_notifications(cur):
     if req_count > 0:
         notifications.append({"title": "Tələblər", "description": f"{req_count} sayda tələb var.", "icon": "inbox", "color": "info", "redirect": "myhome", "redirect_text": "Mənim evim"})
 
-    return ok(notifications=notifications)
+    return ok(notifications=notifications, total_count=len(notifications))
 
 
 @app.route('/get_penalties', methods=['GET'])
@@ -531,7 +530,6 @@ def get_profile(cur):
 @login_required
 @with_db
 def get_roommates(cur):
-    """Otaq yoldaşı axtarışı — yalnız eyni cinsdən tələbələr."""
     cur.execute("""
         SELECT s.id, s.ad_soyad, s.ixtisas, s.ev,
                p.yuxu_rejimi, p.temizlik, p.sosial_munasibet, p.hayat_terzi
@@ -542,16 +540,10 @@ def get_roommates(cur):
     return ok(roommates=cur.fetchall())
 
 
-# ---------------------------------------------------------------------------
-# Ev seçmə planı (GET)
-# ---------------------------------------------------------------------------
-
 @app.route('/get_available_rooms', methods=['GET'])
 @login_required
 @with_db
 def get_available_rooms(cur):
-    """Boş yeri olan evlər — yalnız istifadəçinin cinsinə aid bina."""
-    # Self-heal: slot sətirləri yaradılmamış evlər üçün avtomatik yaradılır
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
         SELECT r.id, s.slot
@@ -623,21 +615,16 @@ def search_students(cur):
 @login_required
 @with_db
 def get_groups(cur):
-    """Qruplar — görünən nömrə canlı sıradır (1, 2, 3...).
-    Boş qruplar avtomatik silinir, sıralar yenidən hesablanır.
-    Yalnız istifadəçinin cinsindən üzvü olan qruplar göstərilir."""
     my_cins = get_cins(cur, session['student_id'])
     q = (request.args.get('q') or '').strip()
 
-    # 1) Boş qrupları avtomatik sil
     cur.execute("""
         DELETE FROM student_groups
         WHERE id NOT IN (
-            SELECT gid FROM (SELECT DISTINCT s.group_id AS gid FROM students s WHERE s.group_id IS NOT NULL) x
+            SELECT gid FROM (SELECT DISTINCT group_id AS gid FROM students s WHERE group_id IS NOT NULL) x
         )
     """)
 
-    # 2) Bütün canlı qrupları daxili ID sırası ilə gətir
     cur.execute("""
         SELECT s.group_id, s.id AS student_id, s.ad_soyad, s.ixtisas, s.kurs, s.cins
         FROM students s
@@ -646,7 +633,6 @@ def get_groups(cur):
     """)
     rows = cur.fetchall()
 
-    # 3) Qruplaşdır
     groups = {}
     group_cins = {}
     for row in rows:
@@ -659,13 +645,9 @@ def get_groups(cur):
             "ixtisas": row['ixtisas'], "kurs": row['kurs']
         })
 
-    # 4) Yalnız mənim cinsimdən olan qruplar (nömrələmə bazası)
     base = [gid for gid in sorted(groups.keys()) if group_cins[gid] == my_cins]
-
-    # 5) Canlı sıra nömrələri — axtarışdan asılı olmayaraq sabit (1, 2, 3...)
     numbered = list(enumerate(base, start=1))
 
-    # 6) Axtarış filtri
     if q:
         if q.isdigit():
             seq = int(q)
@@ -683,7 +665,9 @@ def get_groups(cur):
 @login_required
 @with_db
 def get_requests(cur):
-    """Mənim gördüyüm tələblər (dəvət / qovma / çıxma)."""
+    """Əvvəlcə ölü tələbləri təmizlə, sonra siyahını qaytar."""
+    resolve_stale_requests(cur)
+
     user_id = session['student_id']
 
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
@@ -742,7 +726,7 @@ def get_requests(cur):
 
 
 # ---------------------------------------------------------------------------
-# Mutations (POST) — ərizələr, profil
+# Mutations (POST)
 # ---------------------------------------------------------------------------
 
 @app.route('/submit_application', methods=['POST'])
@@ -851,10 +835,6 @@ def update_api_key(cur):
     return ok(api_key=new_key, message="API açarı yeniləndi!")
 
 
-# ---------------------------------------------------------------------------
-# Qruplar (POST)
-# ---------------------------------------------------------------------------
-
 @app.route('/create_group', methods=['POST'])
 @login_required
 @with_db
@@ -885,11 +865,10 @@ def join_group(cur):
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Yalnız ev seçməmiş tələbələr qrupa qoşula bilər!")
     if get_my_group_id(cur, user_id) is not None:
-        return fail("Siz artıq bir qrupdasınız! Əvvəlcə qrupdan çıxın.")
+        return fail("Siz artıq bir qrupdasınız!")
 
     my_cins = get_cins(cur, user_id)
 
-    # Görünən sıra nömrəsini daxili ID-yə çevir (yalnız mənim cinsimdən qruplar)
     cur.execute("""
         SELECT s.group_id, MIN(s.cins) AS cins
         FROM students s WHERE s.group_id IS NOT NULL
@@ -957,10 +936,6 @@ def add_group_member(cur):
     return ok(message="Üzv qrupa əlavə olundu!")
 
 
-# ---------------------------------------------------------------------------
-# Ev seçmə (POST)
-# ---------------------------------------------------------------------------
-
 @app.route('/select_home', methods=['POST'])
 @login_required
 @with_db
@@ -995,7 +970,6 @@ def select_home(cur):
     if room['cins'] is not None and room['cins'] != my_cins:
         return fail("Bu ev qarşı cinsə aiddir!")
 
-    # Self-heal: slot sətirləri
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
         SELECT %s, s.slot FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
@@ -1026,11 +1000,9 @@ def select_home(cur):
         tuple(member_ids)
     )
 
-    # Ev boş idisə, seçən tərəfin cinsini təyin et
     if room['cins'] is None:
         cur.execute("UPDATE rooms SET cins = %s WHERE id = %s", (my_cins, room_id))
 
-    # Artıq mənasız olan pending dəvətləri bağla
     cur.execute(
         f"UPDATE home_requests SET status = 'Rədd edildi' WHERE target_id IN ({placeholders}) "
         "AND type = 'invite' AND status = 'Gözləmədə'",
@@ -1043,15 +1015,10 @@ def select_home(cur):
     return ok(message=f"Ev {room_id} seçildi! Qrupunuzla birlikdə yerləşdirildiniz.")
 
 
-# ---------------------------------------------------------------------------
-# Tələblər (POST) — dəvət / qovma / çıxma / səsvermə
-# ---------------------------------------------------------------------------
-
 @app.route('/invite_roommate', methods=['POST'])
 @login_required
 @with_db
 def invite_roommate(cur):
-    """Evdə yaşayan sakin, eyni cinsdən ev seçməmiş tələbəni evinə dəvət edir."""
     user_id = session['student_id']
     data = request.get_json() or {}
     target_id = as_int(data.get('student_id'), 0)
@@ -1104,7 +1071,6 @@ def invite_roommate(cur):
 @login_required
 @with_db
 def respond_invite(cur):
-    """Dəvət edilən şəxs dəvəti qəbul/rədd edir."""
     user_id = session['student_id']
     data = request.get_json() or {}
     req_id = as_int(data.get('request_id'), 0)
@@ -1133,7 +1099,6 @@ def respond_invite(cur):
         cur.execute("UPDATE home_requests SET status = 'Rədd edildi' WHERE id = %s", (req_id,))
         return fail("Sizin artıq eviniz var!")
 
-    # Self-heal
     cur.execute("""
         INSERT IGNORE INTO room_slots (room_id, slot)
         SELECT %s, s.slot FROM (SELECT 1 AS slot UNION SELECT 2 UNION SELECT 3
@@ -1173,7 +1138,6 @@ def respond_invite(cur):
 @login_required
 @with_db
 def request_kick(cur):
-    """Ev sakini başqa sakini qovma tələbi verir — evdəkilərin hamısı təsdiq etməlidir."""
     user_id = session['student_id']
     data = request.get_json() or {}
     target_id = as_int(data.get('student_id'), 0)
@@ -1211,7 +1175,6 @@ def request_kick(cur):
 @login_required
 @with_db
 def request_leave(cur):
-    """Evdən çıxma tələbi. Evdə təkdirsə avtomatik çıxır."""
     user_id = session['student_id']
 
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
@@ -1253,7 +1216,6 @@ def request_leave(cur):
 @login_required
 @with_db
 def vote_request(cur):
-    """Ev sakini qovma/çıxma tələbinə səs verir."""
     user_id = session['student_id']
     data = request.get_json() or {}
     req_id = as_int(data.get('request_id'), 0)
