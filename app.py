@@ -113,14 +113,17 @@ def get_my_group_id(cur, user_id):
     return row.get('group_id') if row else None
 
 
-def get_live_group_seq(cur, target_gid):
-    """Canlı sıra: qruplar daxili ID artan sırada 1-dən nömrələnir."""
+def get_live_group_seq(cur, target_gid, my_cins=None):
+    """Canlı sıra: qruplar daxili ID artan sırada 1-dən nömrələnir.
+    my_cins verilibsə, yalnız həmin cinsdən qruplar nömrələnir."""
     cur.execute("""
-        SELECT s.group_id FROM students s
+        SELECT s.group_id, MIN(s.cins) AS cins
+        FROM students s
         WHERE s.group_id IS NOT NULL
         GROUP BY s.group_id ORDER BY s.group_id ASC
     """)
-    ordered = [r['group_id'] for r in cur.fetchall()]
+    rows = cur.fetchall()
+    ordered = [r['group_id'] for r in rows if my_cins is None or r['cins'] == my_cins]
     if target_gid in ordered:
         return ordered.index(target_gid) + 1
     return target_gid
@@ -307,7 +310,7 @@ def get_home(cur):
                 "SELECT id, ad_soyad, ixtisas, kurs FROM students WHERE group_id = %s ORDER BY ad_soyad ASC",
                 (my_group_id,)
             )
-            my_seq = get_live_group_seq(cur, my_group_id)
+            my_seq = get_live_group_seq(cur, my_group_id, get_cins(cur, user_id))
             my_group = {"id": my_seq, "real_id": my_group_id, "members": cur.fetchall()}
 
         cur.execute(
@@ -630,7 +633,7 @@ def get_groups(cur):
     """)
     rows = cur.fetchall()
 
-    # 3) Qruplaşdır + cins uyğunluğunu yoxla
+    # 3) Qruplaşdır
     groups = {}
     group_cins = {}
     for row in rows:
@@ -643,30 +646,23 @@ def get_groups(cur):
             "ixtisas": row['ixtisas'], "kurs": row['kurs']
         })
 
-    # 4) Yalnız mənim cinsimdən olan qruplar + axtarış filtri
-    visible = []
-    for gid in sorted(groups.keys()):
-        if group_cins[gid] != my_cins:
-            continue
-        if q:
-            match = any(q.lower() in m['ad_soyad'].lower() for m in groups[gid])
-            if not (q.isdigit() and False):
-                if not match:
-                    continue
-        visible.append(gid)
+    # 4) Yalnız mənim cinsimdən olan qruplar (nömrələmə bazası)
+    base = [gid for gid in sorted(groups.keys()) if group_cins[gid] == my_cins]
 
-    # Axtarış rəqəmdirsə — canlı sıra nömrəsinə görə filtrlə
-    if q and q.isdigit():
-        target_seq = int(q)
-        visible = [gid for idx, gid in enumerate(visible_all := visible, start=1) if idx == target_seq] if False else visible
-        # Sadə yanaşma: sıra nömrəsinə görə filtrlə
-        visible = [gid for idx, gid in enumerate(visible, start=1) if str(idx) == q]
+    # 5) Canlı sıra nömrələri — axtarışdan asılı olmayaraq sabit (1, 2, 3...)
+    numbered = list(enumerate(base, start=1))
 
-    # 5) Canlı sıralama: görünən qruplar 1-dən başlayaraq nömrələnir
-    result = []
-    for seq, gid in enumerate(visible, start=1):
-        result.append({"id": seq, "real_id": gid, "members": groups[gid]})
+    # 6) Axtarış filtri
+    if q:
+        if q.isdigit():
+            seq = int(q)
+            numbered = [(s, g) for s, g in numbered if s == seq]
+        else:
+            ql = q.lower()
+            numbered = [(s, g) for s, g in numbered
+                        if any(ql in m['ad_soyad'].lower() for m in groups[g])]
 
+    result = [{"id": s, "real_id": g, "members": groups[g]} for s, g in numbered]
     return ok(groups=result)
 
 
@@ -862,7 +858,7 @@ def create_group(cur):
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (group_id, user_id))
 
     # Yaradılan qrupun canlı sıra nömrəsini qaytar
-    seq = get_live_group_seq(cur, group_id)
+    seq = get_live_group_seq(cur, group_id, get_cins(cur, user_id))
     return ok(group_id=seq, message=f"Qrup #{seq} yaradıldı!")
 
 
