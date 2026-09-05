@@ -1,6 +1,8 @@
 import os
+
 import pymysql
 from pymysql.cursors import DictCursor
+from dbutils.pooled_db import PooledDB
 
 DB_CONFIG = {
     "host": os.getenv("DB_HOST"),
@@ -15,29 +17,24 @@ DB_CONFIG = {
 if os.getenv("DB_SSL", "true").lower() in ("true", "1", "yes"):
     DB_CONFIG["ssl"] = {"ssl": True}
 
-
-# --- Connection Pooling (DBUtils) ---
-# Hər request yeni TCP+SSL bağlantısı açmaq əvəzinə pool istifadə olunur.
-# DBUtils quraşdırılmayıbsa avtomatik köhnə üsula qayıdır.
-_pool = None
-try:
-    from dbutils.pooled_db import PooledDB
-    _pool = PooledDB(
-        creator=pymysql,
-        mincached=2,        # həmişə açıq saxlanan bağlantı
-        maxcached=8,        # pool-da maksimum boş bağlantı
-        maxconnections=20,  # ümumi limit
-        blocking=True,      # limit dolu olsa gözlə
-        ping=1,             # istifadədən əvvəl canlılıq yoxlaması
-        **DB_CONFIG
-    )
-except ImportError:
-    _pool = None
+# ---------------------------------------------------------------------------
+# Connection Pool (DBUtils)
+# Hər request yeni TCP+SSL bağlantısı açmaq (TiDB-ə ~200-400ms) əvəzinə
+# bağlantılar pool-dan götürülüb təkrar istifadə olunur.
+# Vacib: pool bağlantısında close() onu REAL bağlamır, pool-a QAYTARIR —
+# ona görə app.py-dəki with_db decorator-u heç bir dəyişiklik tələb etmir.
+# ---------------------------------------------------------------------------
+POOL = PooledDB(
+    creator=pymysql,
+    maxconnections=int(os.getenv("DB_POOL_MAX", 10)),
+    mincached=2,
+    maxcached=int(os.getenv("DB_POOL_CACHED", 5)),
+    blocking=True,   # pool doludursa gözlə (xəta yox)
+    ping=1,          # hər götürmədə bağlantı sağlamlığını yoxla
+    **DB_CONFIG
+)
 
 
 def get_db_connection():
-    """Pool varsa pool-dan, yoxsa adi bağlantı.
-    Pool bağlantısının close() — ona görə mövcud kod dəyişmir."""
-    if _pool is not None:
-        return _pool.connection()
-    return pymysql.connect(**DB_CONFIG)
+    """Pool-dan bağlantı alır. Xəta tutulmur — with_db tutacaq."""
+    return POOL.connection()
