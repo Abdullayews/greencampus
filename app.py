@@ -16,7 +16,6 @@ from config import get_db_connection
 
 app = Flask(__name__)
 
-# --- Secret key — dəyişməz olmalıdır, yoxsa bütün sessiyalar ölür ---
 _secret_key = os.environ.get('SECRET_KEY')
 if not _secret_key:
     _key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret_key.txt')
@@ -29,10 +28,8 @@ if not _secret_key:
             f.write(_secret_key)
 app.secret_key = _secret_key
 
-# --- Sessiya avtomatik bitmir (daimi sessiya, ~10 il) ---
 app.permanent_session_lifetime = timedelta(days=3650)
 
-# --- Cookie konfiqurasiyası + logging ---
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['SESSION_COOKIE_SECURE'] = True
@@ -760,9 +757,7 @@ def get_groups(cur):
 
     cur.execute("""
         DELETE FROM student_groups
-        WHERE id NOT IN (
-            SELECT gid FROM (SELECT DISTINCT s.group_id AS gid FROM students s WHERE s.group_id IS NOT NULL) x
-        )
+        WHERE id NOT IN (SELECT group_id FROM students WHERE group_id IS NOT NULL)
     """)
 
     cur.execute("""
