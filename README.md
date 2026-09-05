@@ -117,4 +117,3 @@ Bütün dəyərlər env variable-lardan oxunur:
 ## 🔗 Bağlı repo
 
 Admin tərəfi: **[greencampusadmin →](https://github.com/Abdullayews/greencampusadmin)**
-```
