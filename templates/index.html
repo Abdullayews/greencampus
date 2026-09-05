@@ -124,7 +124,6 @@
         .icon-btn { width: 44px; height: 44px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-btn); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); cursor: pointer; position: relative; transition: all var(--transition-fast); }
         .icon-btn:hover { background: var(--ku-soft-green); color: var(--ku-dark-green); border-color: var(--ku-green); transform: translateY(-2px); }
         .icon-btn i { width: 20px; height: 20px; }
-        /* YENİ: badge rəqəmli nöqtə */
         .notification-dot { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; background: var(--danger); border-radius: var(--radius-badge); border: 2px solid var(--surface); animation: pulse 2s infinite; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--surface); line-height: 1; padding: 0 2px; }
 
         .notif-dropdown { position: absolute; top: 110%; right: 0; width: 360px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-modal); box-shadow: var(--shadow-lg); padding: 8px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(0.95); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); z-index: 95; max-height: 480px; overflow-y: auto; }
@@ -666,10 +665,10 @@
     <script>
         // ═════════ YARDIMÇILAR ═════════
         function esc(str) {
-            if (!str) return '';
+            if (str === null || str === undefined) return '';
             const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+            div.textContent = String(str);
+            return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
         function gv(id) {
             const el = document.getElementById(id);
@@ -770,19 +769,18 @@
 
         function pollNotifications() {
             if (!isLoggedIn) return;
-            if (document.visibilityState !== 'visible') return;  // tab gizlidirsə sorğu göndərmir
+            if (document.visibilityState !== 'visible') return;
             fetch('/get_notifications', { credentials: 'same-origin' })
                 .then(r => r.json())
                 .then(data => {
                     if (!data.success) return;
                     updateBadge(data.total || 0);
-                    // Dropdown açıqdırsa listi də yenilə
                     const dd = document.getElementById('notifDropdown');
                     if (dd && dd.classList.contains('active')) {
                         renderNotifList(data);
                     }
                 })
-                .catch(() => {});  // sessiya bitibsə sessiya yoxlaması backend-dədir
+                .catch(() => {});
         }
 
         function renderNotifList(data) {
@@ -799,8 +797,7 @@
         }
 
         function startRealTimePolling() {
-            setInterval(pollNotifications, 30000);  // 30 saniyə
-            // Tab görünən olanda dərhal yoxla
+            setInterval(pollNotifications, 30000);
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') pollNotifications();
             });
@@ -810,6 +807,8 @@
         function handleLogin(e) {
             e.preventDefault();
             const btn = e.target.querySelector('.login-btn');
+            const errBox = document.getElementById('loginError');
+            const original = '<i data-lucide="log-in"></i> Daxil ol';
             btn.innerHTML = '<i data-lucide="loader-2" style="animation: spin 1s linear infinite;"></i> Yoxlanılır...';
             lucide.createIcons();
             fetch('/login', {
@@ -818,10 +817,14 @@
             }).then(res => res.json()).then(data => {
                 if (data.success) window.location.reload();
                 else {
-                    document.getElementById('loginError').style.display = 'block';
-                    btn.innerHTML = '<i data-lucide="log-in"></i> Daxil ol';
-                    lucide.createIcons();
+                    errBox.textContent = data.message || 'Email və ya şifrə yanlışdır.';
+                    errBox.style.display = 'block';
+                    btn.innerHTML = original; lucide.createIcons();
                 }
+            }).catch(() => {
+                errBox.textContent = 'Serverə qoşulmaq mümkün olmadı.';
+                errBox.style.display = 'block';
+                btn.innerHTML = original; lucide.createIcons();
             });
         }
 
@@ -890,13 +893,11 @@
                 if (data.success && data.applications.length > 0) {
                     data.applications.forEach((app, index) => {
                         let statusClass = app.status === 'Təsdiqləndi' ? 'approved' : 'pending';
-                        const safeBasliq = app.basliq.replace(/'/g, "\\'");
-                        const safeMuraciet = app.muraciet.replace(/'/g, "\\'");
                         grid.innerHTML += `
-                            <div class="app-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
+                            <div class="app-card" data-app-id="${app.id}" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
                                 <div class="app-card-actions">
-                                    <div class="card-action-btn" onclick="event.stopPropagation(); editAppModal(${app.id}, '${safeBasliq}', '${safeMuraciet}', '${app.priority}')"><i data-lucide="edit-3"></i></div>
-                                    <div class="card-action-btn delete" onclick="event.stopPropagation(); deleteApp(${app.id})"><i data-lucide="trash-2"></i></div>
+                                    <div class="card-action-btn js-edit"><i data-lucide="edit-3"></i></div>
+                                    <div class="card-action-btn delete js-delete"><i data-lucide="trash-2"></i></div>
                                 </div>
                                 <h3>${esc(app.basliq)}</h3>
                                 <p><strong>Öncəlik:</strong> ${esc(app.priority)}</p>
@@ -907,6 +908,15 @@
                             </div>`;
                     });
                     refreshIcons(grid);
+                    grid.querySelectorAll('.app-card').forEach(card => {
+                        const id = parseInt(card.dataset.appId, 10);
+                        const app = data.applications.find(a => a.id === id);
+                        if (!app) return;
+                        const editBtn = card.querySelector('.js-edit');
+                        const delBtn = card.querySelector('.js-delete');
+                        if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); editAppModal(app); });
+                        if (delBtn) delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteApp(id); });
+                    });
                 }
             });
         }
@@ -920,12 +930,12 @@
             openModal('appModalOverlay');
         }
 
-        function editAppModal(id, basliq, muraciet, priority) {
+        function editAppModal(app) {
             document.getElementById('appModalTitle').innerText = "Müraciəti Yenilə";
-            document.getElementById('editAppId').value = id;
-            document.getElementById('appTitle').value = basliq.replace(/^Otaq \d+ - /, '');
-            document.getElementById('appInput').value = muraciet;
-            document.getElementById('appPriority').value = priority;
+            document.getElementById('editAppId').value = app.id;
+            document.getElementById('appTitle').value = String(app.basliq || '').replace(/^Otaq \d+ - /, '');
+            document.getElementById('appInput').value = app.muraciet || '';
+            document.getElementById('appPriority').value = app.priority || 'Orta';
             openModal('appModalOverlay');
         }
 
@@ -1150,26 +1160,6 @@
             });
         }
 
-        async function checkCompatibility(targetId) {
-            const scoreDiv = document.getElementById(`score-${targetId}`);
-            scoreDiv.innerText = "...";
-            try {
-                const res = await fetch('/ai_handler', {
-                    credentials: 'same-origin', method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'match', target_id: safeId(targetId) })
-                });
-                const data = await res.json();
-                if (data.success) { scoreDiv.innerText = data.score + "%"; }
-                else {
-                    scoreDiv.innerText = "Xəta";
-                    infoDialog('AI Xətası', `<p class="dlg-text"><span class="dlg-highlight">${esc(data.message)}</span></p>`, 'warning');
-                }
-            } catch (err) {
-                scoreDiv.innerText = "Xəta";
-                infoDialog('Xəta', `<p class="dlg-text">Server xətası baş verdi.</p>`, 'danger');
-            }
-        }
-
         // ═════════ MƏNİM EVİM ═════════
         let hpState = { myGroupId: null };
         let MY_ID = null;
@@ -1212,7 +1202,6 @@
 
                 if (data.roommates && data.roommates.length > 0) {
                     data.roommates.forEach((r, index) => {
-                        const safeName = String(r.ad_soyad).replace(/'/g, "\\'");
                         let itemsHtml = '';
                         if (r.items && r.items.length > 0) {
                             r.items.forEach((item, i) => {
@@ -1223,12 +1212,17 @@
                             });
                         } else { itemsHtml = '<p style="font-size: 14px; color: var(--text-secondary);">İnventar yoxdur.</p>'; }
                         const kickBtn = (r.id !== myId)
-                            ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;"><button class="hp-btn-secondary" style="color: var(--danger); border-color: #fecaca;" onclick="requestKickRoommate(${r.id}, '${safeName}')"><i data-lucide="user-x"></i> Qov</button></div>`
+                            ? `<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;"><button class="hp-btn-secondary" data-kick-id="${r.id}" data-kick-name="${esc(r.ad_soyad)}" style="color: var(--danger); border-color: #fecaca;"><i data-lucide="user-x"></i> Qov</button></div>`
                             : '';
                         list.innerHTML += `<div class="room-card" style="animation: fadeInUp 0.4s ease ${index * 0.1}s both;">
                             <div class="bed-icon"><i data-lucide="bed-double"></i></div>
                             <div class="room-owner">Yataq: ${esc(r.ad_soyad)}${r.id === myId ? ' (siz)' : ''}</div>
                             <div class="item-list">${itemsHtml}</div>${kickBtn}</div>`;
+                    });
+                    list.querySelectorAll('[data-kick-id]').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            requestKickRoommate(parseInt(btn.dataset.kickId, 10), btn.dataset.kickName);
+                        });
                     });
                     refreshIcons(list);
                 } else {
@@ -1793,10 +1787,10 @@
         }
         function handleAiKeyPress(e) { if (e.key === 'Enter') sendAiMessage(); }
 
-        // ═════════ INIT — real-time polling daxil ═════════
+        // ═════════ INIT ═════════
         {% if is_logged_in %}
             loadHomeData();
-            startRealTimePolling();  // 30 san — badge + dropdown yenilənməsi
+            startRealTimePolling();
         {% endif %}
     </script>
 </body>
