@@ -355,8 +355,8 @@
         .hp-group-card.mine { border-color: var(--ku-green); background: linear-gradient(90deg, #f0fdf4, var(--bg)); }
         .hp-group-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .hp-group-name { font-size: 14px; font-weight: 700; }
-        .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; margin: 0 6px 6px 0; }
-        .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); }
+        .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; margin: 0 6px 6px 0; max-width: 100%; }
+        .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); flex-shrink: 0; }
         .hp-member-chip strong { color: var(--ku-green); }
         .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
@@ -438,8 +438,15 @@
             .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); max-height: 420px; }
             .hp-room-card { padding: 10px; }
             .hp-room-name { font-size: 14px; }
-            .hp-search-row .hp-input, .hp-search-row .hp-select { flex: 1 1 100%; font-size: 16px; }
-            .hp-search-row .hp-btn { flex: 1 1 100%; justify-content: center; }
+            .hp-search-row { gap: 8px; }
+            .hp-search-row .hp-input { flex: 1 1 100%; font-size: 16px; }
+            .hp-search-students .hp-select { flex: 1 1 calc(50% - 4px); font-size: 16px; min-width: 0; }
+            .hp-search-students .hp-btn { flex: 1 1 100%; justify-content: center; }
+            .hp-search-groups .hp-btn, .hp-search-groups .hp-btn-secondary { flex: 1 1 calc(50% - 4px); justify-content: center; }
+            .hp-student-row { flex-wrap: wrap; row-gap: 8px; }
+            .hp-student-info { flex: 1 1 100%; min-width: 0; }
+            .hp-student-row .hp-score { flex: 0 0 48px; }
+            .hp-student-row .hp-btn-secondary { flex: 1 1 auto; justify-content: center; padding: 12px 10px; white-space: normal; }
             .hp-select-btn { padding: 12px; }
             .hp-btn, .hp-btn-secondary { padding: 12px 16px; }
             .modal-overlay { padding: 12px; }
@@ -1252,7 +1259,7 @@
                 }
 
                 if (data.ev_status !== 'Ev seçilib') {
-                    if (desc) desc.innerText = 'Ev seçmə planı — soldan ev seçin, sağda tələbə axtarın və ya qrup qurun:';
+                    if (desc) desc.innerText = 'Ev seçmə planı — yuxarıdan ev seçin, altda tələbə axtarın və ya qrup qurun:';
                     renderHomePlan(data);
                     loadMyHomeRequests();
                     return;
@@ -1485,7 +1492,7 @@
                     <div class="hp-right">
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="user-search"></i> Tələbə axtarışı</div>
-                            <div class="hp-search-row">
+                            <div class="hp-search-row hp-search-students">
                                 <input type="text" class="hp-input" id="hpStudentQ" placeholder="Ad Soyad..." onkeypress="if(event.key==='Enter')searchPlanStudents()">
                                 <select class="hp-select" id="hpFilterIxtisas"><option value="">Bütün ixtisaslar</option></select>
                                 <select class="hp-select" id="hpFilterKurs">
@@ -1500,7 +1507,7 @@
                         </div>
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="users"></i> Qruplar</div>
-                            <div class="hp-search-row">
+                            <div class="hp-search-row hp-search-groups">
                                 <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup sırası və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
                                 <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
                                 <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
@@ -1855,4 +1862,4 @@
         {% endif %}
     </script>
 </body>
-                        </html>
+    </html>
