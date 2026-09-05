@@ -139,22 +139,18 @@ def dissolve_group_if_empty(cur, group_id):
 
 
 def remove_from_room(cur, student_id):
-    """Tələbəni evdən çıxarır; ev boşalırsa evin cinsini sıfırlayır."""
+    """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)
+    və ev boşalanda dəyişmir."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
     row = cur.fetchone()
     if not row:
         return
-    room_id = row['room_id']
 
     gid = get_my_group_id(cur, student_id)
     cur.execute("UPDATE room_slots SET student_id = NULL WHERE student_id = %s", (student_id,))
     cur.execute("UPDATE students SET ev = 'Ev seçilməyib', group_id = NULL WHERE id = %s", (student_id,))
     if gid:
         dissolve_group_if_empty(cur, gid)
-
-    cur.execute("SELECT COUNT(*) AS c FROM room_slots WHERE room_id = %s AND student_id IS NOT NULL", (room_id,))
-    if cur.fetchone()['c'] == 0:
-        cur.execute("UPDATE rooms SET cins = NULL WHERE id = %s", (room_id,))
 
 
 def _apply_request(cur, req):
