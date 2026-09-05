@@ -13,6 +13,7 @@ from config import get_db_connection
 
 app = Flask(__name__)
 
+# --- Secret key — dəyişməz olmalıdır, yoxsa bütün sessiyalar ölür ---
 _secret_key = os.environ.get('SECRET_KEY')
 if not _secret_key:
     _key_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'secret_key.txt')
@@ -25,11 +26,12 @@ if not _secret_key:
             f.write(_secret_key)
 app.secret_key = _secret_key
 
+# --- Sessiya avtomatik bitmir (daimi sessiya, ~10 il) ---
 app.permanent_session_lifetime = timedelta(days=3650)
 
+# --- Cookie konfiqurasiyası + logging ---
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-
 log = logging.getLogger('student')
 logging.basicConfig(level=logging.INFO)
 
@@ -65,7 +67,7 @@ def with_db(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         try:
-            conn = get_db_connection()
+            conn = get_db_connection()   # pool-dan — close() pool-a qaytarır
         except Exception as e:
             return fail(f"DB Bağlantı xətası: {e}", 500)
         try:
@@ -81,7 +83,7 @@ def with_db(f):
             log.exception("Əməliyyat xətası")
             return fail(f"Əməliyyat xətası: {e}", 500)
         finally:
-            conn.close()
+            conn.close()   # pool-a qaytarır
     return decorated
 
 
@@ -147,30 +149,8 @@ def dissolve_group_if_empty(cur, group_id):
         cur.execute("DELETE FROM student_groups WHERE id = %s", (group_id,))
 
 
-def resolve_stale_requests(cur):
-    """Ölü tələbləri avtomatik bağlayır:
-    - Qovma/çıxma: hədəf artıq həmin otaqda yaşamırsa → bağlanır
-    - Dəvət: hədəf artıq ev seçibsə → bağlanır
-    """
-    cur.execute("""
-        UPDATE home_requests hr
-        LEFT JOIN room_slots rs ON rs.student_id = hr.target_id
-        SET hr.status = 'Rədd edildi'
-        WHERE hr.status = 'Gözləmədə'
-          AND hr.type IN ('kick', 'leave')
-          AND (rs.room_id IS NULL OR rs.room_id != hr.room_id)
-    """)
-    cur.execute("""
-        UPDATE home_requests hr
-        JOIN students s ON s.id = hr.target_id
-        SET hr.status = 'Rədd edildi'
-        WHERE hr.status = 'Gözləmədə'
-          AND hr.type = 'invite'
-          AND s.ev != 'Ev seçilməyib'
-    """)
-
-
 def remove_from_room(cur, student_id):
+    """Tələbəni evdən çıxarır. Bina cinsi SABİTDIR (101-120 Kişi, 121-140 Qadın)."""
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (student_id,))
     row = cur.fetchone()
     if not row:
@@ -181,6 +161,30 @@ def remove_from_room(cur, student_id):
     cur.execute("UPDATE students SET ev = 'Ev seçilməyib', group_id = NULL WHERE id = %s", (student_id,))
     if gid:
         dissolve_group_if_empty(cur, gid)
+
+
+def _cleanup_dead_requests(cur):
+    """ÖLÜ TƏLB TƏMİZLƏYİCİ — Gözləmədə olan, amma artıq mənasını itirmiş
+    tələbləri avtomatik bağlayır:
+      - invite: hədəfin artıq evi varsa (başqa yerdə yerləşibsə)
+      - kick/leave: hədəf artıq həmin evdə yaşamırsa (köçübsə/silinibsə)
+    Beləliklə, "əbədi gözləmədə" qalan xətalı tələblər yox olur.
+    """
+    try:
+        cur.execute("""
+            UPDATE home_requests hr
+            JOIN students s ON s.id = hr.target_id
+            LEFT JOIN room_slots rs ON rs.student_id = hr.target_id
+            SET hr.status = 'Rədd edildi'
+            WHERE hr.status = 'Gözləmədə'
+              AND (
+                (hr.type = 'invite' AND s.ev != 'Ev seçilməyib')
+                OR (hr.type IN ('kick', 'leave')
+                    AND (rs.room_id IS NULL OR rs.room_id != hr.room_id))
+              )
+        """)
+    except Exception as e:
+        log.warning("Ölü tələb təmizlənmədi: %s", e)
 
 
 def _apply_request(cur, req):
@@ -255,6 +259,10 @@ def index():
     )
 
 
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json() or {}
@@ -274,9 +282,9 @@ def login():
             user = cursor.fetchone()
 
             if not user:
-                return fail("Email və ya şifrə yanlışdır!")
+                return fail(f"Bu email databasedə yoxdur: {email}")
             if user['sifre'] != sifre:
-                return fail("Email və ya şifrə yanlışdır!")
+                return fail("Şifrə yanlışdır!")
 
             session.permanent = True
             session['student_id'] = user['id']
@@ -335,6 +343,7 @@ def get_home(cur):
 
         return ok(ev_status=ev_status, my_id=user_id, my_group=my_group, ixtisaslar=ixtisaslar)
 
+    # ---- EV SEÇİLİB ----
     gid = get_my_group_id(cur, user_id)
     if gid:
         cur.execute("UPDATE students SET group_id = NULL WHERE id = %s", (user_id,))
@@ -458,6 +467,8 @@ def get_laundry(cur):
 @login_required
 @with_db
 def get_notifications(cur):
+    """Bildirişlər + BILDIRIŞ BADGE SAYI (real-time polling üçün yüngül cavab).
+    30 saniyəlik polling ilə çağırılır — badge rəqəmi `total` sahəsindən oxunur."""
     user_id = session['student_id']
 
     cur.execute("SELECT COUNT(*) as count FROM contents WHERE status = 'Aktiv' AND type = 'announcement'")
@@ -485,6 +496,7 @@ def get_notifications(cur):
     """, (user_id,))
     req_count += cur.fetchone()['c']
 
+    # Sayı 0 olan bildirişlər göndərilmir (avtomatik gizli)
     notifications = []
     if ann_count > 0:
         notifications.append({"title": "Aktiv Elanlar", "description": f"{ann_count} ədəd aktiv elanınız var.", "icon": "megaphone", "color": "info", "redirect": "announcements", "redirect_text": "Elanlar"})
@@ -495,7 +507,8 @@ def get_notifications(cur):
     if req_count > 0:
         notifications.append({"title": "Tələblər", "description": f"{req_count} sayda tələb var.", "icon": "inbox", "color": "info", "redirect": "myhome", "redirect_text": "Mənim evim"})
 
-    return ok(notifications=notifications, total_count=len(notifications))
+    # BILDIRIŞ BADGE SAYI — frontend-də nöqtənin yanında rəqəm kimi göstərilir
+    return ok(notifications=notifications, total=len(notifications), req_count=req_count)
 
 
 @app.route('/get_penalties', methods=['GET'])
@@ -539,6 +552,10 @@ def get_roommates(cur):
     """, (session['student_id'], get_cins(cur, session['student_id'])))
     return ok(roommates=cur.fetchall())
 
+
+# ---------------------------------------------------------------------------
+# Ev seçmə planı (GET)
+# ---------------------------------------------------------------------------
 
 @app.route('/get_available_rooms', methods=['GET'])
 @login_required
@@ -621,7 +638,7 @@ def get_groups(cur):
     cur.execute("""
         DELETE FROM student_groups
         WHERE id NOT IN (
-            SELECT gid FROM (SELECT DISTINCT group_id AS gid FROM students s WHERE group_id IS NOT NULL) x
+            SELECT gid FROM (SELECT DISTINCT s.group_id AS gid FROM students s WHERE s.group_id IS NOT NULL) x
         )
     """)
 
@@ -665,10 +682,13 @@ def get_groups(cur):
 @login_required
 @with_db
 def get_requests(cur):
-    """Əvvəlcə ölü tələbləri təmizlə, sonra siyahını qaytar."""
-    resolve_stale_requests(cur)
-
+    """Mənim gördüyüm tələblər.
+    Əvvəlcə ÖLÜ TƏLƏB TƏMİZLƏYİCİ işə düşür — sonra real siyahı gəlir.
+    (Real-time polling: 30 san-interval ilə çağırıla bilər.)"""
     user_id = session['student_id']
+
+    # Ölü tələbləri bağla (əbədi gözləmədə qalanlar)
+    _cleanup_dead_requests(cur)
 
     cur.execute("SELECT room_id FROM room_slots WHERE student_id = %s", (user_id,))
     row = cur.fetchone()
@@ -835,6 +855,10 @@ def update_api_key(cur):
     return ok(api_key=new_key, message="API açarı yeniləndi!")
 
 
+# ---------------------------------------------------------------------------
+# Qruplar (POST)
+# ---------------------------------------------------------------------------
+
 @app.route('/create_group', methods=['POST'])
 @login_required
 @with_db
@@ -865,7 +889,7 @@ def join_group(cur):
     if get_ev_status(cur, user_id) != 'Ev seçilməyib':
         return fail("Yalnız ev seçməmiş tələbələr qrupa qoşula bilər!")
     if get_my_group_id(cur, user_id) is not None:
-        return fail("Siz artıq bir qrupdasınız!")
+        return fail("Siz artıq bir qrupdasınız! Əvvəlcə qrupdan çıxın.")
 
     my_cins = get_cins(cur, user_id)
 
@@ -935,6 +959,10 @@ def add_group_member(cur):
     cur.execute("UPDATE students SET group_id = %s WHERE id = %s", (gid, student_id))
     return ok(message="Üzv qrupa əlavə olundu!")
 
+
+# ---------------------------------------------------------------------------
+# Ev seçmə (POST)
+# ---------------------------------------------------------------------------
 
 @app.route('/select_home', methods=['POST'])
 @login_required
@@ -1014,6 +1042,10 @@ def select_home(cur):
 
     return ok(message=f"Ev {room_id} seçildi! Qrupunuzla birlikdə yerləşdirildiniz.")
 
+
+# ---------------------------------------------------------------------------
+# Tələblər (POST)
+# ---------------------------------------------------------------------------
 
 @app.route('/invite_roommate', methods=['POST'])
 @login_required
