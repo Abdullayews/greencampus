@@ -318,7 +318,7 @@
         /* === MY HOME STATUS MESAJI === */
         .home-status-message { grid-column: 1 / -1; width: 100%; text-align: center; font-size: 18px; font-weight: 600; color: var(--text-secondary); padding: 80px 24px; animation: fadeIn 0.4s ease; }
 
-        /* === EV SEÇMƏ PLANI === */
+        /* === EV SEÇMƏ PLANI (laptop 60/40) === */
         .home-plan-layout { display: flex; gap: 24px; align-items: stretch; height: calc(100vh - 230px); min-height: 480px; animation: fadeInUp 0.4s ease; }
         .hp-left { flex: 6 1 0; min-width: 340px; display: flex; flex-direction: column; min-height: 0; }
         .hp-right { flex: 4 1 0; min-width: 300px; display: flex; flex-direction: column; gap: 16px; min-height: 0; }
@@ -337,9 +337,13 @@
         .hp-free-badge { padding: 3px 10px; border-radius: var(--radius-badge); font-size: 11px; font-weight: 700; background: linear-gradient(135deg, var(--ku-soft-green), #e8f5d6); color: var(--ku-dark-green); white-space: nowrap; }
         .hp-room-occs { font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.45; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .hp-select-btn { width: 100%; padding: 9px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .hp-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .hp-input { flex: 2 1 140px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; transition: all var(--transition-fast); }
-        .hp-select { flex: 1 1 110px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
+        .hp-search-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+        .hp-input { flex: 2 1 150px; padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); min-width: 0; transition: all var(--transition-fast); }
+        .hp-search-filters { display: flex; gap: 8px; flex: 2 1 160px; min-width: 0; }
+        .hp-search-filters .hp-select { flex: 1 1 0; min-width: 0; }
+        .hp-select { padding: 10px 14px; border: 2px solid var(--border); border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; outline: none; background: var(--bg); cursor: pointer; }
+        .hp-search-submit { flex: 0 0 auto; }
+        .hp-search-btns { display: flex; gap: 8px; flex: 0 0 auto; }
         .hp-input:focus, .hp-select:focus { border-color: var(--ku-green); background: var(--surface); }
         .hp-btn { padding: 10px 16px; background: linear-gradient(135deg, var(--ku-green), var(--ku-dark-green)); color: var(--surface); border: none; border-radius: var(--radius-btn); font-family: 'Poppins'; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         .hp-btn:hover { transform: translateY(-1px); }
@@ -350,22 +354,48 @@
         .hp-student-info { flex: 1; min-width: 0; }
         .hp-student-info h5 { font-size: 14px; font-weight: 600; }
         .hp-student-info p { font-size: 12px; color: var(--text-secondary); }
-        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); width: 44px; text-align: center; flex-shrink: 0; }
+        .hp-student-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .hp-score { font-size: 13px; font-weight: 700; color: var(--ku-green); min-width: 40px; text-align: center; }
         .hp-group-card { border: 1px solid var(--border); border-radius: var(--radius-btn); padding: 14px; background: var(--bg); }
         .hp-group-card.mine { border-color: var(--ku-green); background: linear-gradient(90deg, #f0fdf4, var(--bg)); }
         .hp-group-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .hp-group-name { font-size: 14px; font-weight: 700; }
+        .hp-group-members { margin-top: 2px; }
         .hp-member-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-badge); font-size: 12px; font-weight: 500; margin: 0 6px 6px 0; max-width: 100%; }
         .hp-member-chip i { width: 12px; height: 12px; color: var(--ku-green); flex-shrink: 0; }
         .hp-member-chip strong { color: var(--ku-green); }
         .hp-empty { font-size: 13px; color: var(--text-secondary); padding: 12px; text-align: center; }
         .hp-my-group { border: 2px dashed var(--ku-green); border-radius: var(--radius-btn); padding: 14px; margin-bottom: 12px; background: rgba(211, 232, 191, 0.15); }
         @media (max-width: 1399px) { .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        /* === MOBİL PLAN — TAM SÜTUN (daxili scroll yoxdur) === */
         @media (max-width: 1023px) {
-            .home-plan-layout { flex-direction: column; height: auto; min-height: 0; gap: 16px; }
-            .hp-left, .hp-right { flex: 1 1 auto; width: 100%; }
-            .hp-scroll { max-height: 380px; }
-            .hp-rooms-grid { grid-template-columns: repeat(3, 1fr); max-height: 380px; }
+            .home-plan-layout { display: block; height: auto; min-height: 0; }
+            .hp-left { display: block; width: 100%; min-width: 0; margin-bottom: 16px; }
+            .hp-right { display: block; width: 100%; min-width: 0; }
+            .hp-left .hp-box, .hp-right .hp-box { display: block; height: auto; min-height: 0; flex: none; }
+            .hp-right .hp-box { margin-bottom: 16px; }
+            .hp-right .hp-box:last-child { margin-bottom: 0; }
+            .hp-rooms-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: none; overflow: visible; height: auto; padding-right: 0; }
+            .hp-rooms-grid .hp-empty { grid-column: 1 / -1; }
+            .hp-scroll { display: block; max-height: none; overflow: visible; height: auto; padding-right: 0; }
+            .hp-scroll > * + * { margin-top: 10px; }
+            .hp-search-row { display: block; margin-bottom: 14px; }
+            .hp-search-row > .hp-input { display: block; width: 100%; min-width: 0; flex: none; margin: 0 0 10px 0; font-size: 16px; }
+            .hp-search-filters { display: block; flex: none; }
+            .hp-search-filters .hp-select { display: block; width: 100%; min-width: 0; flex: none; margin: 0 0 10px 0; font-size: 16px; }
+            .hp-search-submit { display: flex; width: 100%; flex: none; margin: 0 0 10px 0; justify-content: center; }
+            .hp-search-btns { display: block; flex: none; }
+            .hp-search-btns .hp-btn { display: flex; width: 100%; flex: none; margin: 0 0 10px 0; justify-content: center; }
+            .hp-search-btns .hp-btn-secondary { display: flex; width: 100%; flex: none; margin: 0 0 10px 0; justify-content: center; }
+            .hp-student-row { display: block; }
+            .hp-student-info { margin: 0 0 10px 0; }
+            .hp-student-actions .hp-btn-secondary { flex: 1 1 auto; }
+            .hp-group-head { display: block; margin-bottom: 6px; }
+            .hp-group-head .hp-btn-secondary { display: flex; width: 100%; margin-top: 10px; justify-content: center; }
+            .hp-room-occs { -webkit-line-clamp: 3; line-clamp: 3; }
+            .hp-select-btn { padding: 12px; font-size: 14px; }
+            .hp-btn, .hp-btn-secondary { padding: 12px 16px; }
         }
 
         /* === SURVEY === */
@@ -411,7 +441,7 @@
         /* === FOCUS VISIBLE === */
         *:focus-visible { outline: 2px solid var(--ku-green); outline-offset: 2px; border-radius: 4px; }
 
-        /* === RESPONSIVE === */
+        /* === RESPONSIVE (ümumi) === */
         @media (max-width: 1023px) { .col-side { width: 100%; } .home-layout { flex-direction: column; } }
         @media (max-width: 767px) {
             body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
@@ -437,22 +467,8 @@
             .room-card { padding: 20px; }
             .hp-box { padding: 14px; }
             .hp-box-title { font-size: 15px; margin-bottom: 10px; }
-            .hp-rooms-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 360px; }
             .hp-room-card { padding: 10px; }
             .hp-room-name { font-size: 14px; }
-            .hp-scroll { max-height: 360px; }
-            .hp-search-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-            .hp-search-row .hp-input { grid-column: 1 / -1; width: 100%; min-width: 0; font-size: 16px; flex: none; }
-            .hp-search-row .hp-select { width: 100%; min-width: 0; font-size: 16px; flex: none; }
-            .hp-search-students .hp-btn { grid-column: 1 / -1; width: 100%; justify-content: center; flex: none; }
-            .hp-search-groups .hp-btn, .hp-search-groups .hp-btn-secondary { width: 100%; justify-content: center; flex: none; }
-            .hp-student-row { flex-wrap: wrap; row-gap: 8px; }
-            .hp-student-info { flex: 1 1 100%; min-width: 0; }
-            .hp-student-row .hp-score { flex: 0 0 auto; min-width: 40px; }
-            .hp-student-row .hp-btn-secondary { flex: 1 1 40%; justify-content: center; white-space: normal; min-width: 0; }
-            .hp-group-head { flex-wrap: wrap; }
-            .hp-select-btn { padding: 12px; }
-            .hp-btn, .hp-btn-secondary { padding: 12px 16px; }
             .modal-overlay { padding: 12px; }
             .modal-card { max-width: 100%; }
             .modal-header, .modal-body { padding: 20px; }
@@ -1495,25 +1511,29 @@
                     <div class="hp-right">
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="user-search"></i> Tələbə axtarışı</div>
-                            <div class="hp-search-row hp-search-students">
+                            <div class="hp-search-row">
                                 <input type="text" class="hp-input" id="hpStudentQ" placeholder="Ad Soyad..." onkeypress="if(event.key==='Enter')searchPlanStudents()">
-                                <select class="hp-select" id="hpFilterIxtisas"><option value="">Bütün ixtisaslar</option></select>
-                                <select class="hp-select" id="hpFilterKurs">
-                                    <option value="">Bütün kurslar</option>
-                                    <option value="1">1 kurs</option><option value="2">2 kurs</option>
-                                    <option value="3">3 kurs</option><option value="4">4 kurs</option>
-                                    <option value="5">5 kurs</option><option value="6">6 kurs</option>
-                                </select>
-                                <button class="hp-btn" onclick="searchPlanStudents()"><i data-lucide="search"></i> Axtar</button>
+                                <div class="hp-search-filters">
+                                    <select class="hp-select" id="hpFilterIxtisas"><option value="">Bütün ixtisaslar</option></select>
+                                    <select class="hp-select" id="hpFilterKurs">
+                                        <option value="">Bütün kurslar</option>
+                                        <option value="1">1 kurs</option><option value="2">2 kurs</option>
+                                        <option value="3">3 kurs</option><option value="4">4 kurs</option>
+                                        <option value="5">5 kurs</option><option value="6">6 kurs</option>
+                                    </select>
+                                </div>
+                                <button class="hp-btn hp-search-submit" onclick="searchPlanStudents()"><i data-lucide="search"></i> Axtar</button>
                             </div>
                             <div class="hp-scroll" id="hpStudents"><div class="hp-empty">Axtarın...</div></div>
                         </div>
                         <div class="hp-box">
                             <div class="hp-box-title"><i data-lucide="users"></i> Qruplar</div>
-                            <div class="hp-search-row hp-search-groups">
+                            <div class="hp-search-row">
                                 <input type="text" class="hp-input" id="hpGroupQ" placeholder="Qrup sırası və ya üzv adı..." onkeypress="if(event.key==='Enter')searchPlanGroups()">
-                                <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
-                                <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
+                                <div class="hp-search-btns">
+                                    <button class="hp-btn" onclick="searchPlanGroups()"><i data-lucide="search"></i> Axtar</button>
+                                    <button class="hp-btn-secondary" onclick="createPlanGroup()">+ Qrup yarat</button>
+                                </div>
                             </div>
                             <div id="hpMyGroup"></div>
                             <div class="hp-scroll" id="hpGroups"><div class="hp-empty">Yüklənir...</div></div>
@@ -1548,7 +1568,7 @@
                             <span class="hp-group-name">Qrup #${myGroup.id} (${myGroup.members.length} üzv)</span>
                             <button class="hp-btn-secondary" onclick="leavePlanGroup()">Qrupdan çıx</button>
                         </div>
-                        <div>${chips}</div>
+                        <div class="hp-group-members">${chips}</div>
                     </div>`;
             } else {
                 hpState.myGroupId = null;
@@ -1615,9 +1635,11 @@
                                 <h5>${esc(s.ad_soyad)}</h5>
                                 <p>${esc(s.ixtisas || '')} • ${esc(s.kurs || '-')} kurs</p>
                             </div>
-                            <div class="hp-score" id="hp-score-${s.id}">-%</div>
-                            <button class="hp-btn-secondary" onclick="checkPlanCompat(${s.id})">Yoxla</button>
-                            ${hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="addPlanMember(${s.id})">Əlavə et</button>` : ''}
+                            <div class="hp-student-actions">
+                                <span class="hp-score" id="hp-score-${s.id}">-%</span>
+                                <button class="hp-btn-secondary" onclick="checkPlanCompat(${s.id})">Yoxla</button>
+                                ${hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="addPlanMember(${s.id})">Əlavə et</button>` : ''}
+                            </div>
                         </div>`).join('');
                 } else {
                     box.innerHTML = '<div class="hp-empty">Nəticə tapılmadı.</div>';
@@ -1733,7 +1755,7 @@
                                 <span class="hp-group-name">Qrup #${g.id} (${g.members.length} üzv)${mine ? ' — sizin' : ''}</span>
                                 ${!mine && !hpState.myGroupId ? `<button class="hp-btn-secondary" onclick="joinPlanGroup(${g.id})">Qoşul</button>` : ''}
                             </div>
-                            <div>${chips}</div>
+                            <div class="hp-group-members">${chips}</div>
                         </div>`;
                     }).join('');
                     refreshIcons(box);
@@ -1865,4 +1887,4 @@
         {% endif %}
     </script>
 </body>
-    </html>
+</html>
